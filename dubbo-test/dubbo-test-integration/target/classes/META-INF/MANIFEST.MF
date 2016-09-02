@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
-Implementation-Vendor: Alibaba
+Built-By: lzg
+Build-Jdk: 1.8.0_91
+Specification-Title: dubbo-test-integration
+Specification-Version: 2.5.4-SNAPSHOT
+Specification-Vendor: Alibaba
 Implementation-Title: dubbo-test-integration
 Implementation-Version: 2.5.4-SNAPSHOT
 Implementation-Vendor-Id: com.alibaba
-Specification-Vendor: Alibaba
-Build-Jdk: 1.7.0_79
-Built-By: haon
+Implementation-Vendor: Alibaba
 Created-By: Maven Integration for Eclipse
-Specification-Title: dubbo-test-integration
-Specification-Version: 2.5.4-SNAPSHOT
 
