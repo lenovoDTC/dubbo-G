@@ -359,8 +359,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 	}
 
 	public String getAnyEid(String eid) {
-		String path = anyEid.get(eid);
-		
+		String path = anyEid.get(eid);		
 		return path;
 	}
 
