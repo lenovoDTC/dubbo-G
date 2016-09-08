@@ -209,4 +209,9 @@ public class SimpleRegistryService extends AbstractRegistry {
         }
     }
 
+	public String getAnyEid(String eid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

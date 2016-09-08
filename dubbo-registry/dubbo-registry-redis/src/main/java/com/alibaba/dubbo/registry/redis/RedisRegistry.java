@@ -630,4 +630,9 @@ public class RedisRegistry extends FailbackRegistry {
         
     }
 
+	public String getAnyEid(String eid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

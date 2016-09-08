@@ -1067,5 +1067,10 @@ public class RegistryDirectoryTest {
                 throw new RpcException("test exception ignore.");
             }
         }
+
+    	public String getAnyEid(String eid) {
+    		// TODO Auto-generated method stub
+    		return null;
+    	}
     }
 }
