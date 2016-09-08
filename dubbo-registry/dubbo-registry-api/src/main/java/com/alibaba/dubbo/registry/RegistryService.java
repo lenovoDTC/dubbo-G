@@ -90,5 +90,7 @@ public interface RegistryService {
      * @return 已注册信息列表，可能为空，含义同{@link com.alibaba.dubbo.registry.NotifyListener#notify(List<URL>)}的参数。
      */
     List<URL> lookup(URL url);
+    
+    String getAnyEid ();
 
 }
