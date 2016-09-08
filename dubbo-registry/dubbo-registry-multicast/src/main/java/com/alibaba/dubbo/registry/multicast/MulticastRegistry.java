@@ -420,4 +420,8 @@ public class MulticastRegistry extends FailbackRegistry {
         return received;
     }
 
+	public String getAnyEid(String eid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -64,4 +64,9 @@ public class MockRegistry implements Registry {
     public List<URL> lookup(URL url) {
         return null;
     }
+
+	public String getAnyEid(String eid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

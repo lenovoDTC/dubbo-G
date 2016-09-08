@@ -161,6 +161,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         for (URL url : urls) {
             String protocol = url.getProtocol();
             String category = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
+            String eid = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_EID);
             if (Constants.ROUTERS_CATEGORY.equals(category) 
                     || Constants.ROUTE_PROTOCOL.equals(protocol)) {
                 routerUrls.add(url);

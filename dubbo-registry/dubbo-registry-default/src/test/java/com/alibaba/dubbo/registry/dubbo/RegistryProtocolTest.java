@@ -183,6 +183,11 @@ public class RegistryProtocolTest {
         public boolean isAvailable() {
             return true;
         }
+
+    	public String getAnyEid(String eid) {
+    		// TODO Auto-generated method stub
+    		return null;
+    	}
     }
 
 }
