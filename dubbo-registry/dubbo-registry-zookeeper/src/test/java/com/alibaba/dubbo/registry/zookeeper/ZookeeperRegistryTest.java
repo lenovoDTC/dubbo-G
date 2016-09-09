@@ -109,12 +109,12 @@ public class ZookeeperRegistryTest {
         assertEquals(subscribearg, StringUtils.toQueryString(arg));*/
 
     }
-    @Test
+  /*  @Test
     public void getAnyEid(){
     	 
     	
     	String xString = zookeeperRegistry.getAnyEid("eid");
     	System.out.println(xString);
-    }
+    }*/
 
 }

@@ -23,6 +23,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkDataListener;
+
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.EidNode;
 import com.alibaba.dubbo.common.URL;
@@ -172,23 +175,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 				}
 			} else {
 				List<URL> urls = new ArrayList<URL>();
-				EidNode q = new EidNode();
-				EidNode w = new EidNode();
-				EidNode e = new EidNode();
-				EidNode r = new EidNode();
-				q.setEid("default");
-				q.setPath();
-				w.setEid("test");
-				w.setParent(q);
-				w.setPath();
-				e.setEid("test1");
-				e.setParent(w);
-				e.setPath();
-				r.setEid("test2");
-				r.setParent(e);
-				r.setPath();
-				
-				anyEid.put("eid", r.getPath());
 				for (String path : toCategoriesPath(url)) {
 					ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
 							.get(url);
@@ -219,11 +205,19 @@ public class ZookeeperRegistry extends FailbackRegistry {
 					if (children != null) {
 						urls.addAll(toUrlsWithEmpty(url, path, children));
 					}
-					zkClient.create(r.getPath(), false);
-					List<String> eidChildren = zkClient.addChildListener(r.getPath(),
-							zkListener);
-					
+
 				}
+//				String dataString = zkClient.readdata("/eid");
+//				System.out.println(dataString);
+				List<String> childList = zkClient.getChildren("/eid");
+				String dataString = zkClient.readData("/eid");
+//				System.out.println(dtString);
+				zkClient.subscribeDataChanges("/eid", new ZKDataListener());
+				zkClient.subscribeChildChanges("/eid", new ZKChildListener());
+				// ConcurrentMap<NotifyListener, ChildListener> listeners =
+				// List<String> eidChildren =
+				// zkClient.addChildListener(r.getPath(),
+				// listeners);
 				notify(url, listener, urls);
 			}
 		} catch (Throwable e) {
@@ -336,11 +330,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		if (urls == null || urls.isEmpty()) {
 			int i = path.lastIndexOf('/');
 			String category = i < 0 ? path : path.substring(i + 1);
-			// Map<String, String> parameters = new HashMap<String, String>();
-			// parameters.put(Constants.GENERIC_EID, "test");
 			URL empty = consumer.setProtocol(Constants.EMPTY_PROTOCOL)
 					.addParameter(Constants.CATEGORY_KEY, category);
-			// .addParameters(parameters)
 			urls.add(empty);
 		}
 		return urls;
@@ -358,10 +349,38 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		return address;
 	}
 
+	private static class ZKDataListener implements IZkDataListener {
+
+		public void handleDataChange(String dataPath, Object data)
+				throws Exception {
+
+			System.out.println(dataPath + ":" + data.toString());
+		}
+
+		public void handleDataDeleted(String dataPath) throws Exception {
+
+			System.out.println(dataPath);
+
+		}
+
+	}
+	private static class ZKChildListener implements IZkChildListener{  
+        /** 
+         * handleChildChange： 用来处理服务器端发送过来的通知 
+         * parentPath：对应的父节点的路径 
+         * currentChilds：子节点的相对路径 
+         */  
+        public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {  
+              
+            System.out.println(parentPath);  
+            System.out.println(currentChilds.toString());  
+              
+        } 
+        } 
+
 	public String getAnyEid(String eid) {
-		String path = anyEid.get(eid);		
+		String path = anyEid.get(eid);
 		return path;
 	}
-
 
 }

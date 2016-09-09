@@ -91,6 +91,5 @@ public interface RegistryService {
      */
     List<URL> lookup(URL url);
     
-    String getAnyEid ();
 
 }

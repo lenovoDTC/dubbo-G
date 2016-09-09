@@ -3,10 +3,12 @@ package com.alibaba.dubbo.remoting.zookeeper.zkclient;
 import java.util.List;
 
 import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
+import org.I0Itec.zkclient.serialize.BytesPushThroughSerializer;
 import org.apache.zookeeper.Watcher.Event.KeeperState;
 
 import com.alibaba.dubbo.common.URL;
@@ -52,6 +54,11 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
 		}
 	}
 
+	public String readData(String path) {
+		client.setZkSerializer(new BytesPushThroughSerializer());
+		byte[] data = client.readData(path);
+		return new String(data);
+    }
 	public void delete(String path) {
 		try {
 			client.delete(path);
@@ -91,5 +98,17 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
 	public void removeTargetChildListener(String path, IZkChildListener listener) {
 		client.unsubscribeChildChanges(path,  listener);
 	}
+
+	public void subscribeDataChanges(String path, IZkDataListener listener) {
+		client.subscribeDataChanges(path, listener);
+		
+	}
+	public List<String> subscribeChildChanges(String path, IZkChildListener listener){
+		List<String>childList = client.subscribeChildChanges(path, listener);
+		return childList;
+		
+	}
+
+
 
 }
