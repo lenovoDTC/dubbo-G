@@ -33,11 +33,7 @@ public class DemoAction {
 
         for (int i = 0; i < 1; i ++) {
             try {
-<<<<<<< HEAD
             	RpcContext.getContext().addHeader("X-Request-EID", "test");
-=======
-        		RpcContext.getContext().addHeader("X-Request-EID", "test");
->>>>>>> f206806a43f7a4936e5856ce30750c0c1d373d0f
             	String hello = demoService.sayHello("world" + i);
                 System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
             } catch (Exception e) {
