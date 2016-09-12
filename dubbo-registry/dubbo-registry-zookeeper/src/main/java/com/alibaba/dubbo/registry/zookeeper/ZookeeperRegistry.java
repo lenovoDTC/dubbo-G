@@ -16,6 +16,7 @@
 package com.alibaba.dubbo.registry.zookeeper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
+import com.alibaba.dubbo.common.utils.PojoUtilsTest.Parent;
 import com.alibaba.dubbo.common.utils.UrlUtils;
 import com.alibaba.dubbo.registry.NotifyListener;
 import com.alibaba.dubbo.registry.support.FailbackRegistry;
@@ -215,7 +217,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 					zkClient.subscribeDataChanges("/eid/" + childList.get(i),
 							new ZKDataListener());
 				}
-
+				
 			}
 		} catch (Throwable e) {
 			throw new RpcException("Failed to subscribe " + url
