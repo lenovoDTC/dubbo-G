@@ -13,4 +13,4 @@
 /*/*.iml
 .idea/*
 /target/
-
+**/target/*
