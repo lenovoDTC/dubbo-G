@@ -148,4 +148,9 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
 		return null;
 	}
 
+	public void writeData(String path, Object object) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

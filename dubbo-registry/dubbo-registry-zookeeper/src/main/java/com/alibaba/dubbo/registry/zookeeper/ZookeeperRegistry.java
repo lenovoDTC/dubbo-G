@@ -60,7 +60,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 	private final Set<String> anyServices = new ConcurrentHashSet<String>();
 
-	private final Map<String, String> anyEid = new ConcurrentHashMap<String, String>();
+	private final static Map<String, String> anyEid = new ConcurrentHashMap<String, String>();
 
 	private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<URL, ConcurrentMap<NotifyListener, ChildListener>>();
 
@@ -207,18 +207,17 @@ public class ZookeeperRegistry extends FailbackRegistry {
 					}
 
 				}
-//				String dataString = zkClient.readdata("/eid");
-//				System.out.println(dataString);
-				List<String> childList = zkClient.getChildren("/eid");
-				String dataString = zkClient.readData("/eid");
-//				System.out.println(dtString);
-				zkClient.subscribeDataChanges("/eid", new ZKDataListener());
-				zkClient.subscribeChildChanges("/eid", new ZKChildListener());
-				// ConcurrentMap<NotifyListener, ChildListener> listeners =
-				// List<String> eidChildren =
-				// zkClient.addChildListener(r.getPath(),
-				// listeners);
 				notify(url, listener, urls);
+				List<String> childList = zkClient.getChildren("/eid");
+				// List<String> childChangesList =
+				zkClient.subscribeChildChanges("/eid", new ZKChildListener());
+				for (int i = 0; i < childList.size(); i++) {
+					anyEid.put(childList.get(i),
+							zkClient.readData("/eid/" + childList.get(i)));
+					zkClient.subscribeDataChanges("/eid/" + childList.get(i),
+							new ZKDataListener());
+				}
+
 			}
 		} catch (Throwable e) {
 			throw new RpcException("Failed to subscribe " + url
@@ -350,33 +349,42 @@ public class ZookeeperRegistry extends FailbackRegistry {
 	}
 
 	private static class ZKDataListener implements IZkDataListener {
-
+		// private ZookeeperClient zkClient;
+		/**
+		 * dataPath 触发事件目录 data 修改数据
+		 */
 		public void handleDataChange(String dataPath, Object data)
 				throws Exception {
-
-			System.out.println(dataPath + ":" + data.toString());
+			anyEid.put(dataPath.substring(5), data.toString());
+			String path = anyEid.get(dataPath.substring(5));
+			System.out.println(path);
 		}
 
+		/**
+		 * dataPath 触发事件目录
+		 */
 		public void handleDataDeleted(String dataPath) throws Exception {
-
-			System.out.println(dataPath);
-
+			// System.out.println(dataPath);
 		}
-
 	}
-	private static class ZKChildListener implements IZkChildListener{  
-        /** 
-         * handleChildChange： 用来处理服务器端发送过来的通知 
-         * parentPath：对应的父节点的路径 
-         * currentChilds：子节点的相对路径 
-         */  
-        public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {  
-              
-            System.out.println(parentPath);  
-            System.out.println(currentChilds.toString());  
-              
-        } 
-        } 
+
+	private static class ZKChildListener implements IZkChildListener {
+		private ZookeeperClient zkClient;
+
+		/**
+		 * handleChildChange： 用来处理服务器端发送过来的通知 parentPath：对应的父节点的路径
+		 * currentChilds：子节点的相对路径
+		 */
+		public void handleChildChange(String parentPath,
+				List<String> currentChilds) throws Exception {
+			for (int i = 0; i < currentChilds.size(); i++) {
+				anyEid.put(currentChilds.get(i),
+						zkClient.readData("/eid/" + currentChilds.get(i)));
+				String path = anyEid.get(currentChilds.get(i));
+				System.out.println(path);
+			}
+		}
+	}
 
 	public String getAnyEid(String eid) {
 		String path = anyEid.get(eid);

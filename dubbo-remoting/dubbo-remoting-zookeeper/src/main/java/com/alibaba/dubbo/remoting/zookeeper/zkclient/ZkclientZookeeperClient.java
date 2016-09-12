@@ -59,13 +59,17 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
 		byte[] data = client.readData(path);
 		return new String(data);
     }
+	
+	public void writeData(String path, Object object) {
+		client.writeData(path, object);		
+	}
 	public void delete(String path) {
 		try {
 			client.delete(path);
 		} catch (ZkNoNodeException e) {
 		}
 	}
-
+	
 	public List<String> getChildren(String path) {
 		try {
 			return client.getChildren(path);

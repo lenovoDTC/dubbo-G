@@ -12,6 +12,8 @@ public interface ZookeeperClient {
 	String readData(String path);
 
 	void create(String path, boolean ephemeral);
+	
+	void writeData(String path, Object object);
 
 	void delete(String path);
 	
