@@ -1,4 +1,3 @@
-/target/*
 .classpath
 .settings/*
 .project
@@ -8,9 +7,6 @@
 /*/*/.classpath
 /*/*/.project
 /*/*/.settings/*
-/*/target/*
 *.iml
 /*/*.iml
 .idea/*
-/target/
-**/target/*

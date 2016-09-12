@@ -22,6 +22,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkDataListener;
+
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.EidNode;
 import com.alibaba.dubbo.common.URL;
@@ -55,7 +58,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 	private final Set<String> anyServices = new ConcurrentHashSet<String>();
 
-	private final Map<String, String> anyEid = new ConcurrentHashMap<String, String>();
+	private final static Map<String, String> anyEid = new ConcurrentHashMap<String, String>();
 
 	private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<URL, ConcurrentMap<NotifyListener, ChildListener>>();
 
@@ -170,23 +173,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
 				}
 			} else {
 				List<URL> urls = new ArrayList<URL>();
-				EidNode q = new EidNode();
-				EidNode w = new EidNode();
-				EidNode e = new EidNode();
-				EidNode r = new EidNode();
-				q.setEid("default");
-				q.setPath();
-				w.setEid("test");
-				w.setParent(q);
-				w.setPath();
-				e.setEid("test1");
-				e.setParent(w);
-				e.setPath();
-				r.setEid("test2");
-				r.setParent(e);
-				r.setPath();
-				
-				anyEid.put("eid", r.getPath());
 				for (String path : toCategoriesPath(url)) {
 					ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
 							.get(url);
@@ -217,12 +203,19 @@ public class ZookeeperRegistry extends FailbackRegistry {
 					if (children != null) {
 						urls.addAll(toUrlsWithEmpty(url, path, children));
 					}
-					zkClient.create(r.getPath(), false);
-					List<String> eidChildren = zkClient.addChildListener(r.getPath(),
-							zkListener);
-					
+
 				}
 				notify(url, listener, urls);
+				List<String> childList = zkClient.getChildren("/eid");
+				// List<String> childChangesList =
+				zkClient.subscribeChildChanges("/eid", new ZKChildListener());
+				for (int i = 0; i < childList.size(); i++) {
+					anyEid.put(childList.get(i),
+							zkClient.readData("/eid/" + childList.get(i)));
+					zkClient.subscribeDataChanges("/eid/" + childList.get(i),
+							new ZKDataListener());
+				}
+
 			}
 		} catch (Throwable e) {
 			throw new RpcException("Failed to subscribe " + url
@@ -334,11 +327,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		if (urls == null || urls.isEmpty()) {
 			int i = path.lastIndexOf('/');
 			String category = i < 0 ? path : path.substring(i + 1);
-			// Map<String, String> parameters = new HashMap<String, String>();
-			// parameters.put(Constants.GENERIC_EID, "test");
 			URL empty = consumer.setProtocol(Constants.EMPTY_PROTOCOL)
 					.addParameter(Constants.CATEGORY_KEY, category);
-			// .addParameters(parameters)
 			urls.add(empty);
 		}
 		return urls;
@@ -356,11 +346,47 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		return address;
 	}
 
-	public String getAnyEid(String eid) {
-		String path = anyEid.get(eid);
-		
-		return path;
+	private static class ZKDataListener implements IZkDataListener {
+		// private ZookeeperClient zkClient;
+		/**
+		 * dataPath 触发事件目录 data 修改数据
+		 */
+		public void handleDataChange(String dataPath, Object data)
+				throws Exception {
+			anyEid.put(dataPath.substring(5), data.toString());
+			String path = anyEid.get(dataPath.substring(5));
+			System.out.println(path);
+		}
+
+		/**
+		 * dataPath 触发事件目录
+		 */
+		public void handleDataDeleted(String dataPath) throws Exception {
+			// System.out.println(dataPath);
+		}
 	}
 
+	private static class ZKChildListener implements IZkChildListener {
+		private ZookeeperClient zkClient;
+
+		/**
+		 * handleChildChange： 用来处理服务器端发送过来的通知 parentPath：对应的父节点的路径
+		 * currentChilds：子节点的相对路径
+		 */
+		public void handleChildChange(String parentPath,
+				List<String> currentChilds) throws Exception {
+			for (int i = 0; i < currentChilds.size(); i++) {
+				anyEid.put(currentChilds.get(i),
+						zkClient.readData("/eid/" + currentChilds.get(i)));
+				String path = anyEid.get(currentChilds.get(i));
+				System.out.println(path);
+			}
+		}
+	}
+
+	public String getAnyEid(String eid) {
+		String path = anyEid.get(eid);
+		return path;
+	}
 
 }
