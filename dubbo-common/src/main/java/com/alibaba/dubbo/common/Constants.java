@@ -580,11 +580,13 @@ public class Constants {
     public static final String GENERIC_SERIALIZATION_BEAN          = "bean";
     
     /* edit dubbo provider constants add environment id property */
-    public static final String DEFAULT_EID                        = "default";
+    public static final String DEFAULT_EID                         = "default";
     
-    public static final String GENERIC_EID  						   = "eid";
+    public static final String GENERIC_EID  					   = "eid";
     
-    public static final String GENERIC_HEADER_EID                      = "X-Request-EID";
+    public static final String GENERIC_HEADER_EID                  = "X-Request-EID";
+    
+    public static final String GROUP_ROOT_EID                      = "/eid";
 
     /*
      * private Constants(){ }
