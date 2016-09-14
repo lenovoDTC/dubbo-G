@@ -585,6 +585,10 @@ public class Constants {
     public static final String GENERIC_EID  						   = "eid";
     
     public static final String GENERIC_HEADER_EID                      = "X-Request-EID";
+    
+    public static final String GENERIC_EID_PATH                        = "epath";
+    
+    public static final String GENERIC_ROOT_EID                        = "/eid";
 
     /*
      * private Constants(){ }

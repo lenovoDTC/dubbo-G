@@ -41,11 +41,12 @@ public class MockInvokersSelector implements Router {
 		} else {
 			String value = invocation.getAttachments().get(Constants.INVOCATION_NEED_MOCK);
 			String eid = invocation.getAttachment(Constants.GENERIC_EID);
+			String path = invocation.getAttachment(Constants.GENERIC_EID_PATH);
 			if (value == null) {
 				if (eid == null)
 					return getNormalInvokers(invokers);
 				else
-					return getNormalInvokers(invokers, eid);
+					return getNormalInvokers(invokers, eid, path);
 			} else if (Boolean.TRUE.toString().equalsIgnoreCase(value)) {
 				return getMockedInvokers(invokers);
 			}
@@ -67,10 +68,10 @@ public class MockInvokersSelector implements Router {
 	}
 
 	private <T> List<Invoker<T>> getNormalInvokers(final List<Invoker<T>> invokers) {
-		return getNormalInvokers(invokers, null);
+		return getNormalInvokers(invokers, null, null);
 	}
 
-	private <T> List<Invoker<T>> getNormalInvokers(final List<Invoker<T>> invokers, String eid) {
+	private <T> List<Invoker<T>> getNormalInvokers(final List<Invoker<T>> invokers, String eid, String path) {
 		if (!hasMockProviders(invokers)) {
 			List<Invoker<T>> sInvokers = new ArrayList<Invoker<T>>(invokers.size());
 			for (Invoker<T> invoker : invokers) {

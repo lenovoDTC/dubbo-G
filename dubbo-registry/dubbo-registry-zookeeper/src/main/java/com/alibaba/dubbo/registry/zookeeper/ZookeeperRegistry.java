@@ -26,7 +26,6 @@ import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 
 import com.alibaba.dubbo.common.Constants;
-import com.alibaba.dubbo.common.EidNode;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
