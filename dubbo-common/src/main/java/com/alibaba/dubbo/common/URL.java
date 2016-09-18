@@ -414,6 +414,13 @@ public final class URL implements Serializable {
         }
         return value;
     }
+    public String getParameter(String key, String defaultValue, String eid) {
+        String value = getParameter(key);
+        if (value == null || value.length() == 0) {
+            return defaultValue;
+        }
+        return value;
+    }
 
     public String[] getParameter(String key, String[] defaultValue) {
         String value = getParameter(key);

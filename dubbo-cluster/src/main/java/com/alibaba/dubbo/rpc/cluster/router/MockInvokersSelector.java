@@ -22,7 +22,6 @@ import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.dubbo.rpc.cluster.Router;
 
@@ -41,12 +40,11 @@ public class MockInvokersSelector implements Router {
 		} else {
 			String value = invocation.getAttachments().get(Constants.INVOCATION_NEED_MOCK);
 			String eid = invocation.getAttachment(Constants.GENERIC_EID);
-			String path = invocation.getAttachment(Constants.GENERIC_EID_PATH);
 			if (value == null) {
 				if (eid == null)
 					return getNormalInvokers(invokers);
 				else
-					return getNormalInvokers(invokers, eid, path);
+					return getNormalInvokers(invokers, eid);
 			} else if (Boolean.TRUE.toString().equalsIgnoreCase(value)) {
 				return getMockedInvokers(invokers);
 			}
@@ -68,10 +66,10 @@ public class MockInvokersSelector implements Router {
 	}
 
 	private <T> List<Invoker<T>> getNormalInvokers(final List<Invoker<T>> invokers) {
-		return getNormalInvokers(invokers, null, null);
+		return getNormalInvokers(invokers, null);
 	}
 
-	private <T> List<Invoker<T>> getNormalInvokers(final List<Invoker<T>> invokers, String eid, String path) {
+	private <T> List<Invoker<T>> getNormalInvokers(final List<Invoker<T>> invokers, String eid) {
 		if (!hasMockProviders(invokers)) {
 			List<Invoker<T>> sInvokers = new ArrayList<Invoker<T>>(invokers.size());
 			for (Invoker<T> invoker : invokers) {

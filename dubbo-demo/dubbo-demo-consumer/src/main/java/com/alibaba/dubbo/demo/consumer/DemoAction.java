@@ -22,25 +22,24 @@ import com.alibaba.dubbo.demo.DemoService;
 import com.alibaba.dubbo.rpc.RpcContext;
 
 public class DemoAction {
+    private DemoService demoService;
 
-	private DemoService demoService;
+    public void setDemoService(DemoService demoService) {
+        this.demoService = demoService;
+    }
 
-	public void setDemoService(DemoService demoService) {
-		this.demoService = demoService;
-	}
+	public void start() throws Exception {            	
 
-	public void start() throws Exception {
-
-		for (int i = 0; i < 1; i++) {
-			try {
-				RpcContext.getContext().addHeader("X-Request-EID", "test");
-				String hello = demoService.sayHello("world" + i);
-				System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			Thread.sleep(2000);
-		}
+        for (int i = 0; i < 1; i ++) {
+        	try{
+        		RpcContext.getContext().addHeader("X-Request-EID", "test");
+            	String hello = demoService.sayHello("world" + i);
+                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Thread.sleep(2000);
+        }
 	}
 
 }

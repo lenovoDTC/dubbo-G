@@ -34,8 +34,8 @@ import com.alibaba.dubbo.common.utils.UrlUtils;
 import com.alibaba.dubbo.registry.NotifyListener;
 import com.alibaba.dubbo.registry.support.FailbackRegistry;
 import com.alibaba.dubbo.remoting.zookeeper.ChildListener;
-import com.alibaba.dubbo.remoting.zookeeper.ZookeeperClient;
 import com.alibaba.dubbo.remoting.zookeeper.StateListener;
+import com.alibaba.dubbo.remoting.zookeeper.ZookeeperClient;
 import com.alibaba.dubbo.remoting.zookeeper.ZookeeperTransporter;
 import com.alibaba.dubbo.rpc.RpcException;
 
@@ -214,7 +214,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 					zkClient.subscribeDataChanges("/eid/" + childList.get(i),
 							new ZKDataListener());
 				}
-
+				
 			}
 		} catch (Throwable e) {
 			throw new RpcException("Failed to subscribe " + url

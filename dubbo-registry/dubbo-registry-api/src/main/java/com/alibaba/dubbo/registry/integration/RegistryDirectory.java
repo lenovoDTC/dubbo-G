@@ -84,6 +84,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 
 	private final String[] serviceMethods;
 
+	private final String serviceEids;
+
 	private final boolean multiGroup;
 
 	private volatile boolean forbidden = false;
@@ -100,8 +102,10 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	private volatile Map<String, Invoker<T>> urlInvokerMap; // 初始为null以及中途可能被赋为null，请使用局部变量引用
 
 	// Map<methodName, Invoker> cache service method to invokers mapping.
-	private volatile Map<String, List<Invoker<T>>> methodInvokerMap; // 初始为null以及中途可能被赋为null，请使用局部变量引用
-	
+	// private volatile Map<String, List<Invoker<T>>> methodInvokerMap; //
+	// 初始为null以及中途可能被赋为null，请使用局部变量引用
+
+	private volatile Map<String, Map<String, List<Invoker<T>>>> methodInvokerMap;// Eid
 	// Set<invokerUrls> cache invokeUrls to invokers mapping.
 	private volatile Set<URL> cachedInvokerUrls; // 初始为null以及中途可能被赋为null，请使用局部变量引用
 
@@ -120,6 +124,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		this.multiGroup = group != null && ("*".equals(group) || group.contains(","));
 		String methods = queryMap.get(Constants.METHODS_KEY);
 		this.serviceMethods = methods == null ? null : Constants.COMMA_SPLIT_PATTERN.split(methods);
+		this.serviceEids = url.getParameter(Constants.GENERIC_EID);
 	}
 
 	public void setProtocol(Protocol protocol) {
@@ -213,6 +218,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 				&& Constants.EMPTY_PROTOCOL.equals(invokerUrls.get(0).getProtocol())) {
 			this.forbidden = true; // 禁止访问
 			this.methodInvokerMap = null; // 置空列表
+
 			destroyAllInvokers(); // 关闭所有Invoker
 		} else {
 			this.forbidden = false; // 允许访问
@@ -228,7 +234,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 				return;
 			}
 			Map<String, Invoker<T>> newUrlInvokerMap = toInvokers(invokerUrls);// 将URL列表转成Invoker列表
-			Map<String, List<Invoker<T>>> newMethodInvokerMap = toMethodInvokers(newUrlInvokerMap); // 换方法名映射Invoker列表
+			Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = toMethodInvokers(newUrlInvokerMap); // 换方法名映射Invoker列表
 			// state change
 			// 如果计算错误，则不进行处理.
 			if (newUrlInvokerMap == null || newUrlInvokerMap.size() == 0) {
@@ -246,34 +252,39 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		}
 	}
 
-	private Map<String, List<Invoker<T>>> toMergeMethodInvokerMap(Map<String, List<Invoker<T>>> methodMap) {
+	private Map<String, Map<String, List<Invoker<T>>>> toMergeMethodInvokerMap(
+			Map<String, Map<String, List<Invoker<T>>>> eidMethodMap) {
 		Map<String, List<Invoker<T>>> result = new HashMap<String, List<Invoker<T>>>();
-		for (Map.Entry<String, List<Invoker<T>>> entry : methodMap.entrySet()) {
-			String method = entry.getKey();
-			List<Invoker<T>> invokers = entry.getValue();
-			Map<String, List<Invoker<T>>> groupMap = new HashMap<String, List<Invoker<T>>>();
-			for (Invoker<T> invoker : invokers) {
-				String group = invoker.getUrl().getParameter(Constants.GROUP_KEY, "");
-				List<Invoker<T>> groupInvokers = groupMap.get(group);
-				if (groupInvokers == null) {
-					groupInvokers = new ArrayList<Invoker<T>>();
-					groupMap.put(group, groupInvokers);
+		Map<String, Map<String, List<Invoker<T>>>> result1 = new HashMap<String, Map<String, List<Invoker<T>>>>();
+		for (Map.Entry<String, Map<String, List<Invoker<T>>>> eidEntry : eidMethodMap.entrySet()) {
+			Map<String, List<Invoker<T>>> eidInvokers = eidEntry.getValue();
+			for (Map.Entry<String, List<Invoker<T>>> entry : eidInvokers.entrySet()) {
+				String method = entry.getKey();
+				List<Invoker<T>> invokers = entry.getValue();
+				Map<String, List<Invoker<T>>> groupMap = new HashMap<String, List<Invoker<T>>>();
+				for (Invoker<T> invoker : invokers) {
+					String group = invoker.getUrl().getParameter(Constants.GROUP_KEY, "");
+					List<Invoker<T>> groupInvokers = groupMap.get(group);
+					if (groupInvokers == null) {
+						groupInvokers = new ArrayList<Invoker<T>>();
+						groupMap.put(group, groupInvokers);
+					}
+					groupInvokers.add(invoker);
 				}
-				groupInvokers.add(invoker);
-			}
-			if (groupMap.size() == 1) {
-				result.put(method, groupMap.values().iterator().next());
-			} else if (groupMap.size() > 1) {
-				List<Invoker<T>> groupInvokers = new ArrayList<Invoker<T>>();
-				for (List<Invoker<T>> groupList : groupMap.values()) {
-					groupInvokers.add(cluster.join(new StaticDirectory<T>(groupList)));
+				if (groupMap.size() == 1) {
+					result.put(method, groupMap.values().iterator().next());
+				} else if (groupMap.size() > 1) {
+					List<Invoker<T>> groupInvokers = new ArrayList<Invoker<T>>();
+					for (List<Invoker<T>> groupList : groupMap.values()) {
+						groupInvokers.add(cluster.join(new StaticDirectory<T>(groupList)));
+					}
+					result.put(method, groupInvokers);
+				} else {
+					result.put(method, invokers);
 				}
-				result.put(method, groupInvokers);
-			} else {
-				result.put(method, invokers);
 			}
 		}
-		return result;
+		return result1;
 	}
 
 	/**
@@ -475,30 +486,43 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	}
 
 	/**
-	 * 将invokers列表转成与方法的映射关系
+	 * 将invokers列表转成与方法的映射关系 方法映射成eid关系表
 	 * 
 	 * @param invokersMap
 	 *            Invoker列表
 	 * @return Invoker与方法的映射关系
 	 */
-	private Map<String, List<Invoker<T>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
-		Map<String, List<Invoker<T>>> newMethodInvokerMap = new HashMap<String, List<Invoker<T>>>();
+	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
+		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
+		Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
 		// 按提供者URL所声明的methods分类，兼容注册中心执行路由过滤掉的methods
 		List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
 		if (invokersMap != null && invokersMap.size() > 0) {
 			for (Invoker<T> invoker : invokersMap.values()) {
 				String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);
+				String parameterEid = invoker.getUrl().getParameter(Constants.GENERIC_EID);
+
 				if (parameter != null && parameter.length() > 0) {
 					String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);
 					if (methods != null && methods.length > 0) {
 						for (String method : methods) {
 							if (method != null && method.length() > 0 && !Constants.ANY_VALUE.equals(method)) {
-								List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
+								Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap.get(method);
 								if (methodInvokers == null) {
-									methodInvokers = new ArrayList<Invoker<T>>();
-									newMethodInvokerMap.put(method, methodInvokers);
+									methodInvokers = new HashMap<String, List<Invoker<T>>>();
+									newMethodInvokerMap.put(method, newEidInvokerMap);
 								}
-								methodInvokers.add(invoker);
+								newMethodInvokerMap.put(method, newEidInvokerMap);
+								if (parameterEid != null && parameterEid.length() > 0
+										&& !Constants.ANY_VALUE.equals(parameterEid)) {
+									List<Invoker<T>> eidInvokers = newEidInvokerMap.get(parameterEid);
+									if (eidInvokers == null) {
+										eidInvokers = new ArrayList<Invoker<T>>();
+										newEidInvokerMap.put(parameterEid, eidInvokers);
+									}
+									eidInvokers.add(invoker);
+								}
+
 							}
 						}
 					}
@@ -506,21 +530,21 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 				invokersList.add(invoker);
 			}
 		}
-		newMethodInvokerMap.put(Constants.ANY_VALUE, invokersList);
-		if (serviceMethods != null && serviceMethods.length > 0) {
-			for (String method : serviceMethods) {
-				List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
-				if (methodInvokers == null || methodInvokers.size() == 0) {
-					methodInvokers = invokersList;
-				}
-				newMethodInvokerMap.put(method, route(methodInvokers, method));
+		newEidInvokerMap.put(Constants.ANY_VALUE, invokersList);
+		if (serviceEids != null) {
+			List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
+			if (eidInvokers == null || eidInvokers.size() == 0) {
+				eidInvokers = invokersList;
 			}
+			newEidInvokerMap.put(serviceEids, route(eidInvokers, serviceEids));
 		}
 		// sort and unmodifiable
 		for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
-			List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
-			Collections.sort(methodInvokers, InvokerComparator.getComparator());
-			newMethodInvokerMap.put(method, Collections.unmodifiableList(methodInvokers));
+			for (String eid : new HashSet<String>(newEidInvokerMap.keySet())) {
+				List<Invoker<T>> eidInvokers = newMethodInvokerMap.get(method).get(eid);
+				Collections.sort(eidInvokers, InvokerComparator.getComparator());
+				newEidInvokerMap.put(eid, Collections.unmodifiableList(eidInvokers));
+			}
 		}
 		return Collections.unmodifiableMap(newMethodInvokerMap);
 	}
@@ -589,6 +613,9 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		}
 	}
 
+	/**
+	 * 原代码
+	 */
 	public List<Invoker<T>> doList(Invocation invocation) {
 		if (forbidden) {
 			throw new RpcException(RpcException.FORBIDDEN_EXCEPTION,
@@ -596,41 +623,50 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 							+ " from registry " + getUrl().getAddress() + " use dubbo version " + Version.getVersion()
 							+ ", Please check registry access list (whitelist/blacklist).");
 		}
-		initializeEid(invocation);
+
 		List<Invoker<T>> invokers = null;
-		Map<String, List<Invoker<T>>> localMethodInvokerMap = this.methodInvokerMap; // local
-																						// reference
+		Map<String, Map<String, List<Invoker<T>>>> localMethodInvokerMap = this.methodInvokerMap; // local
+																									// reference
 		if (localMethodInvokerMap != null && localMethodInvokerMap.size() > 0) {
 			String methodName = RpcUtils.getMethodName(invocation);
+			String eid = invocation.getAttachment(Constants.GENERIC_EID);
+			String ePath = registry.getAnyEid(eid);
+			String[] eids = ePath.split("/");
+			Map<String, List<Invoker<T>>> invokersMap = null;
 			Object[] args = RpcUtils.getArguments(invocation);
-			if (args != null && args.length > 0 && args[0] != null
-					&& (args[0] instanceof String || args[0].getClass().isEnum())) {
-				invokers = localMethodInvokerMap.get(methodName + "." + args[0]); // 可根据第一个参数枚举路由
-			}
-			if (invokers == null) {
-				invokers = localMethodInvokerMap.get(methodName);
-			}
-			if (invokers == null) {
-				invokers = localMethodInvokerMap.get(Constants.ANY_VALUE);
-			}
-			if (invokers == null) {
-				Iterator<List<Invoker<T>>> iterator = localMethodInvokerMap.values().iterator();
-				if (iterator.hasNext()) {
-					invokers = iterator.next();
+			if (localMethodInvokerMap.get(methodName + "." + args[0]) != null) {
+				if (args != null && args.length > 0 && args[0] != null
+						&& (args[0] instanceof String || args[0].getClass().isEnum())) {
+					invokersMap = localMethodInvokerMap.get(methodName + "." + args[0]);
+//					invokers = filter(invokersMap, ePath); // 可根据第一个参数枚举路由
 				}
 			}
+			if (invokersMap == null) {
+				invokersMap = localMethodInvokerMap.get(methodName);
+			}
+			if (invokersMap == null) {
+				invokersMap = localMethodInvokerMap.get(Constants.ANY_VALUE);
+			}
+			if (invokersMap == null) {
+				Iterator<Map<String, List<Invoker<T>>>> iterator = localMethodInvokerMap.values().iterator();
+				if (iterator.hasNext()) {
+					invokersMap = iterator.next();
+				}
+			}
+			invokers = filter(invokersMap, eids);
 		}
 		return invokers == null ? new ArrayList<Invoker<T>>(0) : invokers;
 	}
 
-	public void initializeEid(Invocation invocation) {
-		String eid = invocation.getAttachment(Constants.GENERIC_EID);
-		String parent = registry.getAnyEid(eid);
-		if (parent == null) {
-			parent = Constants.GENERIC_ROOT_EID;
-			return;
+	private List<Invoker<T>> filter(Map<String, List<Invoker<T>>> invokersMap, String[] eidArray) {
+		int i = 0;
+		for (i = eidArray.length - 1; i >= 0; i--) {
+			String eid = eidArray[i];
+			if (invokersMap.containsKey(eid)) {
+				return invokersMap.get(eid);
+			}
 		}
-		invocation.getAttachments().put(Constants.GENERIC_EID_PATH, registry.getAnyEid(eid));
+		return null;
 	}
 
 	public Class<T> getInterface() {
@@ -666,10 +702,10 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	/**
 	 * Haomin: added for test purpose
 	 */
-	public Map<String, List<Invoker<T>>> getMethodInvokerMap() {
+	public Map<String, Map<String, List<Invoker<T>>>> getMethodInvokerMap() {
 		return methodInvokerMap;
 	}
-	
+
 	private static class InvokerComparator implements Comparator<Invoker<?>> {
 
 		private static final InvokerComparator comparator = new InvokerComparator();
