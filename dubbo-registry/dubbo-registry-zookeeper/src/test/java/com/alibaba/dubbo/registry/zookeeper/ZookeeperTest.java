@@ -13,5 +13,6 @@ public class ZookeeperTest {
 		System.out.println("eid" + " data :" + data);
 
 		zkClient.close();
+		
 	}
 }

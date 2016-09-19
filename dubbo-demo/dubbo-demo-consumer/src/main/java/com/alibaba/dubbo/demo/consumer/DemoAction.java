@@ -22,7 +22,6 @@ import com.alibaba.dubbo.demo.DemoService;
 import com.alibaba.dubbo.rpc.RpcContext;
 
 public class DemoAction {
-    
     private DemoService demoService;
 
     public void setDemoService(DemoService demoService) {

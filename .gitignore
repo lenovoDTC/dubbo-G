@@ -10,3 +10,4 @@
 *.iml
 /*/*.iml
 .idea/*
+**/target/*
