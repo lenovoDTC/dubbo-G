@@ -34,7 +34,10 @@ public class DemoAction {
         	try{
         		RpcContext.getContext().addHeader("X-Request-EID", "test");
             	String hello = demoService.sayHello("world" + i);
-                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
+            	System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
+            	RpcContext.getContext().addHeader("X-Request-EID", "test1");
+            	String hello1= demoService.sayHello("world" + i);
+                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello1);
             } catch (Exception e) {
                 e.printStackTrace();
             }

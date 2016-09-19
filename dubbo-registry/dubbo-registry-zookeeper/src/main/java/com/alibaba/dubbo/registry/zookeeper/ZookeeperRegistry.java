@@ -57,7 +57,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 	private final Set<String> anyServices = new ConcurrentHashSet<String>();
 
-	private final static Map<String, String> anyEid = new ConcurrentHashMap<String, String>();
+	private final Map<String, String> anyEid = new ConcurrentHashMap<String, String>();
 
 	private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<URL, ConcurrentMap<NotifyListener, ChildListener>>();
 
@@ -345,8 +345,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		return address;
 	}
 
-	private static class ZKDataListener implements IZkDataListener {
-		// private ZookeeperClient zkClient;
+	private class ZKDataListener implements IZkDataListener {
 		/**
 		 * dataPath 触发事件目录 data 修改数据
 		 */
@@ -365,7 +364,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		}
 	}
 
-	private static class ZKChildListener implements IZkChildListener {
+	private class ZKChildListener implements IZkChildListener {
 		private ZookeeperClient zkClient;
 
 		/**
