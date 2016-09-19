@@ -39,12 +39,8 @@ public class MockInvokersSelector implements Router {
 			return getNormalInvokers(invokers);
 		} else {
 			String value = invocation.getAttachments().get(Constants.INVOCATION_NEED_MOCK);
-			String eid = invocation.getAttachment(Constants.GENERIC_EID);
 			if (value == null) {
-				if (eid == null)
-					return getNormalInvokers(invokers);
-				else
-  					return getNormalInvokers(invokers, eid);
+				return getNormalInvokers(invokers);
 			} else if (Boolean.TRUE.toString().equalsIgnoreCase(value)) {
 				return getMockedInvokers(invokers);
 			}
