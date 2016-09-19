@@ -253,38 +253,53 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	}
 
 	private Map<String, Map<String, List<Invoker<T>>>> toMergeMethodInvokerMap(
-			Map<String, Map<String, List<Invoker<T>>>> eidMethodMap) {
-		Map<String, List<Invoker<T>>> result = new HashMap<String, List<Invoker<T>>>();
-		Map<String, Map<String, List<Invoker<T>>>> result1 = new HashMap<String, Map<String, List<Invoker<T>>>>();
-		for (Map.Entry<String, Map<String, List<Invoker<T>>>> eidEntry : eidMethodMap.entrySet()) {
-			Map<String, List<Invoker<T>>> eidInvokers = eidEntry.getValue();
-			for (Map.Entry<String, List<Invoker<T>>> entry : eidInvokers.entrySet()) {
-				String method = entry.getKey();
-				List<Invoker<T>> invokers = entry.getValue();
-				Map<String, List<Invoker<T>>> groupMap = new HashMap<String, List<Invoker<T>>>();
+			Map<String, Map<String, List<Invoker<T>>>> MethodMap) {
+		Map<String, Map<String, List<Invoker<T>>>> result = new HashMap<String, Map<String, List<Invoker<T>>>>();
+		for (Map.Entry<String, Map<String, List<Invoker<T>>>> entry : MethodMap
+				.entrySet()) {
+			String method = entry.getKey();
+			Map<String, List<Invoker<T>>> eidinvokers = entry.getValue();
+			Map<String, Map<String, List<Invoker<T>>>> groupMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
+			for (Map.Entry<String, List<Invoker<T>>> eidEntry : eidinvokers
+					.entrySet()) {
+				String eid = eidEntry.getKey();
+				List<Invoker<T>> invokers = eidEntry.getValue();
+				Map<String, List<Invoker<T>>> groupInvokers = new HashMap<String, List<Invoker<T>>>();
 				for (Invoker<T> invoker : invokers) {
-					String group = invoker.getUrl().getParameter(Constants.GROUP_KEY, "");
-					List<Invoker<T>> groupInvokers = groupMap.get(group);
+					String group = invoker.getUrl().getParameter(
+							Constants.GROUP_KEY, "");
+					groupInvokers = groupMap.get(group);
 					if (groupInvokers == null) {
-						groupInvokers = new ArrayList<Invoker<T>>();
+						groupInvokers = new HashMap<String, List<Invoker<T>>>();
 						groupMap.put(group, groupInvokers);
 					}
-					groupInvokers.add(invoker);
 				}
-				if (groupMap.size() == 1) {
-					result.put(method, groupMap.values().iterator().next());
-				} else if (groupMap.size() > 1) {
-					List<Invoker<T>> groupInvokers = new ArrayList<Invoker<T>>();
-					for (List<Invoker<T>> groupList : groupMap.values()) {
-						groupInvokers.add(cluster.join(new StaticDirectory<T>(groupList)));
-					}
-					result.put(method, groupInvokers);
-				} else {
-					result.put(method, invokers);
+				groupInvokers.put(eid, invokers);
+			}
+			if (groupMap.size() == 1) {
+				result.put(method, groupMap.values().iterator().next());
+			} else if (groupMap.size() > 1) {
+				Map<String, List<Invoker<T>>> groupInvokers = new HashMap<String, List<Invoker<T>>>();
+				List<Invoker<T>> groupList = new ArrayList<Invoker<T>>();
+				for (Map<String, List<Invoker<T>>> groupMap2 : groupMap
+						.values()) {
+					for (Map.Entry<String, List<Invoker<T>>> eidGroupEntry : groupMap2
+							.entrySet()) {
+						String eid = eidGroupEntry.getKey();
+						List<Invoker<T>> invokers = eidGroupEntry.getValue();
+						groupList.add(cluster.join(new StaticDirectory<T>(
+								invokers)));
+						groupInvokers.put(eid, groupList);
+					}					
 				}
+				result.put(method, groupInvokers);
+			} else {
+				result.put(method, eidinvokers);
 			}
 		}
-		return result1;
+
+		return result;
+
 	}
 
 	/**
@@ -492,7 +507,10 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 *            Invoker列表
 	 * @return Invoker与方法的映射关系
 	 */
-	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
+
+	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(
+			Map<String, Invoker<T>> invokersMap) {
+
 		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
 		Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
 		// 按提供者URL所声明的methods分类，兼容注册中心执行路由过滤掉的methods
@@ -574,6 +592,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * 
 	 * @param invokers
 	 */
+
 	private void destroyUnusedInvokers(Map<String, Invoker<T>> oldUrlInvokerMap,
 			Map<String, Invoker<T>> newUrlInvokerMap) {
 		if (newUrlInvokerMap == null || newUrlInvokerMap.size() == 0) {
@@ -728,7 +747,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * overrideMap重新组装
 	 * 
 	 * @author chao.liuc
+<<<<<<< HEAD
+	 * 
+=======
 	 *
+>>>>>>> b21bde2f169936d94480c4f16130891f7a20b7c5
 	 * @param <T>
 	 */
 	private static class InvokerDelegete<T> extends InvokerWrapper<T> {

@@ -345,7 +345,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		return address;
 	}
 
-	private class ZKDataListener implements IZkDataListener {
+	private  class ZKDataListener implements IZkDataListener {
 		/**
 		 * dataPath 触发事件目录 data 修改数据
 		 */
@@ -364,7 +364,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		}
 	}
 
-	private class ZKChildListener implements IZkChildListener {
+	private  class ZKChildListener implements IZkChildListener {
 		private ZookeeperClient zkClient;
 
 		/**
