@@ -205,16 +205,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
 
 				}
 				notify(url, listener, urls);
-				List<String> childList = zkClient.getChildren("/eid");
-				// List<String> childChangesList =
-				zkClient.subscribeChildChanges("/eid", new ZKChildListener());
+				List<String> childList = zkClient.getChildren(Constants.GENERIC_ROOT_EID);
+				zkClient.subscribeChildChanges(Constants.GENERIC_ROOT_EID, new ZKChildListener());
 				for (int i = 0; i < childList.size(); i++) {
 					anyEid.put(childList.get(i),
-							zkClient.readData("/eid/" + childList.get(i)));
-					zkClient.subscribeDataChanges("/eid/" + childList.get(i),
+							zkClient.readData(Constants.GENERIC_ROOT_EID + "/" + childList.get(i)));
+					zkClient.subscribeDataChanges(Constants.GENERIC_ROOT_EID + "/" + childList.get(i),
 							new ZKDataListener());
 				}
-				
+
 			}
 		} catch (Throwable e) {
 			throw new RpcException("Failed to subscribe " + url
@@ -345,28 +344,24 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		return address;
 	}
 
-	private  class ZKDataListener implements IZkDataListener {
+	private class ZKDataListener implements IZkDataListener {
 		/**
 		 * dataPath 触发事件目录 data 修改数据
 		 */
 		public void handleDataChange(String dataPath, Object data)
 				throws Exception {
 			anyEid.put(dataPath.substring(5), data.toString());
-			String path = anyEid.get(dataPath.substring(5));
-			System.out.println(path);
 		}
 
 		/**
 		 * dataPath 触发事件目录
 		 */
 		public void handleDataDeleted(String dataPath) throws Exception {
-			// System.out.println(dataPath);
+			System.out.println(dataPath);
 		}
 	}
 
-	private  class ZKChildListener implements IZkChildListener {
-		private ZookeeperClient zkClient;
-
+	private class ZKChildListener implements IZkChildListener {
 		/**
 		 * handleChildChange： 用来处理服务器端发送过来的通知 parentPath：对应的父节点的路径
 		 * currentChilds：子节点的相对路径
@@ -374,10 +369,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		public void handleChildChange(String parentPath,
 				List<String> currentChilds) throws Exception {
 			for (int i = 0; i < currentChilds.size(); i++) {
-				anyEid.put(currentChilds.get(i),
-						zkClient.readData("/eid/" + currentChilds.get(i)));
-				String path = anyEid.get(currentChilds.get(i));
-				System.out.println(path);
+				anyEid.put(
+						currentChilds.get(i),
+						zkClient.readData(Constants.GENERIC_ROOT_EID  + "/"
+								+ currentChilds.get(i)));
 			}
 		}
 	}

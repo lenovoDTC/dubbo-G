@@ -747,11 +747,6 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * overrideMap重新组装
 	 * 
 	 * @author chao.liuc
-<<<<<<< HEAD
-	 * 
-=======
-	 *
->>>>>>> b21bde2f169936d94480c4f16130891f7a20b7c5
 	 * @param <T>
 	 */
 	private static class InvokerDelegete<T> extends InvokerWrapper<T> {

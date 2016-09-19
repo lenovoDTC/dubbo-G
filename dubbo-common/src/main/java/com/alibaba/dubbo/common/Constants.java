@@ -590,7 +590,7 @@ public class Constants {
     
     public static final String GENERIC_ROOT_EID                        = "/eid";
     
-    public static final String GROUP_ROOT_EID                      = "/eid";
+//    public static final String GROUP_ROOT_EID                      = "/eid";
 
     /*
      * private Constants(){ }
