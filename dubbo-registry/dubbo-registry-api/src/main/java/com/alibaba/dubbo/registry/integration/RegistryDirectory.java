@@ -650,6 +650,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			String methodName = RpcUtils.getMethodName(invocation);
 			String eid = invocation.getAttachment(Constants.GENERIC_EID);
 			String ePath = registry.getAnyEid(eid);
+			if(ePath == null){ePath="/"+Constants.DEFAULT_EID+"/";}
 			String[] eids = ePath.split("/");
 			Map<String, List<Invoker<T>>> invokersMap = null;
 			Object[] args = RpcUtils.getArguments(invocation);
