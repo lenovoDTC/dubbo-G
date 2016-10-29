@@ -55,7 +55,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         }
         String eid = RpcContext.getContext().getHeader(Constants.GENERIC_HEADER_EID);
         if (eid == null)
-        	 return invoker.invoke(new RpcInvocation(method, args)).recreate();
+        	eid = Constants.DEFAULT_EID;
         Map<String, String> attachment = new HashMap<String, String>();
         attachment.put(Constants.GENERIC_EID, eid);
         return invoker.invoke(new RpcInvocation(method, args, attachment)).recreate();

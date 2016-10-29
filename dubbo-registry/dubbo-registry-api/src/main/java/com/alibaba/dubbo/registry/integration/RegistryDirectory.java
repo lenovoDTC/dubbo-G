@@ -255,19 +255,16 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	private Map<String, Map<String, List<Invoker<T>>>> toMergeMethodInvokerMap(
 			Map<String, Map<String, List<Invoker<T>>>> MethodMap) {
 		Map<String, Map<String, List<Invoker<T>>>> result = new HashMap<String, Map<String, List<Invoker<T>>>>();
-		for (Map.Entry<String, Map<String, List<Invoker<T>>>> entry : MethodMap
-				.entrySet()) {
+		for (Map.Entry<String, Map<String, List<Invoker<T>>>> entry : MethodMap.entrySet()) {
 			String method = entry.getKey();
 			Map<String, List<Invoker<T>>> eidinvokers = entry.getValue();
 			Map<String, Map<String, List<Invoker<T>>>> groupMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
-			for (Map.Entry<String, List<Invoker<T>>> eidEntry : eidinvokers
-					.entrySet()) {
+			for (Map.Entry<String, List<Invoker<T>>> eidEntry : eidinvokers.entrySet()) {
 				String eid = eidEntry.getKey();
 				List<Invoker<T>> invokers = eidEntry.getValue();
 				Map<String, List<Invoker<T>>> groupInvokers = new HashMap<String, List<Invoker<T>>>();
 				for (Invoker<T> invoker : invokers) {
-					String group = invoker.getUrl().getParameter(
-							Constants.GROUP_KEY, "");
+					String group = invoker.getUrl().getParameter(Constants.GROUP_KEY, "");
 					groupInvokers = groupMap.get(group);
 					if (groupInvokers == null) {
 						groupInvokers = new HashMap<String, List<Invoker<T>>>();
@@ -281,16 +278,13 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			} else if (groupMap.size() > 1) {
 				Map<String, List<Invoker<T>>> groupInvokers = new HashMap<String, List<Invoker<T>>>();
 				List<Invoker<T>> groupList = new ArrayList<Invoker<T>>();
-				for (Map<String, List<Invoker<T>>> groupMap2 : groupMap
-						.values()) {
-					for (Map.Entry<String, List<Invoker<T>>> eidGroupEntry : groupMap2
-							.entrySet()) {
+				for (Map<String, List<Invoker<T>>> groupMap2 : groupMap.values()) {
+					for (Map.Entry<String, List<Invoker<T>>> eidGroupEntry : groupMap2.entrySet()) {
 						String eid = eidGroupEntry.getKey();
 						List<Invoker<T>> invokers = eidGroupEntry.getValue();
-						groupList.add(cluster.join(new StaticDirectory<T>(
-								invokers)));
+						groupList.add(cluster.join(new StaticDirectory<T>(invokers)));
 						groupInvokers.put(eid, groupList);
-					}					
+					}
 				}
 				result.put(method, groupInvokers);
 			} else {
@@ -508,8 +502,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * @return Invoker与方法的映射关系
 	 */
 
-	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(
-			Map<String, Invoker<T>> invokersMap) {
+	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
 
 		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
 		Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
@@ -650,14 +643,13 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			String methodName = RpcUtils.getMethodName(invocation);
 			String eid = invocation.getAttachment(Constants.GENERIC_EID);
 			String ePath = registry.getAnyEid(eid);
-			String[] eids = ePath.split("/");
+			String[] eids = ePath == null ? new String[] { eid } : ePath.split("/");
 			Map<String, List<Invoker<T>>> invokersMap = null;
 			Object[] args = RpcUtils.getArguments(invocation);
 			if (localMethodInvokerMap.get(methodName + "." + args[0]) != null) {
 				if (args != null && args.length > 0 && args[0] != null
 						&& (args[0] instanceof String || args[0].getClass().isEnum())) {
 					invokersMap = localMethodInvokerMap.get(methodName + "." + args[0]);
-//					invokers = filter(invokersMap, ePath); // 可根据第一个参数枚举路由
 				}
 			}
 			if (invokersMap == null) {

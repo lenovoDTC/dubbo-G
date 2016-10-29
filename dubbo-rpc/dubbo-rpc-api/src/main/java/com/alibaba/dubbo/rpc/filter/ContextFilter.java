@@ -55,7 +55,6 @@ public class ContextFilter implements Filter {
 						attachments.containsKey(Constants.GENERIC_EID) ? attachments.get(Constants.GENERIC_EID)
 								: Constants.DEFAULT_EID)
 				.setLocalAddress(invoker.getUrl().getHost(), invoker.getUrl().getPort());
-		System.out.println("attachement eid: " + attachments.get(Constants.GENERIC_EID));
 		if (invocation instanceof RpcInvocation) {
 			((RpcInvocation) invocation).setInvoker(invoker);
 		}
