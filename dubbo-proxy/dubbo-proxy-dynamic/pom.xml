@@ -14,4 +14,7 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
+	<properties>
+		<skip_maven_deploy>true</skip_maven_deploy>
+	</properties>
 </project>

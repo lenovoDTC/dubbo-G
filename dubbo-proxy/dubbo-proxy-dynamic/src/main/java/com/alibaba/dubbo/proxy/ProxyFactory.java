@@ -43,10 +43,10 @@ public class ProxyFactory {
 		String interfaceName = interfaceClass.substring(interfaceClass.lastIndexOf(".") + 1);
 		String methodName = properties.getProperty("dubbo.reference." + interfaceClass + ".method.name");
 		registry(packageName, interfaceName, methodName);
-		String key = packageName + classBoundSymbol + interfaceName + classBoundSymbol + methodName;
-		if (!configPool.containsKey(key)) {
-			registryConfig(packageName, interfaceName, methodName, properties);
-		}
+		// String key = packageName + classBoundSymbol + interfaceName + classBoundSymbol + methodName;
+		//if (!configPool.containsKey(key)) {
+		registryConfig(packageName, interfaceName, methodName, properties);
+		//}
 		if (!proxyPool.containsKey(interfaceClass)) {
 			registryProxy(packageName, interfaceName, methodName);
 		}
@@ -87,7 +87,13 @@ public class ProxyFactory {
 			Class<?> classType = JavaCodeCompile.compile(javaCode.toString(), className);
 			classPool.put(className, classType);
 			methodPool.put(methodKey, classType.getMethod(methodName, String.class));
-		} catch (ClassNotFoundException | MalformedURLException | NoSuchMethodException | SecurityException e) {
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException("interface " + className + " registry fail !!", e);
+		} catch (NoSuchMethodException e) {
+			throw new IllegalStateException("interface " + className + " registry fail !!", e);
+		} catch (SecurityException e) {
+			throw new IllegalStateException("interface " + className + " registry fail !!", e);
+		} catch (MalformedURLException e) {
 			throw new IllegalStateException("interface " + className + " registry fail !!", e);
 		} finally {
 			currentLock.writeLock().unlock();
@@ -111,7 +117,13 @@ public class ProxyFactory {
 			Class<?> classType = JavaCodeCompile.compile(javaCode.toString(), className);
 			classPool.put(className, classType);
 			methodPool.put(className + classBoundSymbol + methodName, classType.getMethod(methodName, String.class));
-		} catch (ClassNotFoundException | MalformedURLException | NoSuchMethodException | SecurityException e) {
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException("interface " + className + " registry fail !!", e);
+		} catch (NoSuchMethodException e) {
+			throw new IllegalStateException("interface " + className + " registry fail !!", e);
+		} catch (SecurityException e) {
+			throw new IllegalStateException("interface " + className + " registry fail !!", e);
+		} catch (MalformedURLException e) {
 			throw new IllegalStateException("interface " + className + " registry fail !!", e);
 		} finally {
 			currentLock.writeLock().unlock();
@@ -128,7 +140,13 @@ public class ProxyFactory {
 		Method method = methodPool.get(methodKey);
 		try {
 			return method.invoke(object, args);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (IllegalAccessException e) {
+			throw new IllegalStateException(
+					"inteface " + interfaceName + " method " + methodName + " args " + args + " failed !!");
+		} catch (IllegalArgumentException e) {
+			throw new IllegalStateException(
+					"inteface " + interfaceName + " method " + methodName + " args " + args + " failed !!");
+		} catch (InvocationTargetException e) {
 			throw new IllegalStateException(
 					"inteface " + interfaceName + " method " + methodName + " args " + args + " failed !!");
 		}

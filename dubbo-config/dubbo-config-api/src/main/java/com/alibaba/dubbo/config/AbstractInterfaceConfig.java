@@ -106,6 +106,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         if (registries == null || registries.size() == 0) {
             String address = ConfigUtils.getProperty("dubbo.registry.address");
             String eid = ConfigUtils.getProperty("dubbo.registry.eid");
+            eid = eid == null ? ConfigUtils.getProperty("sys_environment_eid") : eid;
             if (address != null && address.length() > 0) {
                 registries = new ArrayList<RegistryConfig>();
                 String[] as = address.split("\\s*[|]+\\s*");
@@ -180,6 +181,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 
                 /* edit dubbo registry provider url create rule, add environment id by eid property {JVM -Ddubbo.registry.eid}*/
                 String syseid = System.getProperty("dubbo.registry.eid");
+                syseid = syseid == null ? System.getProperty("sys_environment_eid") : eid;
                 if (syseid != null && syseid.length() > 0) {
                 	eid = syseid;
                 }

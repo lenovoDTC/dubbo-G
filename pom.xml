@@ -136,8 +136,8 @@
 
 		<!-- for maven compiler plugin -->
 		<maven_compiler_plugin_version>3.5.1</maven_compiler_plugin_version>
-		<java_source_version>1.6</java_source_version>
-		<java_target_version>1.6</java_target_version>
+		<java_source_version>1.7</java_source_version>
+		<java_target_version>1.7</java_target_version>
 		<file_encoding>UTF-8</file_encoding>
 
 	</properties>
@@ -367,6 +367,18 @@
 			<artifactId>jmockit</artifactId>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<name>Nexus Release Repository</name>
+			<url>http://nexus.lenovo.com/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<name>Nexus Snapshot Repository</name>
+			<url>http://nexus.lenovo.com/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<build>
 		<plugins>
 			<plugin>

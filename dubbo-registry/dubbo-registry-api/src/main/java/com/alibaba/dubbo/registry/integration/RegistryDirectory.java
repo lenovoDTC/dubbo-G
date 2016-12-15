@@ -512,6 +512,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			for (Invoker<T> invoker : invokersMap.values()) {
 				String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);
 				String parameterEid = invoker.getUrl().getParameter(Constants.GENERIC_EID);
+				parameterEid = parameterEid == null ? Constants.DEFAULT_EID : parameterEid;
 
 				if (parameter != null && parameter.length() > 0) {
 					String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);

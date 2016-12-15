@@ -12,6 +12,9 @@
 		<module>dubbo-proxy-api</module>
 		<module>dubbo-proxy-dynamic</module>
 	</modules>
+	<properties>
+		<skip_maven_deploy>true</skip_maven_deploy>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.alibaba</groupId>
