@@ -350,9 +350,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
 		 */
 		public void handleDataChange(String dataPath, Object data)
 				throws Exception {
-			anyEid.put(dataPath.substring(5), data.toString());
+			anyEid.put(dataPath.substring(5), zkClient.readData(dataPath));
 		}
-
 		/**
 		 * dataPath 触发事件目录
 		 */
@@ -373,6 +372,8 @@ public class ZookeeperRegistry extends FailbackRegistry {
 						currentChilds.get(i),
 						zkClient.readData(Constants.GENERIC_ROOT_EID  + "/"
 								+ currentChilds.get(i)));
+				zkClient.subscribeDataChanges(Constants.GENERIC_ROOT_EID + "/" + currentChilds.get(i),
+						new ZKDataListener());
 			}
 		}
 	}
