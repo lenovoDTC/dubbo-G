@@ -507,13 +507,13 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
 		Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
 		// 按提供者URL所声明的methods分类，兼容注册中心执行路由过滤掉的methods
-		List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
+		Map<String, List<Invoker<T>>> eidInvokerMap = new HashMap<String, List<Invoker<T>>>();
 		if (invokersMap != null && invokersMap.size() > 0) {
 			for (Invoker<T> invoker : invokersMap.values()) {
+				List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
 				String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);
 				String parameterEid = invoker.getUrl().getParameter(Constants.GENERIC_EID);
 				parameterEid = parameterEid == null ? Constants.DEFAULT_EID : parameterEid;
-
 				if (parameter != null && parameter.length() > 0) {
 					String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);
 					if (methods != null && methods.length > 0) {
@@ -522,9 +522,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 								Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap.get(method);
 								if (methodInvokers == null) {
 									methodInvokers = new HashMap<String, List<Invoker<T>>>();
-									newMethodInvokerMap.put(method, newEidInvokerMap);
+									newMethodInvokerMap.put(method, methodInvokers);
 								}
-								newMethodInvokerMap.put(method, newEidInvokerMap);
 								if (parameterEid != null && parameterEid.length() > 0
 										&& !Constants.ANY_VALUE.equals(parameterEid)) {
 									List<Invoker<T>> eidInvokers = newEidInvokerMap.get(parameterEid);
@@ -539,25 +538,39 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 						}
 					}
 				}
+				invokersList = eidInvokerMap.get(parameterEid);
+				if(invokersList == null){
+					invokersList = new ArrayList<Invoker<T>>();
+				}
 				invokersList.add(invoker);
-			}
+				eidInvokerMap.put(parameterEid,invokersList);
+			}			
 		}
-		newEidInvokerMap.put(Constants.ANY_VALUE, invokersList);
-		if (serviceEids != null) {
-			List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
-			if (eidInvokers == null || eidInvokers.size() == 0) {
-				eidInvokers = invokersList;
-			}
-			newEidInvokerMap.put(serviceEids, route(eidInvokers, serviceEids));
-		}
+		newMethodInvokerMap.put(Constants.ANY_VALUE, eidInvokerMap);
+//		if (serviceEids != null) {
+//			List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
+//			if (eidInvokers == null || eidInvokers.size() == 0) {
+//				eidInvokers = invokersList;
+//			}
+//			newEidInvokerMap.put(serviceEids, route(eidInvokers, serviceEids));
+//		}
+        if (serviceMethods != null && serviceMethods.length > 0) {
+            for (String method : serviceMethods) {
+            	Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap.get(method);
+            	List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
+                if (methodInvokers == null || methodInvokers.size() == 0) {
+                    methodInvokers = eidInvokerMap;
+                }
+                newEidInvokerMap.put(serviceEids, route(eidInvokers, method));
+                newMethodInvokerMap.put(method, newEidInvokerMap);
+            }
+        }
 		// sort and unmodifiable
-		for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
-			for (String eid : new HashSet<String>(newEidInvokerMap.keySet())) {
-				List<Invoker<T>> eidInvokers = newMethodInvokerMap.get(method).get(eid);
-				Collections.sort(eidInvokers, InvokerComparator.getComparator());
-				newEidInvokerMap.put(eid, Collections.unmodifiableList(eidInvokers));
-			}
-		}
+//        for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
+//            List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
+//            Collections.sort(methodInvokers, InvokerComparator.getComparator());
+//            newMethodInvokerMap.put(method, Collections.unmodifiableList(methodInvokers));
+//        }
 		return Collections.unmodifiableMap(newMethodInvokerMap);
 	}
 
