@@ -58,17 +58,21 @@ import com.alibaba.dubbo.rpc.support.RpcUtils;
  * @author william.liangf
  * @author chao.liuc
  */
-public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyListener {
+public class RegistryDirectory<T> extends AbstractDirectory<T> implements
+		NotifyListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(RegistryDirectory.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(RegistryDirectory.class);
 
-	private static final Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class).getAdaptiveExtension();
+	private static final Cluster cluster = ExtensionLoader.getExtensionLoader(
+			Cluster.class).getAdaptiveExtension();
 
-	private static final RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class)
-			.getAdaptiveExtension();
+	private static final RouterFactory routerFactory = ExtensionLoader
+			.getExtensionLoader(RouterFactory.class).getAdaptiveExtension();
 
 	private static final ConfiguratorFactory configuratorFactory = ExtensionLoader
-			.getExtensionLoader(ConfiguratorFactory.class).getAdaptiveExtension();
+			.getExtensionLoader(ConfiguratorFactory.class)
+			.getAdaptiveExtension();
 
 	private Protocol protocol; // 注入时初始化，断言不为null
 
@@ -117,13 +121,17 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			throw new IllegalArgumentException("registry serviceKey is null.");
 		this.serviceType = serviceType;
 		this.serviceKey = url.getServiceKey();
-		this.queryMap = StringUtils.parseQueryString(url.getParameterAndDecoded(Constants.REFER_KEY));
-		this.overrideDirectoryUrl = this.directoryUrl = url.setPath(url.getServiceInterface()).clearParameters()
+		this.queryMap = StringUtils.parseQueryString(url
+				.getParameterAndDecoded(Constants.REFER_KEY));
+		this.overrideDirectoryUrl = this.directoryUrl = url
+				.setPath(url.getServiceInterface()).clearParameters()
 				.addParameters(queryMap).removeParameter(Constants.MONITOR_KEY);
 		String group = directoryUrl.getParameter(Constants.GROUP_KEY, "");
-		this.multiGroup = group != null && ("*".equals(group) || group.contains(","));
+		this.multiGroup = group != null
+				&& ("*".equals(group) || group.contains(","));
 		String methods = queryMap.get(Constants.METHODS_KEY);
-		this.serviceMethods = methods == null ? null : Constants.COMMA_SPLIT_PATTERN.split(methods);
+		this.serviceMethods = methods == null ? null
+				: Constants.COMMA_SPLIT_PATTERN.split(methods);
 		this.serviceEids = url.getParameter(Constants.GENERIC_EID);
 	}
 
@@ -146,12 +154,13 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		}
 		// unsubscribe.
 		try {
-			if (getConsumerUrl() != null && registry != null && registry.isAvailable()) {
+			if (getConsumerUrl() != null && registry != null
+					&& registry.isAvailable()) {
 				registry.unsubscribe(getConsumerUrl(), this);
 			}
 		} catch (Throwable t) {
-			logger.warn("unexpeced error when unsubscribe service " + serviceKey + "from registry" + registry.getUrl(),
-					t);
+			logger.warn("unexpeced error when unsubscribe service "
+					+ serviceKey + "from registry" + registry.getUrl(), t);
 		}
 		super.destroy(); // 必须在unsubscribe之后执行
 		try {
@@ -167,17 +176,21 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		List<URL> configuratorUrls = new ArrayList<URL>();
 		for (URL url : urls) {
 			String protocol = url.getProtocol();
-			String category = url.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY);
-			if (Constants.ROUTERS_CATEGORY.equals(category) || Constants.ROUTE_PROTOCOL.equals(protocol)) {
+			String category = url.getParameter(Constants.CATEGORY_KEY,
+					Constants.DEFAULT_CATEGORY);
+			if (Constants.ROUTERS_CATEGORY.equals(category)
+					|| Constants.ROUTE_PROTOCOL.equals(protocol)) {
 				routerUrls.add(url);
-			} else
-				if (Constants.CONFIGURATORS_CATEGORY.equals(category) || Constants.OVERRIDE_PROTOCOL.equals(protocol)) {
+			} else if (Constants.CONFIGURATORS_CATEGORY.equals(category)
+					|| Constants.OVERRIDE_PROTOCOL.equals(protocol)) {
 				configuratorUrls.add(url);
 			} else if (Constants.PROVIDERS_CATEGORY.equals(category)) {
 				invokerUrls.add(url);
 			} else {
-				logger.warn("Unsupported category " + category + " in notified url: " + url + " from registry "
-						+ getUrl().getAddress() + " to consumer " + NetUtils.getLocalHost());
+				logger.warn("Unsupported category " + category
+						+ " in notified url: " + url + " from registry "
+						+ getUrl().getAddress() + " to consumer "
+						+ NetUtils.getLocalHost());
 			}
 		}
 		// configurators
@@ -197,7 +210,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		this.overrideDirectoryUrl = directoryUrl;
 		if (localConfigurators != null && localConfigurators.size() > 0) {
 			for (Configurator configurator : localConfigurators) {
-				this.overrideDirectoryUrl = configurator.configure(overrideDirectoryUrl);
+				this.overrideDirectoryUrl = configurator
+						.configure(overrideDirectoryUrl);
 			}
 		}
 		// providers
@@ -214,8 +228,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 *            传入的参数不能为null
 	 */
 	private void refreshInvoker(List<URL> invokerUrls) {
-		if (invokerUrls != null && invokerUrls.size() == 1 && invokerUrls.get(0) != null
-				&& Constants.EMPTY_PROTOCOL.equals(invokerUrls.get(0).getProtocol())) {
+		if (invokerUrls != null
+				&& invokerUrls.size() == 1
+				&& invokerUrls.get(0) != null
+				&& Constants.EMPTY_PROTOCOL.equals(invokerUrls.get(0)
+						.getProtocol())) {
 			this.forbidden = true; // 禁止访问
 			this.methodInvokerMap = null; // 置空列表
 
@@ -238,11 +255,15 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			// state change
 			// 如果计算错误，则不进行处理.
 			if (newUrlInvokerMap == null || newUrlInvokerMap.size() == 0) {
-				logger.error(new IllegalStateException("urls to invokers error .invokerUrls.size :" + invokerUrls.size()
-						+ ", invoker.size :0. urls :" + invokerUrls.toString()));
+				logger.error(new IllegalStateException(
+						"urls to invokers error .invokerUrls.size :"
+								+ invokerUrls.size()
+								+ ", invoker.size :0. urls :"
+								+ invokerUrls.toString()));
 				return;
 			}
-			this.methodInvokerMap = multiGroup ? toMergeMethodInvokerMap(newMethodInvokerMap) : newMethodInvokerMap;
+			this.methodInvokerMap = multiGroup ? toMergeMethodInvokerMap(newMethodInvokerMap)
+					: newMethodInvokerMap;
 			this.urlInvokerMap = newUrlInvokerMap;
 			try {
 				destroyUnusedInvokers(oldUrlInvokerMap, newUrlInvokerMap); // 关闭未使用的Invoker
@@ -255,16 +276,19 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	private Map<String, Map<String, List<Invoker<T>>>> toMergeMethodInvokerMap(
 			Map<String, Map<String, List<Invoker<T>>>> MethodMap) {
 		Map<String, Map<String, List<Invoker<T>>>> result = new HashMap<String, Map<String, List<Invoker<T>>>>();
-		for (Map.Entry<String, Map<String, List<Invoker<T>>>> entry : MethodMap.entrySet()) {
+		for (Map.Entry<String, Map<String, List<Invoker<T>>>> entry : MethodMap
+				.entrySet()) {
 			String method = entry.getKey();
 			Map<String, List<Invoker<T>>> eidinvokers = entry.getValue();
 			Map<String, Map<String, List<Invoker<T>>>> groupMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
-			for (Map.Entry<String, List<Invoker<T>>> eidEntry : eidinvokers.entrySet()) {
+			for (Map.Entry<String, List<Invoker<T>>> eidEntry : eidinvokers
+					.entrySet()) {
 				String eid = eidEntry.getKey();
 				List<Invoker<T>> invokers = eidEntry.getValue();
 				Map<String, List<Invoker<T>>> groupInvokers = new HashMap<String, List<Invoker<T>>>();
 				for (Invoker<T> invoker : invokers) {
-					String group = invoker.getUrl().getParameter(Constants.GROUP_KEY, "");
+					String group = invoker.getUrl().getParameter(
+							Constants.GROUP_KEY, "");
 					groupInvokers = groupMap.get(group);
 					if (groupInvokers == null) {
 						groupInvokers = new HashMap<String, List<Invoker<T>>>();
@@ -278,11 +302,14 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			} else if (groupMap.size() > 1) {
 				Map<String, List<Invoker<T>>> groupInvokers = new HashMap<String, List<Invoker<T>>>();
 				List<Invoker<T>> groupList = new ArrayList<Invoker<T>>();
-				for (Map<String, List<Invoker<T>>> groupMap2 : groupMap.values()) {
-					for (Map.Entry<String, List<Invoker<T>>> eidGroupEntry : groupMap2.entrySet()) {
+				for (Map<String, List<Invoker<T>>> groupMap2 : groupMap
+						.values()) {
+					for (Map.Entry<String, List<Invoker<T>>> eidGroupEntry : groupMap2
+							.entrySet()) {
 						String eid = eidGroupEntry.getKey();
 						List<Invoker<T>> invokers = eidGroupEntry.getValue();
-						groupList.add(cluster.join(new StaticDirectory<T>(invokers)));
+						groupList.add(cluster.join(new StaticDirectory<T>(
+								invokers)));
 						groupInvokers.put(eid, groupList);
 					}
 				}
@@ -309,7 +336,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * @return
 	 */
 	public static List<Configurator> toConfigurators(List<URL> urls) {
-		List<Configurator> configurators = new ArrayList<Configurator>(urls.size());
+		List<Configurator> configurators = new ArrayList<Configurator>(
+				urls.size());
 		if (urls == null || urls.size() == 0) {
 			return configurators;
 		}
@@ -318,7 +346,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 				configurators.clear();
 				break;
 			}
-			Map<String, String> override = new HashMap<String, String>(url.getParameters());
+			Map<String, String> override = new HashMap<String, String>(
+					url.getParameters());
 			// override 上的anyhost可能是自动添加的，不能影响改变url判断
 			override.remove(Constants.ANYHOST_KEY);
 			if (override.size() == 0) {
@@ -355,7 +384,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 					if (!routers.contains(router))
 						routers.add(router);
 				} catch (Throwable t) {
-					logger.error("convert router url to router error, url: " + url, t);
+					logger.error("convert router url to router error, url: "
+							+ url, t);
 				}
 			}
 		}
@@ -395,11 +425,19 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			if (Constants.EMPTY_PROTOCOL.equals(providerUrl.getProtocol())) {
 				continue;
 			}
-			if (!ExtensionLoader.getExtensionLoader(Protocol.class).hasExtension(providerUrl.getProtocol())) {
-				logger.error(new IllegalStateException("Unsupported protocol " + providerUrl.getProtocol()
-						+ " in notified url: " + providerUrl + " from registry " + getUrl().getAddress()
-						+ " to consumer " + NetUtils.getLocalHost() + ", supported protocol: "
-						+ ExtensionLoader.getExtensionLoader(Protocol.class).getSupportedExtensions()));
+			if (!ExtensionLoader.getExtensionLoader(Protocol.class)
+					.hasExtension(providerUrl.getProtocol())) {
+				logger.error(new IllegalStateException("Unsupported protocol "
+						+ providerUrl.getProtocol()
+						+ " in notified url: "
+						+ providerUrl
+						+ " from registry "
+						+ getUrl().getAddress()
+						+ " to consumer "
+						+ NetUtils.getLocalHost()
+						+ ", supported protocol: "
+						+ ExtensionLoader.getExtensionLoader(Protocol.class)
+								.getSupportedExtensions()));
 				continue;
 			}
 			URL url = mergeUrl(providerUrl);
@@ -412,21 +450,26 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			// 缓存key为没有合并消费端参数的URL，不管消费端如何合并参数，如果服务端URL发生变化，则重新refer
 			Map<String, Invoker<T>> localUrlInvokerMap = this.urlInvokerMap; // local
 																				// reference
-			Invoker<T> invoker = localUrlInvokerMap == null ? null : localUrlInvokerMap.get(key);
+			Invoker<T> invoker = localUrlInvokerMap == null ? null
+					: localUrlInvokerMap.get(key);
 			if (invoker == null) { // 缓存中没有，重新refer
 				try {
 					boolean enabled = true;
 					if (url.hasParameter(Constants.DISABLED_KEY)) {
-						enabled = !url.getParameter(Constants.DISABLED_KEY, false);
+						enabled = !url.getParameter(Constants.DISABLED_KEY,
+								false);
 					} else {
 						enabled = url.getParameter(Constants.ENABLED_KEY, true);
 					}
 					if (enabled) {
-						invoker = new InvokerDelegete<T>(protocol.refer(serviceType, url), url, providerUrl);
+						invoker = new InvokerDelegete<T>(protocol.refer(
+								serviceType, url), url, providerUrl);
 					}
 				} catch (Throwable t) {
-					logger.error("Failed to refer invoker for interface:" + serviceType + ",url:(" + url + ")"
-							+ t.getMessage(), t);
+					logger.error(
+							"Failed to refer invoker for interface:"
+									+ serviceType + ",url:(" + url + ")"
+									+ t.getMessage(), t);
 				}
 				if (invoker != null) { // 将新的引用放入缓存
 					newUrlInvokerMap.put(key, invoker);
@@ -457,10 +500,12 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			}
 		}
 
-		providerUrl = providerUrl.addParameter(Constants.CHECK_KEY, String.valueOf(false)); // 不检查连接是否成功，总是创建Invoker！
+		providerUrl = providerUrl.addParameter(Constants.CHECK_KEY,
+				String.valueOf(false)); // 不检查连接是否成功，总是创建Invoker！
 
 		// directoryUrl 与 override 合并是在notify的最后，这里不能够处理
-		this.overrideDirectoryUrl = this.overrideDirectoryUrl.addParametersIfAbsent(providerUrl.getParameters()); // 合并提供者参数
+		this.overrideDirectoryUrl = this.overrideDirectoryUrl
+				.addParametersIfAbsent(providerUrl.getParameters()); // 合并提供者参数
 
 		if ((providerUrl.getPath() == null || providerUrl.getPath().length() == 0)
 				&& "dubbo".equals(providerUrl.getProtocol())) { // 兼容1.0
@@ -482,12 +527,16 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	}
 
 	private List<Invoker<T>> route(List<Invoker<T>> invokers, String method) {
-		Invocation invocation = new RpcInvocation(method, new Class<?>[0], new Object[0]);
+		Invocation invocation = new RpcInvocation(method, new Class<?>[0],
+				new Object[0]);
 		List<Router> routers = getRouters();
 		if (routers != null) {
 			for (Router router : routers) {
-				if (router.getUrl() != null && !router.getUrl().getParameter(Constants.RUNTIME_KEY, true)) {
-					invokers = router.route(invokers, getConsumerUrl(), invocation);
+				if (router.getUrl() != null
+						&& !router.getUrl().getParameter(Constants.RUNTIME_KEY,
+								true)) {
+					invokers = router.route(invokers, getConsumerUrl(),
+							invocation);
 				}
 			}
 		}
@@ -502,7 +551,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * @return Invoker与方法的映射关系
 	 */
 
-	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(Map<String, Invoker<T>> invokersMap) {
+	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(
+			Map<String, Invoker<T>> invokersMap) {
 
 		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
 		Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
@@ -511,25 +561,36 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		if (invokersMap != null && invokersMap.size() > 0) {
 			for (Invoker<T> invoker : invokersMap.values()) {
 				List<Invoker<T>> invokersList = new ArrayList<Invoker<T>>();
-				String parameter = invoker.getUrl().getParameter(Constants.METHODS_KEY);
-				String parameterEid = invoker.getUrl().getParameter(Constants.GENERIC_EID);
-				parameterEid = parameterEid == null ? Constants.DEFAULT_EID : parameterEid;
+				String parameter = invoker.getUrl().getParameter(
+						Constants.METHODS_KEY);
+				String parameterEid = invoker.getUrl().getParameter(
+						Constants.GENERIC_EID);
+				parameterEid = parameterEid == null ? Constants.DEFAULT_EID
+						: parameterEid;
 				if (parameter != null && parameter.length() > 0) {
-					String[] methods = Constants.COMMA_SPLIT_PATTERN.split(parameter);
+					String[] methods = Constants.COMMA_SPLIT_PATTERN
+							.split(parameter);
 					if (methods != null && methods.length > 0) {
 						for (String method : methods) {
-							if (method != null && method.length() > 0 && !Constants.ANY_VALUE.equals(method)) {
-								Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap.get(method);
+							if (method != null && method.length() > 0
+									&& !Constants.ANY_VALUE.equals(method)) {
+								Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap
+										.get(method);
 								if (methodInvokers == null) {
 									methodInvokers = new HashMap<String, List<Invoker<T>>>();
-									newMethodInvokerMap.put(method, methodInvokers);
+									newMethodInvokerMap.put(method,
+											methodInvokers);
 								}
-								if (parameterEid != null && parameterEid.length() > 0
-										&& !Constants.ANY_VALUE.equals(parameterEid)) {
-									List<Invoker<T>> eidInvokers = newEidInvokerMap.get(parameterEid);
+								if (parameterEid != null
+										&& parameterEid.length() > 0
+										&& !Constants.ANY_VALUE
+												.equals(parameterEid)) {
+									List<Invoker<T>> eidInvokers = newEidInvokerMap
+											.get(parameterEid);
 									if (eidInvokers == null) {
 										eidInvokers = new ArrayList<Invoker<T>>();
-										newEidInvokerMap.put(parameterEid, eidInvokers);
+										newEidInvokerMap.put(parameterEid,
+												eidInvokers);
 									}
 									eidInvokers.add(invoker);
 								}
@@ -539,38 +600,55 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 					}
 				}
 				invokersList = eidInvokerMap.get(parameterEid);
-				if(invokersList == null){
+				if (invokersList == null) {
 					invokersList = new ArrayList<Invoker<T>>();
 				}
 				invokersList.add(invoker);
-				eidInvokerMap.put(parameterEid,invokersList);
-			}			
+				eidInvokerMap.put(parameterEid, invokersList);
+			}
 		}
 		newMethodInvokerMap.put(Constants.ANY_VALUE, eidInvokerMap);
-//		if (serviceEids != null) {
-//			List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
-//			if (eidInvokers == null || eidInvokers.size() == 0) {
-//				eidInvokers = invokersList;
-//			}
-//			newEidInvokerMap.put(serviceEids, route(eidInvokers, serviceEids));
-//		}
-        if (serviceMethods != null && serviceMethods.length > 0) {
-            for (String method : serviceMethods) {
-            	Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap.get(method);
-            	List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
-                if (methodInvokers == null || methodInvokers.size() == 0) {
-                    methodInvokers = eidInvokerMap;
-                }
-                newEidInvokerMap.put(serviceEids, route(eidInvokers, method));
-                newMethodInvokerMap.put(method, newEidInvokerMap);
-            }
-        }
+		// if (serviceEids != null) {
+		// List<Invoker<T>> eidInvokers = newEidInvokerMap.get(serviceEids);
+		// if (eidInvokers == null || eidInvokers.size() == 0) {
+		// eidInvokers = invokersList;
+		// }
+		// newEidInvokerMap.put(serviceEids, route(eidInvokers, serviceEids));
+		// }
+		if (serviceMethods != null && serviceMethods.length > 0) {
+			for (String method : serviceMethods) {
+				Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap
+						.get(method);
+				List<Invoker<T>> eidInvokers = newEidInvokerMap
+						.get(serviceEids);
+				if (methodInvokers == null || methodInvokers.size() == 0) {
+					methodInvokers = eidInvokerMap;
+				}
+				newEidInvokerMap.put(serviceEids, route(eidInvokers, method));
+				newMethodInvokerMap.put(method, newEidInvokerMap);
+			}
+		}
 		// sort and unmodifiable
-//        for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
-//            List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
-//            Collections.sort(methodInvokers, InvokerComparator.getComparator());
-//            newMethodInvokerMap.put(method, Collections.unmodifiableList(methodInvokers));
-//        }
+		// for (String method : new
+		// HashSet<String>(newMethodInvokerMap.keySet())) {
+		// List<Invoker<T>> methodInvokers = newMethodInvokerMap.get(method);
+		// Collections.sort(methodInvokers, InvokerComparator.getComparator());
+		// newMethodInvokerMap.put(method,
+		// Collections.unmodifiableList(methodInvokers));
+		// }
+//		for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
+//			Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap
+//					.get(method);
+//			for (String eid : new HashSet<String>(methodInvokers.keySet())) {
+//				List<Invoker<T>> eidInvokers = methodInvokers.get(eid);
+//				Collections
+//						.sort(eidInvokers, InvokerComparator.getComparator());
+//				newEidInvokerMap.put(eid,
+//						Collections.unmodifiableList(eidInvokers));
+//			}
+//			newMethodInvokerMap.put(method,
+//					Collections.unmodifiableMap(methodInvokers));
+//		}
 		return Collections.unmodifiableMap(newMethodInvokerMap);
 	}
 
@@ -581,11 +659,13 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		Map<String, Invoker<T>> localUrlInvokerMap = this.urlInvokerMap; // local
 																			// reference
 		if (localUrlInvokerMap != null) {
-			for (Invoker<T> invoker : new ArrayList<Invoker<T>>(localUrlInvokerMap.values())) {
+			for (Invoker<T> invoker : new ArrayList<Invoker<T>>(
+					localUrlInvokerMap.values())) {
 				try {
 					invoker.destroy();
 				} catch (Throwable t) {
-					logger.warn("Failed to destroy service " + serviceKey + " to provider " + invoker.getUrl(), t);
+					logger.warn("Failed to destroy service " + serviceKey
+							+ " to provider " + invoker.getUrl(), t);
 				}
 			}
 			localUrlInvokerMap.clear();
@@ -600,7 +680,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 * @param invokers
 	 */
 
-	private void destroyUnusedInvokers(Map<String, Invoker<T>> oldUrlInvokerMap,
+	private void destroyUnusedInvokers(
+			Map<String, Invoker<T>> oldUrlInvokerMap,
 			Map<String, Invoker<T>> newUrlInvokerMap) {
 		if (newUrlInvokerMap == null || newUrlInvokerMap.size() == 0) {
 			destroyAllInvokers();
@@ -610,7 +691,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		List<String> deleted = null;
 		if (oldUrlInvokerMap != null) {
 			Collection<Invoker<T>> newInvokers = newUrlInvokerMap.values();
-			for (Map.Entry<String, Invoker<T>> entry : oldUrlInvokerMap.entrySet()) {
+			for (Map.Entry<String, Invoker<T>> entry : oldUrlInvokerMap
+					.entrySet()) {
 				if (!newInvokers.contains(entry.getValue())) {
 					if (deleted == null) {
 						deleted = new ArrayList<String>();
@@ -628,10 +710,12 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 						try {
 							invoker.destroy();
 							if (logger.isDebugEnabled()) {
-								logger.debug("destory invoker[" + invoker.getUrl() + "] success. ");
+								logger.debug("destory invoker["
+										+ invoker.getUrl() + "] success. ");
 							}
 						} catch (Exception e) {
-							logger.warn("destory invoker[" + invoker.getUrl() + "] faild. " + e.getMessage(), e);
+							logger.warn("destory invoker[" + invoker.getUrl()
+									+ "] faild. " + e.getMessage(), e);
 						}
 					}
 				}
@@ -644,9 +728,16 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 	 */
 	public List<Invoker<T>> doList(Invocation invocation) {
 		if (forbidden) {
-			throw new RpcException(RpcException.FORBIDDEN_EXCEPTION,
-					"Forbid consumer " + NetUtils.getLocalHost() + " access service " + getInterface().getName()
-							+ " from registry " + getUrl().getAddress() + " use dubbo version " + Version.getVersion()
+			throw new RpcException(
+					RpcException.FORBIDDEN_EXCEPTION,
+					"Forbid consumer "
+							+ NetUtils.getLocalHost()
+							+ " access service "
+							+ getInterface().getName()
+							+ " from registry "
+							+ getUrl().getAddress()
+							+ " use dubbo version "
+							+ Version.getVersion()
 							+ ", Please check registry access list (whitelist/blacklist).");
 		}
 
@@ -657,14 +748,17 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 			String methodName = RpcUtils.getMethodName(invocation);
 			String eid = invocation.getAttachment(Constants.GENERIC_EID);
 			String ePath = registry.getAnyEid(eid);
-			String[] eids = ePath == null ? new String[] { eid } : ePath.split("/");
+			String[] eids = ePath == null ? new String[] { eid } : ePath
+					.split("/");
 			Map<String, List<Invoker<T>>> invokersMap = null;
 			Object[] args = RpcUtils.getArguments(invocation);
-			if (localMethodInvokerMap.get(methodName + "." + args[0]) != null) {
-				if (args != null && args.length > 0 && args[0] != null
-						&& (args[0] instanceof String || args[0].getClass().isEnum())) {
-					invokersMap = localMethodInvokerMap.get(methodName + "." + args[0]);
-				}
+			if (args != null
+					&& args.length > 0
+					&& args[0] != null
+					&& (args[0] instanceof String || args[0].getClass()
+							.isEnum())) {
+				invokersMap = localMethodInvokerMap.get(methodName + "."
+						+ args[0]);
 			}
 			if (invokersMap == null) {
 				invokersMap = localMethodInvokerMap.get(methodName);
@@ -673,7 +767,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 				invokersMap = localMethodInvokerMap.get(Constants.ANY_VALUE);
 			}
 			if (invokersMap == null) {
-				Iterator<Map<String, List<Invoker<T>>>> iterator = localMethodInvokerMap.values().iterator();
+				Iterator<Map<String, List<Invoker<T>>>> iterator = localMethodInvokerMap
+						.values().iterator();
 				if (iterator.hasNext()) {
 					invokersMap = iterator.next();
 				}
@@ -683,7 +778,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		return invokers == null ? new ArrayList<Invoker<T>>(0) : invokers;
 	}
 
-	private List<Invoker<T>> filter(Map<String, List<Invoker<T>>> invokersMap, String[] eidArray) {
+	private List<Invoker<T>> filter(Map<String, List<Invoker<T>>> invokersMap,
+			String[] eidArray) {
 		int i = 0;
 		for (i = eidArray.length - 1; i >= 0; i--) {
 			String eid = eidArray[i];
@@ -708,7 +804,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 		}
 		Map<String, Invoker<T>> localUrlInvokerMap = urlInvokerMap;
 		if (localUrlInvokerMap != null && localUrlInvokerMap.size() > 0) {
-			for (Invoker<T> invoker : new ArrayList<Invoker<T>>(localUrlInvokerMap.values())) {
+			for (Invoker<T> invoker : new ArrayList<Invoker<T>>(
+					localUrlInvokerMap.values())) {
 				if (invoker.isAvailable()) {
 					return true;
 				}
