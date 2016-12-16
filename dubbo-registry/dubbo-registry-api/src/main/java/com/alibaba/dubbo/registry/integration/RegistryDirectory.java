@@ -522,17 +522,16 @@ public class RegistryDirectory<T> extends AbstractDirectory<T>implements NotifyL
 								Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap.get(method);
 								if (methodInvokers == null) {
 									methodInvokers = new HashMap<String, List<Invoker<T>>>();
-									newMethodInvokerMap.put(method, newEidInvokerMap);
+									newMethodInvokerMap.put(method, methodInvokers);
 								}
-								newMethodInvokerMap.put(method, newEidInvokerMap);
 								if (parameterEid != null && parameterEid.length() > 0
 										&& !Constants.ANY_VALUE.equals(parameterEid)) {
-									List<Invoker<T>> eidInvokers = newEidInvokerMap.get(parameterEid);
+									List<Invoker<T>> eidInvokers = methodInvokers.get(parameterEid);
 									if (eidInvokers == null) {
 										eidInvokers = new ArrayList<Invoker<T>>();
-										newEidInvokerMap.put(parameterEid, eidInvokers);
+										eidInvokers.add(invoker);
+										methodInvokers.put(parameterEid, eidInvokers);
 									}
-									eidInvokers.add(invoker);
 								}
 
 							}

@@ -21,6 +21,7 @@ public class DemoConsumerTest {
 		RegistryConfig registry = new RegistryConfig();
 		registry.setAddress("c01.zk.dtc.uat:2181");
 		registry.setProtocol("zookeeper");
+		registry.setGroup("test");
 
 		// 注意：ReferenceConfig为重对象，内部封装了与注册中心的连接，以及与服务提供方的连接
 

@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>dubbo</artifactId>
-			<version>${project.parent.version}</version>
+			<version>2.5.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>

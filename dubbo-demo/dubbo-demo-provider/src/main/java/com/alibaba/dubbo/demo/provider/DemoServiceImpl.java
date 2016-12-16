@@ -31,7 +31,8 @@ public class DemoServiceImpl implements DemoService {
 			e.printStackTrace();
 		}
         System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Hello " + name + ", request from consumer: " + RpcContext.getContext().getRemoteAddress());
-        return "Hello " + name + ", response form provider: " + RpcContext.getContext().getLocalAddress() + "; eid = " + RpcContext.getContext().getHeader(Constants.GENERIC_HEADER_EID);
+//        return "Hello " + name + ", response form provider: " + RpcContext.getContext().getLocalAddress() + "; eid = " + RpcContext.getContext().getHeader(Constants.GENERIC_HEADER_EID);
+        return "Hello " + name + ", response form provider: " + RpcContext.getContext().getLocalAddress();
     }
     
 }
