@@ -554,7 +554,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 	private Map<String, Map<String, List<Invoker<T>>>> toMethodInvokers(
 			Map<String, Invoker<T>> invokersMap) {
 
-		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
+//		Map<String, List<Invoker<T>>> newEidInvokerMap = new HashMap<String, List<Invoker<T>>>();
 		Map<String, Map<String, List<Invoker<T>>>> newMethodInvokerMap = new HashMap<String, Map<String, List<Invoker<T>>>>();
 		// 按提供者URL所声明的methods分类，兼容注册中心执行路由过滤掉的methods
 		Map<String, List<Invoker<T>>> eidInvokerMap = new HashMap<String, List<Invoker<T>>>();
@@ -585,11 +585,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 										&& parameterEid.length() > 0
 										&& !Constants.ANY_VALUE
 												.equals(parameterEid)) {
-									List<Invoker<T>> eidInvokers = newEidInvokerMap
+									List<Invoker<T>> eidInvokers = methodInvokers
 											.get(parameterEid);
 									if (eidInvokers == null) {
 										eidInvokers = new ArrayList<Invoker<T>>();
-										newEidInvokerMap.put(parameterEid,
+										methodInvokers.put(parameterEid,
 												eidInvokers);
 									}
 									eidInvokers.add(invoker);
@@ -619,13 +619,13 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 			for (String method : serviceMethods) {
 				Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap
 						.get(method);
-				List<Invoker<T>> eidInvokers = newEidInvokerMap
+				List<Invoker<T>> eidInvokers = methodInvokers
 						.get(serviceEids);
 				if (methodInvokers == null || methodInvokers.size() == 0) {
 					methodInvokers = eidInvokerMap;
 				}
-				newEidInvokerMap.put(serviceEids, route(eidInvokers, method));
-				newMethodInvokerMap.put(method, newEidInvokerMap);
+				methodInvokers.put(serviceEids, route(eidInvokers, serviceEids));
+				newMethodInvokerMap.put(method, methodInvokers);
 			}
 		}
 		// sort and unmodifiable
@@ -636,19 +636,20 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 		// newMethodInvokerMap.put(method,
 		// Collections.unmodifiableList(methodInvokers));
 		// }
-//		for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
-//			Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap
-//					.get(method);
-//			for (String eid : new HashSet<String>(methodInvokers.keySet())) {
-//				List<Invoker<T>> eidInvokers = methodInvokers.get(eid);
-//				Collections
-//						.sort(eidInvokers, InvokerComparator.getComparator());
-//				newEidInvokerMap.put(eid,
-//						Collections.unmodifiableList(eidInvokers));
-//			}
-//			newMethodInvokerMap.put(method,
-//					Collections.unmodifiableMap(methodInvokers));
-//		}
+		// sort and unmodifiable
+		for (String method : new HashSet<String>(newMethodInvokerMap.keySet())) {
+			Map<String, List<Invoker<T>>> methodInvokers = newMethodInvokerMap
+					.get(method);
+			for (String eid : new HashSet<String>(methodInvokers.keySet())) {
+				List<Invoker<T>> eidInvokers = methodInvokers.get(eid);
+				Collections
+						.sort(eidInvokers, InvokerComparator.getComparator());
+				methodInvokers.put(eid,
+						Collections.unmodifiableList(eidInvokers));
+			}
+			newMethodInvokerMap.put(method,
+					Collections.unmodifiableMap(methodInvokers));
+		}
 		return Collections.unmodifiableMap(newMethodInvokerMap);
 	}
 
