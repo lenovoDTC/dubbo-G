@@ -34,7 +34,7 @@ public class DemoAction {
 
 		for (int i = 0; i < 1; i++) {
 			try {
-				RpcContext.getContext().addHeader("X-Request-EID", "test1");
+//				RpcContext.getContext().addHeader("X-Request-EID", "test1");
 				demoService.sayHello("world" + i);
 				Future<String> future = RpcContext.getContext().getFuture();
 				String hello1 = future.get(3000L, TimeUnit.MILLISECONDS);
