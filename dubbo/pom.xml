@@ -183,6 +183,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
+			<artifactId>dubbo-registry-api</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
 			<artifactId>dubbo-registry-default</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>

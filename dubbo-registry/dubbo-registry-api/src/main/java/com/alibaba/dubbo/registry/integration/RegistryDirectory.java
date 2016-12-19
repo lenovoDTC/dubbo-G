@@ -581,6 +581,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 									newMethodInvokerMap.put(method,
 											methodInvokers);
 								}
+
 								if (parameterEid != null
 										&& parameterEid.length() > 0
 										&& !Constants.ANY_VALUE
@@ -592,7 +593,6 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 										methodInvokers.put(parameterEid,
 												eidInvokers);
 									}
-									eidInvokers.add(invoker);
 								}
 
 							}
