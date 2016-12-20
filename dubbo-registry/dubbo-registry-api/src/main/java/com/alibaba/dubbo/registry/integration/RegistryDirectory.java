@@ -593,6 +593,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements
 										methodInvokers.put(parameterEid,
 												eidInvokers);
 									}
+									eidInvokers.add(invoker);
 								}
 
 							}
