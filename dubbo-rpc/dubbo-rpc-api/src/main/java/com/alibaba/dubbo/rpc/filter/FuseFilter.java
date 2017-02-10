@@ -99,9 +99,14 @@ public class FuseFilter implements Filter {
 			}
 			jsonObject = new JSONObject();
 			total = 0;
+			successNumber = 0;
 		}
 		total++;
 		if (elapsed1 / 1000 >= 10) {
+			if(total == 0&&successNumber == 0){
+				oldsuccessNumber = 0;
+				oldtotal = 0;
+			}
 			int newsuccessNumber = successNumber;
 			int newtotal = total;
 			String ss = invoker
