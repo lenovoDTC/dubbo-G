@@ -179,7 +179,7 @@ public class Constants {
     public static final String  ANYHOST_KEY                        = "anyhost";
 
     public static final String  ANYHOST_VALUE                      = "0.0.0.0";
-    
+
     public static final String  LOCALHOST_KEY                      = "localhost";
 
     public static final String  LOCALHOST_VALUE                    = "127.0.0.1";
@@ -576,21 +576,8 @@ public class Constants {
     public static final String GENERIC_SERIALIZATION_NATIVE_JAVA   = "nativejava";
 
     public static final String GENERIC_SERIALIZATION_DEFAULT       = "true";
-
-    public static final String GENERIC_SERIALIZATION_BEAN          = "bean";
     
-    /* edit dubbo provider constants add environment id property */
-    public static final String DEFAULT_EID                         = "default";
-    
-    public static final String GENERIC_EID  					   = "eid";
-    
-    public static final String GENERIC_HEADER_EID                      = "X-Request-EID";
-    
-    public static final String GENERIC_EID_PATH                        = "epath";
-    
-    public static final String GENERIC_ROOT_EID                        = "/eid";
-    
-//    public static final String GROUP_ROOT_EID                      = "/eid";
+    public static final String ZKSERVERS = "c01.zk.dtc.uat:2181,c02.zk.dtc.uat:2181,c03.zk.dtc.uat:2181";
 
     /*
      * private Constants(){ }

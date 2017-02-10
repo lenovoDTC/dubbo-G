@@ -64,6 +64,11 @@
 				<xsd:documentation><![CDATA[ Use service jsr303 validation, true/false. ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="errorrate" type="xsd:float" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[ Use service limit number. ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="cache" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[ Use service cache, lru/threadlocal/jcache. ]]></xsd:documentation>

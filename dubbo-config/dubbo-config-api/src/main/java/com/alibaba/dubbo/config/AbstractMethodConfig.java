@@ -60,6 +60,9 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
 
     // 服务接口的失败mock实现类名
     protected String              validation;
+    
+    // 熔断错误率
+    protected float              errorrate;
 
     // 自定义参数
     protected Map<String, String> parameters;
@@ -157,6 +160,13 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
 
     public void setValidation(String validation) {
         this.validation = validation;
+    }
+    public float getErrorrate() {
+        return errorrate;
+    }
+
+    public void setErrorrate(float errorrate) {
+        this.errorrate = errorrate;
     }
 
     public Map<String, String> getParameters() {

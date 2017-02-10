@@ -72,8 +72,8 @@ public class RouteServiceImpl extends AbstractService implements RouteService {
             return;
         }
 
-		registryService.unregister(oldRoute);
-        URL newRoute= oldRoute.addParameter("enabled", true);
+        URL newRoute = oldRoute.removeParameter("enabled");
+        registryService.unregister(oldRoute);
         registryService.register(newRoute);
         
     }

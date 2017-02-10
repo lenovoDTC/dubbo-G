@@ -3,8 +3,6 @@ package com.alibaba.dubbo.remoting.zookeeper.curator;
 import java.io.IOException;
 import java.util.List;
 
-import org.I0Itec.zkclient.IZkChildListener;
-import org.I0Itec.zkclient.IZkDataListener;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.KeeperException.NodeExistsException;
@@ -135,22 +133,6 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
 	
 	public void removeTargetChildListener(String path, CuratorWatcher listener) {
 		((CuratorWatcherImpl) listener).unwatch();
-	}
-
-	public void subscribeDataChanges(String path, IZkDataListener listener) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public List<String> subscribeChildChanges(String path,
-			IZkChildListener listener) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void writeData(String path, Object object) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

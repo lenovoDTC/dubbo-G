@@ -18,7 +18,6 @@ package com.alibaba.dubbo.common.bytecode;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,6 +38,7 @@ import javassist.CtNewMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 
+import com.alibaba.dubbo.common.utils.ClassHelper;
 import com.alibaba.dubbo.common.utils.ReflectUtils;
 
 /**
@@ -59,7 +59,7 @@ public final class ClassGenerator
 
 	public static ClassGenerator newInstance()
 	{
-		return new ClassGenerator(getClassPool(Thread.currentThread().getContextClassLoader()));
+		return new ClassGenerator(getClassPool(ClassHelper.getCallerClassLoader(ClassGenerator.class)));
 	}
 
 	public static ClassGenerator newInstance(ClassLoader loader)
@@ -289,11 +289,7 @@ public final class ClassGenerator
 	    return mPool;
 	}
 
-	public Class<?> toClass(){
-		return toClass(getClass().getClassLoader(), getClass().getProtectionDomain());
-	}
-
-	public Class<?> toClass(ClassLoader loader, ProtectionDomain pd)
+	public Class<?> toClass()
 	{
 		if( mCtc != null )
 			mCtc.detach();
@@ -339,7 +335,7 @@ public final class ClassGenerator
 					}
 				}
 			}
-			return mCtc.toClass(loader, pd);
+			return mCtc.toClass(ClassHelper.getCallerClassLoader(getClass()), null);
 		}
 		catch(RuntimeException e)
 		{

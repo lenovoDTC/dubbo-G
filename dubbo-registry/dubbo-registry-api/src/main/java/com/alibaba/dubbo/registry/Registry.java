@@ -26,5 +26,4 @@ import com.alibaba.dubbo.common.URL;
  * @author william.liangf
  */
 public interface Registry extends Node, RegistryService {
-	String getAnyEid(String eid);
 }

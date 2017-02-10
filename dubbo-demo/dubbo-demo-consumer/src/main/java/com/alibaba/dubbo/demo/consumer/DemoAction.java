@@ -17,32 +17,27 @@ package com.alibaba.dubbo.demo.consumer;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import com.alibaba.dubbo.demo.DemoService;
-import com.alibaba.dubbo.rpc.RpcContext;
 
 public class DemoAction {
-	private DemoService demoService;
+    
+    private DemoService demoService;
 
-	public void setDemoService(DemoService demoService) {
-		this.demoService = demoService;
-	}
+    public void setDemoService(DemoService demoService) {
+        this.demoService = demoService;
+    }
 
 	public void start() throws Exception {
-
-		for (int i = 0; i < 1; i++) {
-			try {
-//				RpcContext.getContext().addHeader("X-Request-EID", "test1");
-				demoService.sayHello("world" + i);
-				Future<String> future = RpcContext.getContext().getFuture();
-				String hello1 = future.get(3000L, TimeUnit.MILLISECONDS);
-				System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello1);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+        for (int i = 0; i < Integer.MAX_VALUE; i ++) {
+            try {
+            	String hello = demoService.sayHello("world" + i);
+                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Thread.sleep(2000);
+        }
 	}
 
 }

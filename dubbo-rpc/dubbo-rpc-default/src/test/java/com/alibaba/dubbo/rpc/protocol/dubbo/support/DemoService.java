@@ -32,8 +32,6 @@ public interface DemoService
 
 	String echo(String text);
 
-	Map echo(Map map);
-
 	long timestamp();
 
 	String getThreadName();

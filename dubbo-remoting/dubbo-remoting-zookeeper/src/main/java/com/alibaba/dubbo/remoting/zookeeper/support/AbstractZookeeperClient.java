@@ -1,13 +1,10 @@
 package com.alibaba.dubbo.remoting.zookeeper.support;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import org.apache.zookeeper.ClientCnxn;
 
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.logger.Logger;
@@ -46,13 +43,7 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 		} else {
 			createPersistent(path);
 		}
-		}
-	 public String readData(String path){
-		 String dataString = readData(path);
-		 return dataString;
 	}
-		
-	
 
 	public void addStateListener(StateListener listener) {
 		stateListeners.add(listener);

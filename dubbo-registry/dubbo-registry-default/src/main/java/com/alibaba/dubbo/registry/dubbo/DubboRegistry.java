@@ -145,11 +145,5 @@ public class DubboRegistry extends FailbackRegistry {
     public List<URL> lookup(URL url) {
         return registryService.lookup(url);
     }
-
-
-	public String getAnyEid(String eid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
     
 }

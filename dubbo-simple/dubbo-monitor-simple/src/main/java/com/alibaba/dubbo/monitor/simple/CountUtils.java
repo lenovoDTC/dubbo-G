@@ -46,11 +46,11 @@ public class CountUtils {
     }
 
     public static long max(File file) {
-        return calc(file, MAX);
+        return calc(file, SUM);
     }
 
     public static long avg(File file) {
-        return calc(file, AVG);
+        return calc(file, SUM);
     }
     
     private static long calc(File file, int op) {

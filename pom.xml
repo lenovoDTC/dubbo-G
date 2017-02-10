@@ -1,17 +1,28 @@
-<!-- - Copyright 1999-2011 Alibaba Group. - - Licensed under the Apache License, 
-	Version 2.0 (the "License"); - you may not use this file except in compliance 
-	with the License. - You may obtain a copy of the License at - - http://www.apache.org/licenses/LICENSE-2.0 
-	- - Unless required by applicable law or agreed to in writing, software - 
-	distributed under the License is distributed on an "AS IS" BASIS, - WITHOUT 
-	WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. - See the 
-	License for the specific language governing permissions and - limitations 
-	under the License. -->
+<!--
+ - Copyright 1999-2011 Alibaba Group.
+ -  
+ - Licensed under the Apache License, Version 2.0 (the "License");
+ - you may not use this file except in compliance with the License.
+ - You may obtain a copy of the License at
+ -  
+ -	  http://www.apache.org/licenses/LICENSE-2.0
+ -  
+ - Unless required by applicable law or agreed to in writing, software
+ - distributed under the License is distributed on an "AS IS" BASIS,
+ - WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ - See the License for the specific language governing permissions and
+ - limitations under the License.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.alibaba</groupId>
+	<parent>
+		<groupId>com.alibaba</groupId>
+		<artifactId>opensesame</artifactId>
+		<version>2.0</version>
+	</parent>
 	<artifactId>dubbo-parent</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>2.5.3</version>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<description>The parent project of dubbo</description>
@@ -30,7 +41,6 @@
 		<url>http://www.alibaba.com</url>
 	</organization>
 	<modules>
-		<module>hessian-lite</module>
 		<module>dubbo-common</module>
 		<module>dubbo-container</module>
 		<module>dubbo-remoting</module>
@@ -41,10 +51,9 @@
 		<module>dubbo-monitor</module>
 		<module>dubbo-config</module>
 		<module>dubbo</module>
-		<module>dubbo-simple</module>
-		<module>dubbo-admin</module>
-		<module>dubbo-demo</module>
-		<module>dubbo-proxy</module>
+                <module>dubbo-simple</module>
+                <module>dubbo-admin</module>
+                <module>dubbo-demo</module>
 	</modules>
 	<profiles>
 		<profile>
@@ -75,8 +84,8 @@
 	</profiles>
 	<properties>
 		<!-- Common libs -->
-		<spring_version>3.2.16.RELEASE</spring_version>
-		<javassist_version>3.20.0-GA</javassist_version>
+		<spring_version>2.5.6.SEC03</spring_version>
+		<javassist_version>3.15.0-GA</javassist_version>
 		<netty_version>3.2.5.Final</netty_version>
 		<mina_version>1.1.7</mina_version>
 		<grizzly_version>2.1.4</grizzly_version>
@@ -114,42 +123,22 @@
 		<easymock_version>3.0</easymock_version>
 		<jmockit_version>0.999.8</jmockit_version>
 		<!-- Build args -->
-		<argline>-server -Xms64m -Xmx256m -XX:PermSize=64m
-			-XX:MaxPermSize=128m -Dfile.encoding=UTF-8
-			-Djava.net.preferIPv4Stack=true</argline>
+		<!--<argline>-server -Xms64m -Xmx64m -XX:PermSize=64m -XX:MaxPermSize=64m</argline>-->
 		<skip_maven_deploy>false</skip_maven_deploy>
 		<updateReleaseInfo>true</updateReleaseInfo>
 		<project.build.sourceEncoding>${file_encoding}</project.build.sourceEncoding>
 
-		<!-- generate idea copyright -->
-		<copyright>Copyright 1999-2012 Alibaba Group.&#10; &#10;Licensed under
-			the Apache License, Version 2.0 (the &quot;License&quot;);&#10;you
-			may not use this file except in compliance with the License.&#10;You
-			may obtain a copy of the License at&#10; &#10;
-			http://www.apache.org/licenses/LICENSE-2.0&#10; &#10;Unless required
-			by applicable law or agreed to in writing, software&#10;distributed
-			under the License is distributed on an &quot;AS IS&quot;
-			BASIS,&#10;WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-			express or implied.&#10;See the License for the specific language
-			governing permissions and&#10;limitations under the License.</copyright>
-		<profile.name>oss</profile.name>
-
-		<!-- for maven compiler plugin -->
-		<maven_compiler_plugin_version>3.5.1</maven_compiler_plugin_version>
-		<java_source_version>1.7</java_source_version>
-		<java_target_version>1.7</java_target_version>
-		<file_encoding>UTF-8</file_encoding>
-
+        <!-- generate idea copyright -->
+        <copyright>Copyright 1999-2012 Alibaba Group.&#10; &#10;Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);&#10;you may not use this file except in compliance with the License.&#10;You may obtain a copy of the License at&#10; &#10;     http://www.apache.org/licenses/LICENSE-2.0&#10; &#10;Unless required by applicable law or agreed to in writing, software&#10;distributed under the License is distributed on an &quot;AS IS&quot; BASIS,&#10;WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&#10;See the License for the specific language governing permissions and&#10;limitations under the License.</copyright>
+        <profile.name>oss</profile.name>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<!-- Common libs -->
 			<dependency>
 				<groupId>org.springframework</groupId>
-				<artifactId>spring-framework-bom</artifactId>
+				<artifactId>spring</artifactId>
 				<version>${spring_version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -362,30 +351,13 @@
 			<groupId>org.easymock</groupId>
 			<artifactId>easymockclassextension</artifactId>
 		</dependency>
-		<dependency>
+			<dependency>
 			<groupId>com.googlecode.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<repository>
-			<id>nexus-releases</id>
-			<name>Nexus Release Repository</name>
-			<url>http://nexus.lenovo.com/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus-snapshots</id>
-			<name>Nexus Snapshot Repository</name>
-			<url>http://nexus.lenovo.com/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.1</version>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -479,14 +451,25 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	<repositories>
+		<repository>
+			<id>opensesame.releases</id>
+			<url>http://code.alibabatech.com/mvn/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<issueManagement>
-		<system>github</system>
-		<url>https://github.com/alibaba/dubbo/issues</url>
+		<system>jira</system>
+		<url>http://code.alibabatech.com/jira/browse/DUBBO</url>
 	</issueManagement>
 	<scm>
-		<url>https://github.com/alibaba/dubbo</url>
-		<connection>https://github.com/alibaba/dubbo.git</connection>
+		<url>http://code.alibabatech.com/svn/dubbo/trunk</url>
+		<connection>scm:svn:http://code.alibabatech.com/svn/dubbo/trunk</connection>
 	</scm>
 	<mailingLists>
 		<mailingList>
@@ -556,15 +539,6 @@
 			<name>LvGang(Kimi)</name>
 			<id>gang.lvg</id>
 			<email>gang.lvg (AT) alibaba-inc.com</email>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+8</timezone>
-		</developer>
-		<developer>
-			<name>WuXiaoFei(Teaey)</name>
-			<id>xiaofei.wxf</id>
-			<email>xiaofei.wxf (AT) alibaba-inc.com</email>
 			<roles>
 				<role>Developer</role>
 			</roles>

@@ -99,10 +99,4 @@ public class MockRegistry implements Registry {
         return null;
     }
 
-	public String getAnyEid(String eid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-
 }

@@ -20,9 +20,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import com.alibaba.dubbo.common.Constants;
-import com.alibaba.dubbo.common.beanutil.JavaBeanAccessor;
-import com.alibaba.dubbo.common.beanutil.JavaBeanDescriptor;
-import com.alibaba.dubbo.common.beanutil.JavaBeanSerializeUtil;
 import com.alibaba.dubbo.common.extension.Activate;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
@@ -64,16 +61,7 @@ public class GenericImplFilter implements Filter {
             for (int i = 0; i < parameterTypes.length; i ++) {
                 types[i] = ReflectUtils.getName(parameterTypes[i]);
             }
-
-            Object[] args;
-            if (ProtocolUtils.isBeanGenericSerialization(generic)) {
-                args = new Object[arguments.length];
-                for(int i = 0; i < arguments.length; i++) {
-                    args[i] = JavaBeanSerializeUtil.serialize(arguments[i], JavaBeanAccessor.METHOD);
-                }
-            } else {
-                args = PojoUtils.generalize(arguments);
-            }
+            Object[] args = PojoUtils.generalize(arguments);
             
             invocation2.setMethodName(Constants.$INVOKE);
             invocation2.setParameterTypes(GENERIC_PARAMETER_TYPES);
@@ -84,24 +72,7 @@ public class GenericImplFilter implements Filter {
                 Object value = result.getValue();
                 try {
                     Method method = invoker.getInterface().getMethod(methodName, parameterTypes);
-                    if (ProtocolUtils.isBeanGenericSerialization(generic)) {
-                        if (value == null) {
-                            return new RpcResult(value);
-                        } else if (value instanceof JavaBeanDescriptor) {
-                            return new RpcResult(JavaBeanSerializeUtil.deserialize((JavaBeanDescriptor)value));
-                        } else {
-                            throw new RpcException(
-                                new StringBuilder(64)
-                                    .append("The type of result value is ")
-                                    .append(value.getClass().getName())
-                                    .append(" other than ")
-                                    .append(JavaBeanDescriptor.class.getName())
-                                    .append(", and the result is ")
-                                    .append(value).toString());
-                        }
-                    } else {
-                        return new RpcResult(PojoUtils.realize(value, method.getReturnType(), method.getGenericReturnType()));
-                    }
+                    return new RpcResult(PojoUtils.realize(value, method.getReturnType(), method.getGenericReturnType()));
                 } catch (NoSuchMethodException e) {
                     throw new RpcException(e.getMessage(), e);
                 }
@@ -151,18 +122,12 @@ public class GenericImplFilter implements Filter {
             && invocation.getArguments().length == 3
             && ProtocolUtils.isGeneric(generic)) {
 
-            Object[] args = (Object[]) invocation.getArguments()[2];
             if (ProtocolUtils.isJavaGenericSerialization(generic)) {
+                Object[] args = (Object[]) invocation.getArguments()[2];
 
                 for (Object arg : args) {
                     if (!(byte[].class == arg.getClass())) {
-                        error(byte[].class.getName(), arg.getClass().getName());
-                    }
-                }
-            } else if (ProtocolUtils.isBeanGenericSerialization(generic)) {
-                for(Object arg : args) {
-                    if (!(arg instanceof JavaBeanDescriptor)) {
-                        error(JavaBeanDescriptor.class.getName(), arg.getClass().getName());
+                        error(arg.getClass().getName());
                     }
                 }
             }
@@ -173,15 +138,15 @@ public class GenericImplFilter implements Filter {
         return invoker.invoke(invocation);
     }
 
-    private void error(String expected, String actual) throws RpcException {
+    private void error(String type) throws RpcException {
         throw new RpcException(
             new StringBuilder(32)
                 .append("Generic serialization [")
                 .append(Constants.GENERIC_SERIALIZATION_NATIVE_JAVA)
                 .append("] only support message type ")
-                .append(expected)
+                .append(byte[].class)
                 .append(" and your message type is ")
-                .append(actual).toString());
+                .append(type).toString());
     }
 
 }

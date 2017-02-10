@@ -105,19 +105,15 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         // 兼容旧版本
         if (registries == null || registries.size() == 0) {
             String address = ConfigUtils.getProperty("dubbo.registry.address");
-            String eid = ConfigUtils.getProperty("dubbo.registry.eid");
-            eid = eid == null ? ConfigUtils.getProperty("sys_environment_eid") : eid;
             if (address != null && address.length() > 0) {
                 registries = new ArrayList<RegistryConfig>();
                 String[] as = address.split("\\s*[|]+\\s*");
                 for (String a : as) {
                     RegistryConfig registryConfig = new RegistryConfig();
                     registryConfig.setAddress(a);
-                    registryConfig.setEid(eid);
                     registries.add(registryConfig);
                 }
             }
-            
         }
         if ((registries == null || registries.size() == 0)) {
             throw new IllegalStateException((getClass().getSimpleName().startsWith("Reference") 
@@ -168,24 +164,10 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 if (address == null || address.length() == 0) {
                 	address = Constants.ANYHOST_VALUE;
                 }
-                /* edit dubbo registry provider url create rule, add environment id by eid property*/
-                String eid = config.getEid();
-                if (eid == null || eid.length() == 0) {
-                	eid = Constants.DEFAULT_EID;
-                }
-                
                 String sysaddress = System.getProperty("dubbo.registry.address");
                 if (sysaddress != null && sysaddress.length() > 0) {
                     address = sysaddress;
                 }
-                
-                /* edit dubbo registry provider url create rule, add environment id by eid property {JVM -Ddubbo.registry.eid}*/
-                String syseid = System.getProperty("dubbo.registry.eid");
-                syseid = syseid == null ? System.getProperty("sys_environment_eid") : eid;
-                if (syseid != null && syseid.length() > 0) {
-                	eid = syseid;
-                }
-                
                 if (address != null && address.length() > 0 
                         && ! RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
                     Map<String, String> map = new HashMap<String, String>();
@@ -194,7 +176,6 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     map.put("path", RegistryService.class.getName());
                     map.put("dubbo", Version.getVersion());
                     map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
-                    map.put(Constants.GENERIC_EID, eid);
                     if (ConfigUtils.getPid() > 0) {
                         map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
                     }
@@ -205,7 +186,6 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                             map.put("protocol", "dubbo");
                         }
                     }
-                    
                     List<URL> urls = UrlUtils.parseURLs(address, map);
                     for (URL url : urls) {
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());

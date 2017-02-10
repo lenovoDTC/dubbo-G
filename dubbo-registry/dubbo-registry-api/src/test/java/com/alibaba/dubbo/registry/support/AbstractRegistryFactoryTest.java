@@ -67,16 +67,6 @@ public class AbstractRegistryFactoryTest {
                 public List<URL> lookup(URL url) {
                     return null;
                 }
-
-				public String getAnyEid() {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				public String getAnyEid(String eid) {
-					// TODO Auto-generated method stub
-					return null;
-				}
                 
             };
         }

@@ -91,9 +91,6 @@ public class RegistryConfig extends AbstractConfig {
     // 是否为缺省
     private Boolean             isDefault;
     
-    // environment id 
-    private String 				eid;
-    
     public RegistryConfig() {
     }
     
@@ -239,14 +236,6 @@ public class RegistryConfig extends AbstractConfig {
             throw new IllegalStateException("No such client type : " + client);
         }*/
         this.client = client;
-    }
-    
-    public void setEid(String eid) {
-    	this.eid = eid;
-    }
-    
-    public String getEid() {
-    	return eid;
     }
 
 	public Integer getTimeout() {

@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,16 +105,15 @@ public class AccessLogFilter implements Filter {
                             }
                             FileWriter writer = new FileWriter(file, true);
                             try {
-                                for(Iterator<String> iterator = logSet.iterator();
-                                    iterator.hasNext();
-                                    iterator.remove()) {
-                                    writer.write(iterator.next());
+                                for (String msg : logSet) {
+                                    writer.write(msg);
                                     writer.write("\r\n");
                                 }
                                 writer.flush();
                             } finally {
                                 writer.close();
                             }
+                            logSet.clear();
                         } catch (Exception e) {
                             logger.error(e.getMessage(), e);
                         }

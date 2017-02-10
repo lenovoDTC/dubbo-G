@@ -550,12 +550,12 @@ public class RegistryDirectoryTest {
         List<Router> routers = registryDirectory.getRouters();
         //default invocation selector
         Assert.assertEquals(1+1, routers.size());
-        Assert.assertTrue(ScriptRouter.class == routers.get(1).getClass() || ScriptRouter.class == routers.get(0).getClass());
+        Assert.assertEquals(ScriptRouter.class, routers.get(1).getClass());
 
         registryDirectory.notify(new ArrayList<URL>());
         routers = registryDirectory.getRouters();
         Assert.assertEquals(1 + 1, routers.size());
-        Assert.assertTrue(ScriptRouter.class == routers.get(1).getClass() || ScriptRouter.class == routers.get(0).getClass());
+        Assert.assertEquals(ScriptRouter.class, routers.get(1).getClass());
 
         serviceUrls.clear();
         serviceUrls.add(routerurl.addParameter(Constants.ROUTER_KEY, Constants.ROUTER_TYPE_CLEAR));
@@ -1067,10 +1067,5 @@ public class RegistryDirectoryTest {
                 throw new RpcException("test exception ignore.");
             }
         }
-
-    	public String getAnyEid(String eid) {
-    		// TODO Auto-generated method stub
-    		return null;
-    	}
     }
 }
