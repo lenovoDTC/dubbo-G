@@ -15,7 +15,16 @@
  */
 package com.alibaba.dubbo.rpc.cluster.support.wrapper;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+
+import org.I0Itec.zkclient.ZkClient;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
+import org.json.JSONObject;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
@@ -35,6 +44,13 @@ import com.alibaba.dubbo.rpc.support.MockInvoker;
  * @author chao.liuc
  */
 public class MockClusterInvoker<T> implements Invoker<T>{
+	private int total = 0;
+	private int successNumber = 0;
+	private int oldtotal = 0;
+	private int oldsuccessNumber = 0;
+	private long start = System.currentTimeMillis();
+	private long start1 = System.currentTimeMillis();
+	private JSONObject jsonObject = new JSONObject();
 	
 	private static final Logger logger = LoggerFactory.getLogger(MockClusterInvoker.class);
 
@@ -66,7 +82,8 @@ public class MockClusterInvoker<T> implements Invoker<T>{
 	public Result invoke(Invocation invocation) throws RpcException {
 		Result result = null;
         
-        String value = directory.getUrl().getMethodParameter(invocation.getMethodName(), Constants.MOCK_KEY, Boolean.FALSE.toString()).trim(); 
+        String value = directory.getUrl().getMethodParameter(invocation.getMethodName(), Constants.MOCK_KEY, Boolean.FALSE.toString()).trim();
+        
         if (value.length() == 0 || value.equalsIgnoreCase("false")){
         	//no mock
         	result = this.invoker.invoke(invocation);
@@ -79,7 +96,87 @@ public class MockClusterInvoker<T> implements Invoker<T>{
         } else {
         	//fail-mock
         	try {
+        		long elapsed = System.currentTimeMillis() - start;
+        		long elapsed1 = System.currentTimeMillis() - start1;
+        		if (elapsed / 1000 >= 300) {
+        			start = System.currentTimeMillis();
+        			jsonObject.put("total", "" + total);
+        			try {
+        				ZooKeeper zkClient = new ZooKeeper(Constants.ZKSERVERS, 30000,
+        						new Watcher() {
+        							public void process(WatchedEvent arg0) {
+        							}
+        						});
+        				try {
+        					String bb = "{}";
+        					byte[] aa = zkClient.getData("/dubbo/"
+        							+ directory.getUrl().getServiceInterface(),
+        							false, null);
+        					if (aa != null) {
+        						bb = new String(aa);
+        					}
+        					JSONObject aaJsonObject = new JSONObject(bb);
+        					Iterator iterator = jsonObject.keys();
+        					while (iterator.hasNext()) {
+        						String key = (String) iterator.next();
+        						Long value2 = Long.parseLong(jsonObject.get(key)
+        								.toString());
+        						if (aaJsonObject.isNull(key)) {
+        							aaJsonObject.put(key, value2);
+        							continue;
+        						}
+        						Long value1 = Long.parseLong(aaJsonObject.get(key)
+        								.toString());
+        						aaJsonObject.put(key, value2 + value1);
+        					}
+        					zkClient.setData("/dubbo/"
+        							+ directory.getUrl().getServiceInterface(),
+        							(aaJsonObject.toString()).getBytes(), -1);
+        					zkClient.close();
+        				} catch (KeeperException e) {
+        					e.printStackTrace();
+        				} catch (InterruptedException e) {
+        					e.printStackTrace();
+        				}
+        			} catch (IOException e) {
+        				e.printStackTrace();
+        			}
+        			jsonObject = new JSONObject();
+        			total = 0;
+        			successNumber = 0;
+        		}
+        		total++;
+        		if (elapsed1 / 1000 >= 10) {
+        			if (total == 0 && successNumber == 0) {
+        				oldsuccessNumber = 0;
+        				oldtotal = 0;
+        			}
+        			int newsuccessNumber = successNumber;
+        			int newtotal = total;
+        			String errorrate = directory.getUrl().getMethodParameter(invocation.getMethodName(),Constants.ERRORRATE_KEY,Boolean.FALSE.toString()).trim();
+        			if (Float.parseFloat(errorrate) != 0) {
+        				if (newtotal != oldtotal) {
+        					if (10 - ((float) (newsuccessNumber - oldsuccessNumber)
+        							/ (newtotal - oldtotal) * 10) >= Float
+        								.parseFloat(errorrate)) {
+        						if (elapsed1 / 1000 >= 40) {
+        							start1 = System.currentTimeMillis();
+        							oldsuccessNumber = successNumber;
+        							oldtotal = total;
+        						}
+        						System.out.println("熔断");
+        						result = doMockInvoke(invocation, null);
+        						return result;
+        					}
+        				}
+        			}
+        			start1 = System.currentTimeMillis();
+        			oldsuccessNumber = successNumber;
+        			oldtotal = total;
+        		}
         		result = this.invoker.invoke(invocation);
+        		successNumber++;
+        		jsonObject.put("success", "" + successNumber);
         	}catch (RpcException e) {
 				if (e.isBiz()) {
 					throw e;

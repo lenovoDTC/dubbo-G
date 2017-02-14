@@ -335,7 +335,6 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     
 	@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 	private T createProxy(Map<String, String> map) {
-		map.put("errorrate",""+getErrorrate());
 		URL tmpUrl = new URL("temp", "localhost", 0, map);
 		final boolean isJvmRefer;
         if (isInjvm() == null) {
