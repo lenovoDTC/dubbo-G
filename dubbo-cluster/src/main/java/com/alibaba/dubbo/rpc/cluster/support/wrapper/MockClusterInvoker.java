@@ -18,6 +18,7 @@ package com.alibaba.dubbo.rpc.cluster.support.wrapper;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -44,12 +45,16 @@ import com.alibaba.dubbo.rpc.support.MockInvoker;
  */
 public class MockClusterInvoker<T> implements Invoker<T> {
 
-	private int total = 0;
-	private int successNumber = 0;
+	private AtomicInteger total = new AtomicInteger();
+	private AtomicInteger successNumber = new AtomicInteger();
+	private AtomicInteger zkStatus = new AtomicInteger();
+	private AtomicInteger fuseStatus = new AtomicInteger();
+	private int successStatus = 2;
 	private int oldtotal = 0;
 	private int oldsuccessNumber = 0;
 	private long start = System.currentTimeMillis();
 	private long start1 = System.currentTimeMillis();
+	private long start3 = System.currentTimeMillis();
 	private JSONObject jsonObject = new JSONObject();
 
 	private static final Logger logger = LoggerFactory
@@ -217,86 +222,94 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 	 */
 	public String fuseCount(String errorrate, String supervene, String status) {
 		if (status.equals("before")) {
-			long start3 = System.currentTimeMillis();
-//			long shu = 0;
+
+			// long shu = 0;
 			long elapsed = System.currentTimeMillis() - start;
 			long elapsed1 = System.currentTimeMillis() - start1;
-			if (elapsed / 1000 >= 300) {
-				start = System.currentTimeMillis();
-				jsonObject.put("total", "" + total);
-				try {
-					ZooKeeper zkClient = new ZooKeeper(Constants.ZKSERVERS,
-							30000, new Watcher() {
-								public void process(WatchedEvent arg0) {
-								}
-							});
+			if (elapsed / 1000 >= 180) {// 三分钟后数据上传zk
+				if (zkStatus.getAndIncrement() == 0) {
+					start = System.currentTimeMillis();
+					jsonObject.put("total", "" + total.get());
 					try {
-						String bb = "{}";
-						byte[] aa = zkClient.getData("/dubbo/"
-								+ directory.getUrl().getServiceInterface(),
-								false, null);
-						if (aa != null) {
-							bb = new String(aa);
-						}
-						JSONObject aaJsonObject = new JSONObject(bb);
-						Iterator iterator = jsonObject.keys();
-						while (iterator.hasNext()) {
-							String key = (String) iterator.next();
-							Long value2 = Long.parseLong(jsonObject.get(key)
-									.toString());
-							if (aaJsonObject.isNull(key)) {
-								aaJsonObject.put(key, value2);
-								continue;
+						ZooKeeper zkClient = new ZooKeeper(Constants.ZKSERVERS,
+								30000, new Watcher() {
+									public void process(WatchedEvent arg0) {
+									}
+								});
+						try {
+							String bb = "{}";
+							byte[] aa = zkClient.getData("/dubbo/"
+									+ directory.getUrl().getServiceInterface(),
+									false, null);
+							if (aa != null) {
+								bb = new String(aa);
 							}
-							Long value1 = Long.parseLong(aaJsonObject.get(key)
-									.toString());
-							aaJsonObject.put(key, value2 + value1);
+							JSONObject aaJsonObject = new JSONObject(bb);
+							Iterator iterator = jsonObject.keys();
+							while (iterator.hasNext()) {
+								String key = (String) iterator.next();
+								Long value2 = Long.parseLong(jsonObject
+										.get(key).toString());
+								if (aaJsonObject.isNull(key)) {
+									aaJsonObject.put(key, value2);
+									continue;
+								}
+								Long value1 = Long.parseLong(aaJsonObject.get(
+										key).toString());
+								aaJsonObject.put(key, value2 + value1);
+							}
+							zkClient.setData("/dubbo/"
+									+ directory.getUrl().getServiceInterface(),
+									(aaJsonObject.toString()).getBytes(), -1);
+							zkClient.close();
+							// if (shu != 0) {
+							// shu = Long.parseLong(aaJsonObject.get("total")
+							// .toString())
+							// + Long.parseLong(jsonObject.get("total")
+							// .toString()) - shu;
+							// }
+						} catch (KeeperException e) {
+							e.printStackTrace();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-						zkClient.setData("/dubbo/"
-								+ directory.getUrl().getServiceInterface(),
-								(aaJsonObject.toString()).getBytes(), -1);
-						zkClient.close();
-//						if (shu != 0) {
-//							shu = Long.parseLong(aaJsonObject.get("total")
-//									.toString())
-//									+ Long.parseLong(jsonObject.get("total")
-//											.toString()) - shu;
-//						}
-					} catch (KeeperException e) {
-						e.printStackTrace();
-					} catch (InterruptedException e) {
+					} catch (IOException e) {
 						e.printStackTrace();
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
+					jsonObject = new JSONObject();
+					total.set(0);
+					start3 = System.currentTimeMillis();
+					successNumber.set(0);
 				}
-				jsonObject = new JSONObject();
-				total = 0;
-				start3 = System.currentTimeMillis();
-				successNumber = 0;
+				zkStatus.set(0);
 			}
-//			if(System.currentTimeMillis()-start3 == 0){
-//			if (total*1000/(System.currentTimeMillis()-start3) >= Integer.parseInt(supervene)) {
-//				System.out.println("降   级");
-//				return "fail";
-//			}}
-			total++;
-			if (elapsed1 / 1000 >= 10) {
-				if (total == 0 && successNumber == 0) {
+			// if (System.currentTimeMillis() - start3 != 0) {//通过配置降级
+			// if ((float)total.get() * 1000 / (System.currentTimeMillis() -
+			// start3) >= Integer
+			// .parseInt(supervene)) {
+			// System.out.println("降   级");
+			// return "fail";
+			// }
+			// }
+			total.getAndIncrement();
+			if (elapsed1 / 1000 >= 10) {// 10秒检测熔断
+				if (total.get() == 0 && successNumber.get() == 0) {
 					oldsuccessNumber = 0;
 					oldtotal = 0;
 				}
-				int newsuccessNumber = successNumber;
-				int newtotal = total - 1;
+				int newsuccessNumber = successNumber.get();
+				int newtotal = total.get() - 1;
 				if (Float.parseFloat(errorrate) != 0) {
 					if (newtotal != oldtotal) {
-						if (10 - ((float) (newsuccessNumber - oldsuccessNumber)
-								/ (newtotal - oldtotal) * 10) >= Float
+						if (100 - ((float) (newsuccessNumber - oldsuccessNumber)
+								/ (newtotal - oldtotal) * 100) >= Float
 									.parseFloat(errorrate)) {
-							if (elapsed1 / 1000 >= 40) {
-								start1 = System.currentTimeMillis();
-								oldsuccessNumber = successNumber;
-								oldtotal = total - 1;
+							if (elapsed1 / 1000 >= successStatus * 10) {
+								if (fuseStatus.getAndIncrement() == 0) {
+									successStatus++;
+									fuseStatus.set(0);
+									return "success";
+								}
 							}
 							System.out.println("熔   断");
 							return "fail";
@@ -304,15 +317,19 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 					}
 				}
 				start1 = System.currentTimeMillis();
-				oldsuccessNumber = successNumber;
-				oldtotal = total - 1;
+				oldsuccessNumber = successNumber.get();
+				oldtotal = total.get() - 1;
 			}
 		}
 		if (status.equals("after")) {
-			successNumber++;
-			jsonObject.put("success", "" + successNumber);
-			System.out.println(successNumber);
-			System.out.println(total);
+			successNumber.getAndIncrement();
+			jsonObject.put("success", "" + successNumber.get());
+			if (fuseStatus.get() >= 0) {
+				successStatus = 2;
+				start1 = System.currentTimeMillis();
+				oldsuccessNumber = successNumber.get();
+				oldtotal = total.get() - 1;
+			}
 		}
 		return "success";
 	}

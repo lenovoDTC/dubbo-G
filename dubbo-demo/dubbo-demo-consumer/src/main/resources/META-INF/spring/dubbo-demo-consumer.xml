@@ -21,7 +21,7 @@
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
 	<dubbo:reference id="demoService"
-		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="3.5" supervene="1000"/>
+		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="3.5" supervene="50"/>
 	<dubbo:consumer id="count" filter="count"
 
 		retries="0" />
