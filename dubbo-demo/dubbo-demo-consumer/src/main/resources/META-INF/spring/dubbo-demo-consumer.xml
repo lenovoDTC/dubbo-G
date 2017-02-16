@@ -15,15 +15,15 @@
  - limitations under the License.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <dubbo:reference id="demoService"
-                     interface="com.alibaba.dubbo.demo.DemoService" mock="return null" errorrate="3.5"/>
-    <dubbo:consumer id="fuse" filter="fuse"
+	<dubbo:reference id="demoService"
+		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="3.5" supervene="1000"/>
+	<dubbo:consumer id="count" filter="count"
 
-                    retries="0"/>
+		retries="0" />
 
 </beans>

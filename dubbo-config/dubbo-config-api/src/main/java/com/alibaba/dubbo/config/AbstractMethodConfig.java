@@ -23,7 +23,7 @@ import com.alibaba.dubbo.rpc.cluster.LoadBalance;
 
 /**
  * AbstractMethodConfig
- *
+ * 
  * @author william.liangf
  * @export
  */
@@ -32,37 +32,40 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     private static final long serialVersionUID = 1L;
 
     // 远程调用超时时间(毫秒)
-    protected Integer timeout;
+    protected Integer             timeout;
 
     // 重试次数
-    protected Integer retries;
+    protected Integer             retries;
 
     // 最大并发调用
-    protected Integer actives;
-
+    protected Integer             actives;
+    
     // 负载均衡
-    protected String loadbalance;
+    protected String              loadbalance;
 
     // 是否异步
-    protected Boolean async;
-
+    protected Boolean             async;
+    
     // 异步发送是否等待发送成功
-    protected Boolean sent;
+    protected Boolean             sent;
 
     // 服务接口的失败mock实现类名
-    protected String mock;
+    protected String              mock;
 
     // 合并器
-    protected String merger;
+    protected String              merger;
+    
+    // 服务接口的失败mock实现类名
+    protected String              cache;
 
     // 服务接口的失败mock实现类名
-    protected String cache;
-
-    // 服务接口的失败mock实现类名
-    protected String validation;
-
+    protected String              validation;
+    
     // 熔断错误率
-    protected float errorrate;
+    protected float              errorrate;
+
+    // 降级并发数
+    protected int              supervene;
 
     // 自定义参数
     protected Map<String, String> parameters;
@@ -103,7 +106,7 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     public Integer getActives() {
         return actives;
     }
-
+    
     public void setActives(Integer actives) {
         this.actives = actives;
     }
@@ -129,7 +132,7 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
         }
         this.mock = mock;
     }
-
+    
     public void setMock(Boolean mock) {
         if (mock == null) {
             setMock((String) null);
@@ -160,6 +163,14 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
 
     public void setValidation(String validation) {
         this.validation = validation;
+    }
+
+    public int getSupervene() {
+        return supervene;
+    }
+
+    public void setSupervene(int supervene) {
+        this.supervene = supervene;
     }
 
     public float getErrorrate() {
