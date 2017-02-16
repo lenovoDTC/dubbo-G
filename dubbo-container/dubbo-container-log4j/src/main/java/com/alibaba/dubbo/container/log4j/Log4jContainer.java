@@ -28,7 +28,7 @@ import com.alibaba.dubbo.container.Container;
 
 /**
  * Log4jContainer. (SPI, Singleton, ThreadSafe)
- * 
+ *
  * @author william.liangf
  */
 public class Log4jContainer implements Container {
@@ -69,7 +69,7 @@ public class Log4jContainer implements Container {
                     while (as.hasMoreElements()) {
                         Appender a = as.nextElement();
                         if (a instanceof FileAppender) {
-                            FileAppender fa = (FileAppender)a;
+                            FileAppender fa = (FileAppender) a;
                             String f = fa.getFile();
                             if (f != null && f.length() > 0) {
                                 int i = f.replace('\\', '/').lastIndexOf('/');
@@ -78,7 +78,7 @@ public class Log4jContainer implements Container {
                                     path = subdirectory;
                                 } else {
                                     path = f.substring(0, i);
-                                    if (! path.endsWith(subdirectory)) {
+                                    if (!path.endsWith(subdirectory)) {
                                         path = path + "/" + subdirectory;
                                     }
                                     f = f.substring(i + 1);

@@ -27,7 +27,7 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelEventRunnable.ChannelState;
 
 public class MessageOnlyChannelHandler extends WrappedChannelHandler {
-    
+
     public MessageOnlyChannelHandler(ChannelHandler handler, URL url) {
         super(handler, url);
     }

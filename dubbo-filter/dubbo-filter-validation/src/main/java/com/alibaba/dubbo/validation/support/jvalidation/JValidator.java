@@ -64,7 +64,7 @@ import com.alibaba.dubbo.validation.Validator;
 
 /**
  * JValidator
- * 
+ *
  * @author william.liangf
  */
 public class JValidator implements Validator {
@@ -72,16 +72,16 @@ public class JValidator implements Validator {
     private static final Logger logger = LoggerFactory.getLogger(JValidator.class);
 
     private final Class<?> clazz;
-    
+
     private final javax.validation.Validator validator;
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public JValidator(URL url) {
         this.clazz = ReflectUtils.forName(url.getServiceInterface());
         String jvalidation = url.getParameter("jvalidation");
         ValidatorFactory factory;
         if (jvalidation != null && jvalidation.length() > 0) {
-            factory = Validation.byProvider((Class)ReflectUtils.forName(jvalidation)).configure().buildValidatorFactory();
+            factory = Validation.byProvider((Class) ReflectUtils.forName(jvalidation)).configure().buildValidatorFactory();
         } else {
             factory = Validation.buildDefaultValidatorFactory();
         }
@@ -89,7 +89,7 @@ public class JValidator implements Validator {
     }
 
     public void validate(String methodName, Class<?>[] parameterTypes, Object[] arguments) throws Exception {
-        String methodClassName = clazz.getName() + "_" + toUpperMethoName(methodName);
+        String methodClassName = clazz.getName() + "$" + toUpperMethoName(methodName);
         Class<?> methodClass = null;
         try {
             methodClass = Class.forName(methodClassName, false, Thread.currentThread().getContextClassLoader());
@@ -114,7 +114,7 @@ public class JValidator implements Validator {
     }
 
     private void validate(Set<ConstraintViolation<?>> violations, Object arg, Class<?> clazz, Class<?> methodClass) {
-        if (arg != null && ! isPrimitives(arg.getClass())) {
+        if (arg != null && !isPrimitives(arg.getClass())) {
             if (Object[].class.isInstance(arg)) {
                 for (Object item : (Object[]) arg) {
                     validate(violations, item, clazz, methodClass);
@@ -137,27 +137,27 @@ public class JValidator implements Validator {
             }
         }
     }
-    
+
     private static boolean isPrimitives(Class<?> cls) {
         if (cls.isArray()) {
             return isPrimitive(cls.getComponentType());
         }
         return isPrimitive(cls);
     }
-    
+
     private static boolean isPrimitive(Class<?> cls) {
-        return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class 
+        return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class
                 || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls);
     }
-    
+
     private static Object getMethodParameterBean(Class<?> clazz, Method method, Object[] args) {
-        if (! hasConstraintParameter(method)) {
+        if (!hasConstraintParameter(method)) {
             return null;
         }
         try {
             String upperName = toUpperMethoName(method.getName());
             String parameterSimpleName = upperName + "Parameter";
-            String parameterClassName = clazz.getName() + "_" + parameterSimpleName;
+            String parameterClassName = clazz.getName() + "$" + parameterSimpleName;
             Class<?> parameterClass;
             try {
                 parameterClass = (Class<?>) Class.forName(parameterClassName, true, clazz.getClassLoader());
@@ -170,7 +170,7 @@ public class JValidator implements Validator {
                 // parameter fields
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-                for (int i = 0; i < parameterTypes.length; i ++) {
+                for (int i = 0; i < parameterTypes.length; i++) {
                     Class<?> type = parameterTypes[i];
                     Annotation[] annotations = parameterAnnotations[i];
                     AnnotationsAttribute attribute = new AnnotationsAttribute(classFile.getConstPool(), AnnotationsAttribute.visibleTag);
@@ -184,7 +184,7 @@ public class JValidator implements Validator {
                                         && member.getParameterTypes().length == 0
                                         && member.getDeclaringClass() == annotation.annotationType()) {
                                     Object value = member.invoke(annotation, new Object[0]);
-                                    if (value != null && ! value.equals(member.getDefaultValue())) {
+                                    if (value != null && !value.equals(member.getDefaultValue())) {
                                         MemberValue memberValue = createMemberValue(
                                                 classFile.getConstPool(), pool.get(member.getReturnType().getName()), value);
                                         ja.addMemberValue(member.getName(), memberValue);
@@ -202,7 +202,7 @@ public class JValidator implements Validator {
                 parameterClass = ctClass.toClass();
             }
             Object parameterBean = parameterClass.newInstance();
-            for (int i = 0; i < args.length; i ++) {
+            for (int i = 0; i < args.length; i++) {
                 Field field = parameterClass.getField(method.getName() + "Argument" + i);
                 field.set(parameterBean, args[i]);
             }
@@ -230,7 +230,7 @@ public class JValidator implements Validator {
     private static String toUpperMethoName(String methodName) {
         return methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
     }
-    
+
     // Copy from javassist.bytecode.annotation.Annotation.createMemberValue(ConstPool, CtClass);
     private static MemberValue createMemberValue(ConstPool cp, CtClass type, Object value) throws NotFoundException {
         MemberValue memberValue = javassist.bytecode.annotation.Annotation.createMemberValue(cp, type);
@@ -251,17 +251,17 @@ public class JValidator implements Validator {
         else if (memberValue instanceof DoubleMemberValue)
             ((DoubleMemberValue) memberValue).setValue((Double) value);
         else if (memberValue instanceof ClassMemberValue)
-            ((ClassMemberValue) memberValue).setValue(((Class<?>)value).getName());
+            ((ClassMemberValue) memberValue).setValue(((Class<?>) value).getName());
         else if (memberValue instanceof StringMemberValue)
             ((StringMemberValue) memberValue).setValue((String) value);
-        else if (memberValue instanceof EnumMemberValue) 
+        else if (memberValue instanceof EnumMemberValue)
             ((EnumMemberValue) memberValue).setValue(((Enum<?>) value).name());
         /* else if (memberValue instanceof AnnotationMemberValue) */
         else if (memberValue instanceof ArrayMemberValue) {
             CtClass arrayType = type.getComponentType();
             int len = Array.getLength(value);
             MemberValue[] members = new MemberValue[len];
-            for (int i = 0; i < len; i ++) {
+            for (int i = 0; i < len; i++) {
                 members[i] = createMemberValue(cp, arrayType, Array.get(value, i));
             }
             ((ArrayMemberValue) memberValue).setValue(members);

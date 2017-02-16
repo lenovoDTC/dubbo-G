@@ -33,30 +33,30 @@ import com.alibaba.dubbo.remoting.telnet.support.Help;
 
 /**
  * LogTelnetHandler
+ *
  * @author chao.liuc
- * 
  */
 @Activate
 @Help(parameter = "level", summary = "Change log level or show log ", detail = "Change log level or show log")
 public class LogTelnetHandler implements TelnetHandler {
-    
+
     public static final String SERVICE_KEY = "telnet.log";
 
     public String telnet(Channel channel, String message) {
-        long size = 0 ;
+        long size = 0;
         File file = LoggerFactory.getFile();
         StringBuffer buf = new StringBuffer();
         if (message == null || message.trim().length() == 0) {
             buf.append("EXAMPLE: log error / log 100");
-        }else {
+        } else {
             String str[] = message.split(" ");
-            if (! StringUtils.isInteger(str[0])){
+            if (!StringUtils.isInteger(str[0])) {
                 LoggerFactory.setLevel(Level.valueOf(message.toUpperCase()));
             } else {
                 int SHOW_LOG_LENGTH = Integer.parseInt(str[0]);
-                
+
                 if (file != null && file.exists()) {
-                    try{
+                    try {
                         FileInputStream fis = new FileInputStream(file);
                         FileChannel filechannel = fis.getChannel();
                         size = filechannel.size();
@@ -71,23 +71,23 @@ public class LogTelnetHandler implements TelnetHandler {
                         }
                         bb.flip();
                         String content = new String(bb.array()).replace("<", "&lt;")
-                        .replace(">", "&gt;").replace("\n", "<br/><br/>");
-                        buf.append("\r\ncontent:"+content);
-                        
-                        buf.append("\r\nmodified:"+(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(new Date(file.lastModified()))));
-                        buf.append("\r\nsize:"+size +"\r\n");
-                    }catch (Exception e) {
+                                .replace(">", "&gt;").replace("\n", "<br/><br/>");
+                        buf.append("\r\ncontent:" + content);
+
+                        buf.append("\r\nmodified:" + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                                .format(new Date(file.lastModified()))));
+                        buf.append("\r\nsize:" + size + "\r\n");
+                    } catch (Exception e) {
                         buf.append(e.getMessage());
                     }
-                }else {
+                } else {
                     size = 0;
                     buf.append("\r\nMESSAGE: log file not exists or log appender is console .");
                 }
             }
         }
-        buf.append("\r\nCURRENT LOG LEVEL:"+ LoggerFactory.getLevel())
-        .append("\r\nCURRENT LOG APPENDER:"+ (file == null ? "console" : file.getAbsolutePath()));
+        buf.append("\r\nCURRENT LOG LEVEL:" + LoggerFactory.getLevel())
+                .append("\r\nCURRENT LOG APPENDER:" + (file == null ? "console" : file.getAbsolutePath()));
         return buf.toString();
     }
 

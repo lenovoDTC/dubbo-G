@@ -24,7 +24,7 @@ import com.alibaba.dubbo.examples.annotation.action.AnnotationAction;
 
 /**
  * AnnotationTest
- * 
+ *
  * @author william.liangf
  */
 public class AnnotationTest {

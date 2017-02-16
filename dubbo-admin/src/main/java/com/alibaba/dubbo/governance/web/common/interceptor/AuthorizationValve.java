@@ -1,8 +1,8 @@
 /**
  * Function: 拦截器
- * 
+ * <p>
  * File Created at 2011-08-11
- * 
+ * <p>
  * Copyright 2011 Alibaba.com Croporation Limited.
  * All rights reserved.
  */
@@ -43,11 +43,11 @@ public class AuthorizationValve extends AbstractValve {
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationValve.class);
 
     @Autowired
-    private HttpServletRequest  request;
+    private HttpServletRequest request;
 
     @Autowired
     private HttpServletResponse response;
-    
+
     @Autowired
     private UserService userService;
 
@@ -60,23 +60,23 @@ public class AuthorizationValve extends AbstractValve {
             logger.info("AuthorizationValve of uri: " + request.getRequestURI());
         }
         String uri = request.getRequestURI();
-		String contextPath = request.getContextPath();
-		if (contextPath != null && contextPath.length() > 0  && ! "/".equals(contextPath)) {
-		    uri = uri.substring(contextPath.length());
-		}
+        String contextPath = request.getContextPath();
+        if (contextPath != null && contextPath.length() > 0 && !"/".equals(contextPath)) {
+            uri = uri.substring(contextPath.length());
+        }
         if (uri.equals(logout)) {
-		    if (! isLogout()) {
-		        setLogout(true);
-    		    showLoginForm();
-		    } else {
-		        setLogout(false);
-		        response.sendRedirect(contextPath == null || contextPath.length() == 0 ? "/" : contextPath);
-		    }
+            if (!isLogout()) {
+                setLogout(true);
+                showLoginForm();
+            } else {
+                setLogout(false);
+                response.sendRedirect(contextPath == null || contextPath.length() == 0 ? "/" : contextPath);
+            }
             return;
-		}
+        }
         //FIXME
-        if(! uri.startsWith("/status/")){
-        	User user = null;
+        if (!uri.startsWith("/status/")) {
+            User user = null;
             String authType = null;
             String authorization = request.getHeader("Authorization");
             if (authorization != null && authorization.length() > 0) {
@@ -99,32 +99,32 @@ public class AuthorizationValve extends AbstractValve {
                 request.getSession().setAttribute(WebConstants.CURRENT_USER_KEY, user);
                 pipelineContext.invokeNext();
             }
-        }else{
+        } else {
             pipelineContext.invokeNext();
         }
     }
 
     private User getUser(String username) {
-    	return userService.findUser(username);
+        return userService.findUser(username);
     }
 
-    private static final String BASIC_CHALLENGE  = "Basic";
+    private static final String BASIC_CHALLENGE = "Basic";
 
     private static final String DIGEST_CHALLENGE = "Digest";
 
-    private static final String CHALLENGE        = BASIC_CHALLENGE;
+    private static final String CHALLENGE = BASIC_CHALLENGE;
 
-    private static final String REALM            = User.REALM;
+    private static final String REALM = User.REALM;
 
-	private String logout = "/logout";
-	
-	private String logoutCookie = "logout";
+    private String logout = "/logout";
+
+    private String logoutCookie = "logout";
 
     private void showLoginForm() throws IOException {
         if (DIGEST_CHALLENGE.equals(CHALLENGE)) {
             response.setHeader("WWW-Authenticate", CHALLENGE + " realm=\"" + REALM + "\", qop=\"auth\", nonce=\""
-                                                   + UUID.randomUUID().toString().replace("-", "") + "\", opaque=\""
-                                                   + Coder.encodeMd5(REALM) + "\"");
+                    + UUID.randomUUID().toString().replace("-", "") + "\", opaque=\""
+                    + Coder.encodeMd5(REALM) + "\"");
         } else {
             response.setHeader("WWW-Authenticate", CHALLENGE + " realm=\"" + REALM + "\"");
         }
@@ -132,7 +132,7 @@ public class AuthorizationValve extends AbstractValve {
         response.setHeader("Content-Type", "text/html; charset=iso-8859-1");
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
-    
+
     private User loginByBase(String authorization) {
         authorization = Coder.decodeBase64(authorization);
         int i = authorization.indexOf(':');
@@ -175,11 +175,11 @@ public class AuthorizationValve extends AbstractValve {
                         String a1 = pwd;
 
                         String a2 = "auth-int".equals(qop)
-                            ? Coder.encodeMd5(method + ":" + uri + ":" + Coder.encodeMd5(readToBytes(request.getInputStream())))
-                            : Coder.encodeMd5(method + ":" + uri);
+                                ? Coder.encodeMd5(method + ":" + uri + ":" + Coder.encodeMd5(readToBytes(request.getInputStream())))
+                                : Coder.encodeMd5(method + ":" + uri);
                         String digest = "auth".equals(qop) || "auth-int".equals(qop)
-                            ? Coder.encodeMd5(a1 + ":" + nonce + ":" + nc + ":" + cnonce + ":" + qop + ":" + a2)
-                            : Coder.encodeMd5(a1 + ":" + nonce + ":" + a2);
+                                ? Coder.encodeMd5(a1 + ":" + nonce + ":" + nc + ":" + cnonce + ":" + qop + ":" + a2)
+                                : Coder.encodeMd5(a1 + ":" + nonce + ":" + a2);
                         if (digest.equals(passwordDigest)) {
                             return user;
                         }
@@ -189,7 +189,7 @@ public class AuthorizationValve extends AbstractValve {
         }
         return null;
     }
-    
+
     private boolean isLogout() {
         Cookie[] cookies = request.getCookies();
         if (cookies != null && cookies.length > 0) {
@@ -201,11 +201,11 @@ public class AuthorizationValve extends AbstractValve {
         }
         return false;
     }
-    
+
     private void setLogout(boolean logoutValue) {
         response.addCookie(new Cookie(logoutCookie, String.valueOf(logoutValue)));
     }
-    
+
     private static Pattern PARAMETER_PATTERN = Pattern.compile("(\\w+)=[\"]?([^,\"]+)[\"]?[,]?\\s*");
 
     static Map<String, String> parseParameters(String query) {

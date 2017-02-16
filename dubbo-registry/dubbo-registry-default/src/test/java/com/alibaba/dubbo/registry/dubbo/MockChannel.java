@@ -30,9 +30,9 @@ public class MockChannel implements ExchangeChannel {
 
     final InetSocketAddress remoteAddress;
 
-    public static boolean   closed = false;
+    public static boolean closed = false;
 
-    public MockChannel(String localHostname, int localPort, String remoteHostName, int remotePort){
+    public MockChannel(String localHostname, int localPort, String remoteHostName, int remotePort) {
         localAddress = new InetSocketAddress(localHostname, localPort);
         remoteAddress = new InetSocketAddress(remoteHostName, remotePort);
         closed = false;

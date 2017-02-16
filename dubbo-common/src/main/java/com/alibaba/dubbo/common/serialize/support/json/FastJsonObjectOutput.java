@@ -28,17 +28,17 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
  * JsonObjectOutput
- * 
+ *
  * @author william.liangf
  */
 public class FastJsonObjectOutput implements ObjectOutput {
 
     private final PrintWriter writer;
-    
+
     public FastJsonObjectOutput(OutputStream out) {
         this(new OutputStreamWriter(out));
     }
-    
+
     public FastJsonObjectOutput(Writer writer) {
         this.writer = new PrintWriter(writer);
     }

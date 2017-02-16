@@ -23,16 +23,16 @@ import com.alibaba.dubbo.rpc.protocol.AbstractExporter;
 
 /**
  * InjvmExporter
- * 
+ *
  * @author william.liangf
  */
 class InjvmExporter<T> extends AbstractExporter<T> {
 
     private final String key;
-    
+
     private final Map<String, Exporter<?>> exporterMap;
 
-    InjvmExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap){
+    InjvmExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap) {
         super(invoker);
         this.key = key;
         this.exporterMap = exporterMap;

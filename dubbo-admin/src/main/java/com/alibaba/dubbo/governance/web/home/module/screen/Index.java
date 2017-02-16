@@ -35,7 +35,7 @@ import com.alibaba.dubbo.registry.common.domain.Provider;
 
 /**
  * Index
- * 
+ *
  * @author william.liangf
  */
 public class Index {
@@ -44,16 +44,16 @@ public class Index {
 
     @Autowired
     private HttpServletRequest request;
-    
+
     @Autowired
     private ProviderService providerService;
-    
+
     @Autowired
     private ConsumerService consumerService;
-    
+
     public void execute(Context context) {
         Set<String> applications = new HashSet<String>();
-        Set<String> services  = new HashSet<String>(); 
+        Set<String> services = new HashSet<String>();
         List<Provider> pList = new ArrayList<Provider>();
         try {
             pList = providerService.findAll();
@@ -64,7 +64,7 @@ public class Index {
             applications.add(p.getApplication());
             services.add(p.getService());
         }
-        List<Consumer> cList  = new ArrayList<Consumer>();
+        List<Consumer> cList = new ArrayList<Consumer>();
         try {
             cList = consumerService.findAll();
         } catch (Exception e) {

@@ -27,7 +27,7 @@ import com.alibaba.dubbo.container.page.PageServlet;
 
 /**
  * HomePageHandler
- * 
+ *
  * @author william.liangf
  */
 @Menu(name = "Home", desc = "Home page.", order = Integer.MIN_VALUE)
@@ -43,7 +43,7 @@ public class HomePageHandler implements PageHandler {
             row.add(menu.desc());
             rows.add(row);
         }
-        return new Page("Home", "Menus",  new String[] {"Menu Name", "Menu Desc"}, rows);
+        return new Page("Home", "Menus", new String[]{"Menu Name", "Menu Desc"}, rows);
     }
 
 }

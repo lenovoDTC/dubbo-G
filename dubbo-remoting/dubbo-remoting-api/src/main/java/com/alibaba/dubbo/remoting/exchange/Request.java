@@ -17,39 +17,37 @@ package com.alibaba.dubbo.remoting.exchange;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
-
 /**
  * Request.
- * 
+ *
  * @author qian.lei
  * @author william.liangf
  */
 public class Request {
-    
+
     public static final String HEARTBEAT_EVENT = null;
-    
+
     public static final String READONLY_EVENT = "R";
-    
+
     private static final AtomicLong INVOKE_ID = new AtomicLong(0);
 
-    private final long    mId;
+    private final long mId;
 
-    private String  mVersion;
+    private String mVersion;
 
-    private boolean mTwoWay   = true;
-    
+    private boolean mTwoWay = true;
+
     private boolean mEvent = false;
 
-    private boolean mBroken   = false;
+    private boolean mBroken = false;
 
-    private Object  mData;
+    private Object mData;
 
     public Request() {
         mId = newId();
     }
 
-    public Request(long id){
+    public Request(long id) {
         mId = id;
     }
 
@@ -116,18 +114,7 @@ public class Request {
     @Override
     public String toString() {
         return "Request [id=" + mId + ", version=" + mVersion + ", twoway=" + mTwoWay + ", event=" + mEvent
-               + ", broken=" + mBroken + ", data=" + (mData == this ? "this" : safeToString(mData)) + "]";
+                + ", broken=" + mBroken + ", data=" + (mData == this ? "this" : mData) + "]";
     }
 
-    private static String safeToString(Object data) {
-        if (data == null) return null;
-        String dataStr;
-        try {
-            dataStr = data.toString();
-        } catch (Throwable e) {
-            dataStr = "<Fail toString of " + data.getClass() + ", cause: " +
-                    StringUtils.toString(e) + ">";
-        }
-        return dataStr;
-    }
 }

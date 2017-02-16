@@ -25,7 +25,7 @@ import com.alibaba.dubbo.registry.NotifyListener;
 
 /**
  * UnsubscribePageHandler
- * 
+ *
  * @author william.liangf
  */
 public class UnsubscribePageHandler implements PageHandler {
@@ -49,15 +49,17 @@ public class UnsubscribePageHandler implements PageHandler {
         }
         return new Page("<script type=\"text/javascript\">window.location.href=\"consumers.html?" + parameter + "\";</script>");
     }
-    
-    private static class NotifyListenerAdapter implements NotifyListener {
-        
-        public static final NotifyListener NOTIFY_LISTENER = new NotifyListenerAdapter();
-        
-        private NotifyListenerAdapter() {}
 
-        public void notify(List<URL> urls) {}
-        
+    private static class NotifyListenerAdapter implements NotifyListener {
+
+        public static final NotifyListener NOTIFY_LISTENER = new NotifyListenerAdapter();
+
+        private NotifyListenerAdapter() {
+        }
+
+        public void notify(List<URL> urls) {
+        }
+
     }
 
 }

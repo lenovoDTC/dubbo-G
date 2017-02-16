@@ -30,14 +30,14 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * ListenerProtocol
- * 
+ *
  * @author william.liangf
  */
 public class ProtocolFilterWrapper implements Protocol {
 
     private final Protocol protocol;
 
-    public ProtocolFilterWrapper(Protocol protocol){
+    public ProtocolFilterWrapper(Protocol protocol) {
         if (protocol == null) {
             throw new IllegalArgumentException("protocol == null");
         }
@@ -70,7 +70,7 @@ public class ProtocolFilterWrapper implements Protocol {
         Invoker<T> last = invoker;
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         if (filters.size() > 0) {
-            for (int i = filters.size() - 1; i >= 0; i --) {
+            for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
@@ -104,5 +104,5 @@ public class ProtocolFilterWrapper implements Protocol {
         }
         return last;
     }
-    
+
 }

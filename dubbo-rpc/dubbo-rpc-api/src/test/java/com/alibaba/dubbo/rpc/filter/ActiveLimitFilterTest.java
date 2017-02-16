@@ -29,13 +29,13 @@ import com.alibaba.dubbo.rpc.support.MyInvoker;
 
 /**
  * ActiveLimitFilterTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class ActiveLimitFilterTest {
 
-    Filter                      activeLimitFilter = new ActiveLimitFilter();
-    private static volatile int count             = 0;
+    Filter activeLimitFilter = new ActiveLimitFilter();
+    private static volatile int count = 0;
 
     @Test
     public void testInvokeNoActives() {

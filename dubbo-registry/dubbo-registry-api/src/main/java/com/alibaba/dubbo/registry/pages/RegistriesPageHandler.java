@@ -30,7 +30,7 @@ import com.alibaba.dubbo.registry.support.AbstractRegistryFactory;
 
 /**
  * RegistriesPageHandler
- * 
+ *
  * @author william.liangf
  */
 @Menu(name = "Registries", desc = "Show connected registries.", order = 10000)
@@ -65,7 +65,7 @@ public class RegistriesPageHandler implements PageHandler {
             }
         }
         return new Page("Registries", "Registries (" + rows.size() + ")",
-                new String[] { "Registry Address:", "Status", "Registered(" + registeredCount + ")", "Subscribed(" + subscribedCount + ")" }, rows);
+                new String[]{"Registry Address:", "Status", "Registered(" + registeredCount + ")", "Subscribed(" + subscribedCount + ")"}, rows);
     }
 
 }

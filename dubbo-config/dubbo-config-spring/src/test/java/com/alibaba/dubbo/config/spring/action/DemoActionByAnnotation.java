@@ -21,14 +21,14 @@ import com.alibaba.dubbo.config.spring.api.DemoService;
 
 /**
  * DemoAction
- * 
+ *
  * @author william.liangf
  */
 public class DemoActionByAnnotation {
-    
+
     @Autowired
     private DemoService demoService;
-    
+
     public DemoService getDemoService() {
         return demoService;
     }

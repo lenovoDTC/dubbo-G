@@ -28,11 +28,11 @@ import javax.validation.constraints.Size;
 
 /**
  * ValidationParameter
- * 
+ *
  * @author william.liangf
  */
 public class ValidationParameter implements Serializable {
-    
+
     private static final long serialVersionUID = 7158911668568000392L;
 
     @NotNull // 不允许为空

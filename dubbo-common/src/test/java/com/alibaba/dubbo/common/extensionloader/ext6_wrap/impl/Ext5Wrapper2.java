@@ -25,7 +25,7 @@ import com.alibaba.dubbo.common.extensionloader.ext6_wrap.WrappedExt;
  */
 public class Ext5Wrapper2 implements WrappedExt {
     WrappedExt instance;
-    
+
     public static AtomicInteger echoCount = new AtomicInteger();
 
     public Ext5Wrapper2(WrappedExt instance) {

@@ -36,17 +36,17 @@ import com.alibaba.dubbo.registry.NotifyListener;
 
 /**
  * MulticastRegistryTest
- * 
+ *
  * @author tony.chenl
  */
 public class MulticastRegistryTest {
 
-    String            service     = "com.alibaba.dubbo.test.injvmServie";
-    URL               registryUrl = URL.valueOf("multicast://239.255.255.255/");
-    URL               serviceUrl  = URL.valueOf("dubbo://" + NetUtils.getLocalHost() + "/" + service
-                                                + "?methods=test1,test2");
-    URL               consumerUrl = URL.valueOf("subscribe://" + NetUtils.getLocalHost() + "/" + service + "?arg1=1&arg2=2");
-    MulticastRegistry registry    = new MulticastRegistry(registryUrl);
+    String service = "com.alibaba.dubbo.test.injvmServie";
+    URL registryUrl = URL.valueOf("multicast://239.255.255.255/");
+    URL serviceUrl = URL.valueOf("dubbo://" + NetUtils.getLocalHost() + "/" + service
+            + "?methods=test1,test2");
+    URL consumerUrl = URL.valueOf("subscribe://" + NetUtils.getLocalHost() + "/" + service + "?arg1=1&arg2=2");
+    MulticastRegistry registry = new MulticastRegistry(registryUrl);
 
     /**
      * @throws java.lang.Exception

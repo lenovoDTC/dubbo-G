@@ -34,13 +34,13 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.support.ProtocolUtils;
 
 /**
  * ChangeTelnetHandlerTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class ChangeTelnetHandlerTest {
 
     private static TelnetHandler change = new ChangeTelnetHandler();
-    private Channel              mockChannel;
+    private Channel mockChannel;
     private Invoker<DemoService> mockInvoker;
 
     @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class ChangeTelnetHandlerTest {
         DubboProtocol.getDubboProtocol().export(mockInvoker);
         String result = change.telnet(mockChannel, "com.alibaba.dubbo.rpc.protocol.dubbo.support.DemoService");
         assertEquals("Used the com.alibaba.dubbo.rpc.protocol.dubbo.support.DemoService as default.\r\nYou can cancel default service by command: cd /",
-                     result);
+                result);
     }
 
     @Test

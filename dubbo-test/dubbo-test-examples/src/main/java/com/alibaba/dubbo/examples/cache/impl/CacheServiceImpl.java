@@ -21,11 +21,11 @@ import com.alibaba.dubbo.examples.cache.api.CacheService;
 
 /**
  * ValidationServiceImpl
- * 
+ *
  * @author william.liangf
  */
 public class CacheServiceImpl implements CacheService {
-    
+
     private final AtomicInteger i = new AtomicInteger();
 
     public String findCache(String id) {

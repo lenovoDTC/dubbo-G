@@ -73,7 +73,7 @@ final class DeprecatedExchangeCodec extends DeprecatedTelnetCodec implements Cod
     protected Object decode(Channel channel, InputStream is, int readable, byte[] header) throws IOException {
         // check magic number.
         if (readable > 0 && header[0] != MAGIC_HIGH
-            || readable > 1 && header[1] != MAGIC_LOW) {
+                || readable > 1 && header[1] != MAGIC_LOW) {
             int length = header.length;
             if (header.length < readable) {
                 header = Bytes.copyOf(header, readable);

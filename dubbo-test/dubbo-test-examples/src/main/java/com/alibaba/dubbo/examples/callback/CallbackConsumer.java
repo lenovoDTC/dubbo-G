@@ -22,7 +22,7 @@ import com.alibaba.dubbo.examples.callback.api.CallbackService;
 
 /**
  * CallbackConsumer
- * 
+ *
  * @author william.liangf
  */
 public class CallbackConsumer {

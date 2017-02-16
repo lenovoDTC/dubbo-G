@@ -26,7 +26,7 @@ import com.alibaba.dubbo.rpc.cluster.LoadBalance;
 
 /**
  * AvailableCluster
- * 
+ *
  * @author william.liangf
  */
 public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {

@@ -29,7 +29,7 @@ import com.alibaba.dubbo.registry.support.AbstractRegistryFactory;
 
 /**
  * SubscribedPageHandler
- * 
+ *
  * @author william.liangf
  */
 public class SubscribedPageHandler implements PageHandler {
@@ -73,7 +73,7 @@ public class SubscribedPageHandler implements PageHandler {
             }
         }
         return new Page("<a href=\"registries.html\">Registries</a>" + select.toString() + " &gt; <a href=\"registered.html?registry=" + registryAddress + "\">Registered</a> | Subscribed", "Subscribed (" + rows.size() + ")",
-                new String[] { "Consumer URL:" }, rows);
+                new String[]{"Consumer URL:"}, rows);
     }
 
 }

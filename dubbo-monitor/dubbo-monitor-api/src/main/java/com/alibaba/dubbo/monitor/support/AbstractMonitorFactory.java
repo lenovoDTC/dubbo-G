@@ -29,14 +29,14 @@ import com.alibaba.dubbo.monitor.MonitorService;
 
 /**
  * AbstractMonitorFactroy. (SPI, Singleton, ThreadSafe)
- * 
+ *
  * @author william.liangf
  */
 public abstract class AbstractMonitorFactory implements MonitorFactory {
 
     // 注册中心获取过程锁
     private static final ReentrantLock LOCK = new ReentrantLock();
-    
+
     // 注册中心集合 Map<RegistryAddress, Registry>
     private static final Map<String, Monitor> MONITORS = new ConcurrentHashMap<String, Monitor>();
 
@@ -45,8 +45,8 @@ public abstract class AbstractMonitorFactory implements MonitorFactory {
     }
 
     public Monitor getMonitor(URL url) {
-    	url = url.setPath(MonitorService.class.getName()).addParameter(Constants.INTERFACE_KEY, MonitorService.class.getName());
-    	String key = url.toServiceString();
+        url = url.setPath(MonitorService.class.getName()).addParameter(Constants.INTERFACE_KEY, MonitorService.class.getName());
+        String key = url.toServiceString();
         LOCK.lock();
         try {
             Monitor monitor = MONITORS.get(key);

@@ -23,18 +23,18 @@ import org.apache.log4j.spi.LoggingEvent;
 
 public class DubboAppender extends ConsoleAppender {
 
-    public static boolean   available = false;
+    public static boolean available = false;
 
-    public static List<Log> logList   = new ArrayList<Log>();
+    public static List<Log> logList = new ArrayList<Log>();
 
     public static void doStart() {
         available = true;
     }
-    
+
     public static void doStop() {
         available = false;
     }
-    
+
     public static void clear() {
         logList.clear();
     }
@@ -55,5 +55,5 @@ public class DubboAppender extends ConsoleAppender {
         log.setLogMessage(event.getMessage().toString());
         return log;
     }
-    
+
 }

@@ -45,13 +45,13 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
 
     private static final Logger log = LoggerFactory.getLogger(DecodeableRpcInvocation.class);
 
-    private Channel     channel;
+    private Channel channel;
 
-    private byte        serializationType;
+    private byte serializationType;
 
     private InputStream inputStream;
 
-    private Request     request;
+    private Request request;
 
     private volatile boolean hasDecoded;
 
@@ -87,7 +87,7 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
 
     public Object decode(Channel channel, InputStream input) throws IOException {
         ObjectInput in = CodecSupport.getSerialization(channel.getUrl(), serializationType)
-            .deserialize(channel.getUrl(), input);
+                .deserialize(channel.getUrl(), input);
 
         setAttachment(Constants.DUBBO_VERSION_KEY, in.readUTF());
         setAttachment(Constants.PATH_KEY, in.readUTF());

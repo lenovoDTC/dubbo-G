@@ -1,12 +1,12 @@
 /**
  * Project: dubbo.registry.server-1.1.0-SNAPSHOT
- * 
+ * <p>
  * File Created at 2010-6-30
  * $Id: ConfigServiceImpl.java 181735 2012-06-26 02:31:34Z tony.chenl $
- * 
+ * <p>
  * Copyright 2008 Alibaba.com Croporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -26,14 +26,14 @@ import com.alibaba.dubbo.registry.common.domain.Config;
  * @author rain.chenjr
  *
  */
-public class ConfigServiceImpl extends AbstractService implements ConfigService{
+public class ConfigServiceImpl extends AbstractService implements ConfigService {
 
     /* (non-Javadoc)
      * @see com.alibaba.dubbo.governance.service.ConfigService#update(java.util.List)
      */
     public void update(List<Config> configs) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)

@@ -24,31 +24,31 @@ import com.alibaba.dubbo.rpc.Invocation;
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
  */
 public class ThriftNativeCodec implements Codec2 {
-    
+
     private final AtomicInteger thriftSeq = new AtomicInteger(0);
-    
+
     public void encode(Channel channel, ChannelBuffer buffer, Object message)
-        throws IOException {
+            throws IOException {
         if (message instanceof Request) {
-            encodeRequest(channel, buffer, (Request)message);
+            encodeRequest(channel, buffer, (Request) message);
         } else if (message instanceof Response) {
-            encodeResponse(channel, buffer, (Response)message);
+            encodeResponse(channel, buffer, (Response) message);
         } else {
             throw new IOException("Unsupported message type "
-                                      + message.getClass().getName());
+                    + message.getClass().getName());
         }
     }
 
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request request)
-        throws IOException {
+            throws IOException {
         Invocation invocation = (Invocation) request.getData();
         TProtocol protocol = newProtocol(channel.getUrl(), buffer);
         try {
             protocol.writeMessageBegin(new TMessage(
-                invocation.getMethodName(), TMessageType.CALL, 
-                thriftSeq.getAndIncrement()));
+                    invocation.getMethodName(), TMessageType.CALL,
+                    thriftSeq.getAndIncrement()));
             protocol.writeStructBegin(new TStruct(invocation.getMethodName() + "_args"));
-            for(int i = 0; i < invocation.getParameterTypes().length; i++) {
+            for (int i = 0; i < invocation.getParameterTypes().length; i++) {
                 Class<?> type = invocation.getParameterTypes()[i];
 
             }
@@ -59,7 +59,7 @@ public class ThriftNativeCodec implements Codec2 {
     }
 
     protected void encodeResponse(Channel channel, ChannelBuffer buffer, Response response)
-        throws IOException {
+            throws IOException {
 
     }
 
@@ -69,7 +69,7 @@ public class ThriftNativeCodec implements Codec2 {
 
     protected static TProtocol newProtocol(URL url, ChannelBuffer buffer) throws IOException {
         String protocol = url.getParameter(ThriftConstants.THRIFT_PROTOCOL_KEY,
-                                           ThriftConstants.DEFAULT_PROTOCOL);
+                ThriftConstants.DEFAULT_PROTOCOL);
         if (ThriftConstants.BINARY_THRIFT_PROTOCOL.equals(protocol)) {
             return new TBinaryProtocol(new TIOStreamTransport(new ChannelBufferOutputStream(buffer)));
         }

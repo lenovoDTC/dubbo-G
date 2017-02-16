@@ -40,15 +40,15 @@ import com.alibaba.dubbo.rpc.cluster.Router;
 
 /**
  * ScriptRouter
- * 
+ *
  * @author william.liangf
  */
 public class ScriptRouter implements Router {
 
     private static final Logger logger = LoggerFactory.getLogger(ScriptRouter.class);
-    
+
     private static final Map<String, ScriptEngine> engines = new ConcurrentHashMap<String, ScriptEngine>();
-    
+
     private final ScriptEngine engine;
 
     private final int priority;
@@ -66,14 +66,14 @@ public class ScriptRouter implements Router {
         String type = url.getParameter(Constants.TYPE_KEY);
         this.priority = url.getParameter(Constants.PRIORITY_KEY, 0);
         String rule = url.getParameterAndDecoded(Constants.RULE_KEY);
-        if (type == null || type.length() == 0){
+        if (type == null || type.length() == 0) {
             type = Constants.DEFAULT_SCRIPT_TYPE_KEY;
         }
-        if (rule == null || rule.length() == 0){
+        if (rule == null || rule.length() == 0) {
             throw new IllegalStateException(new IllegalStateException("route rule can not be empty. rule:" + rule));
         }
         ScriptEngine engine = engines.get(type);
-        if (engine == null){
+        if (engine == null) {
             engine = new ScriptEngineManager().getEngineByName(type);
             if (engine == null) {
                 throw new IllegalStateException(new IllegalStateException("Unsupported route rule type: " + type + ", rule: " + rule));
@@ -100,7 +100,7 @@ public class ScriptRouter implements Router {
             } else if (obj instanceof Object[]) {
                 invokersCopy = new ArrayList<Invoker<T>>();
                 for (Object inv : (Object[]) obj) {
-                    invokersCopy.add((Invoker<T>)inv);
+                    invokersCopy.add((Invoker<T>) inv);
                 }
             } else {
                 invokersCopy = (List<Invoker<T>>) obj;

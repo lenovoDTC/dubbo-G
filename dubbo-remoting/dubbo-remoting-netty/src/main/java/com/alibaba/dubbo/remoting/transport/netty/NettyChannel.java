@@ -32,7 +32,7 @@ import com.alibaba.dubbo.remoting.transport.AbstractChannel;
 
 /**
  * NettyChannel.
- * 
+ *
  * @author qian.lei
  * @author william.liangf
  */
@@ -46,7 +46,7 @@ final class NettyChannel extends AbstractChannel {
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
 
-    private NettyChannel(org.jboss.netty.channel.Channel channel, URL url, ChannelHandler handler){
+    private NettyChannel(org.jboss.netty.channel.Channel channel, URL url, ChannelHandler handler) {
         super(url, handler);
         if (channel == null) {
             throw new IllegalArgumentException("netty channel == null;");
@@ -72,7 +72,7 @@ final class NettyChannel extends AbstractChannel {
     }
 
     static void removeChannelIfDisconnected(org.jboss.netty.channel.Channel ch) {
-        if (ch != null && ! ch.isConnected()) {
+        if (ch != null && !ch.isConnected()) {
             channelMap.remove(ch);
         }
     }
@@ -91,7 +91,7 @@ final class NettyChannel extends AbstractChannel {
 
     public void send(Object message, boolean sent) throws RemotingException {
         super.send(message, sent);
-        
+
         boolean success = true;
         int timeout = 0;
         try {
@@ -107,8 +107,8 @@ final class NettyChannel extends AbstractChannel {
         } catch (Throwable e) {
             throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress() + ", cause: " + e.getMessage(), e);
         }
-        
-        if(! success) {
+
+        if (!success) {
             throw new RemotingException(this, "Failed to send message " + message + " to " + getRemoteAddress()
                     + "in timeout(" + timeout + "ms) limit");
         }
@@ -143,7 +143,7 @@ final class NettyChannel extends AbstractChannel {
     public boolean hasAttribute(String key) {
         return attributes.containsKey(key);
     }
-    
+
     public Object getAttribute(String key) {
         return attributes.get(key);
     }

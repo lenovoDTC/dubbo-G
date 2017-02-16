@@ -45,7 +45,8 @@ public final class MultiMessage implements Iterable {
 
     private final List messages = new ArrayList();
 
-    private MultiMessage() {}
+    private MultiMessage() {
+    }
 
     public void addMessage(Object msg) {
         messages.add(msg);

@@ -23,13 +23,13 @@ import com.alibaba.dubbo.config.spring.api.DemoServiceSon;
  * @author ding.lid
  */
 public class DemoServiceSonImpl implements DemoServiceSon {
-    
+
     private String prefix = "say:";
-    
+
     public String sayName(String name) {
         return prefix + name;
     }
-    
+
     public Box getBox() {
         return null;
     }
@@ -41,5 +41,5 @@ public class DemoServiceSonImpl implements DemoServiceSon {
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
-    
+
 }

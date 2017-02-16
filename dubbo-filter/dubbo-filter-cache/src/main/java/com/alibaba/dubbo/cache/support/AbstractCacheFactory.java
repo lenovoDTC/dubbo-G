@@ -24,11 +24,11 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * AbstractCacheFactory
- * 
+ *
  * @author william.liangf
  */
 public abstract class AbstractCacheFactory implements CacheFactory {
-    
+
     private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
 
     public Cache getCache(URL url) {

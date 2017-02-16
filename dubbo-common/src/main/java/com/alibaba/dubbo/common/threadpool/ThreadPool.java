@@ -24,15 +24,15 @@ import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * ThreadPool
- * 
+ *
  * @author william.liangf
  */
 @SPI("fixed")
 public interface ThreadPool {
-    
+
     /**
      * 线程池
-     * 
+     *
      * @param url 线程参数
      * @return 线程池
      */

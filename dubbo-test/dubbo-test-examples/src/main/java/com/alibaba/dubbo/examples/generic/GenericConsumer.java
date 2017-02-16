@@ -23,7 +23,7 @@ import com.alibaba.dubbo.examples.generic.api.IUserService.User;
 
 /**
  * GenericConsumer
- * 
+ *
  * @author chao.liuc
  */
 public class GenericConsumer {

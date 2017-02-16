@@ -127,7 +127,7 @@ public class HeartbeatHandlerTest {
         }
 
         public void received(Channel channel, Object message) throws RemotingException {
-        	logger.error(this.getClass().getSimpleName() + message.toString());
+            logger.error(this.getClass().getSimpleName() + message.toString());
         }
 
         public void caught(Channel channel, Throwable exception) throws RemotingException {

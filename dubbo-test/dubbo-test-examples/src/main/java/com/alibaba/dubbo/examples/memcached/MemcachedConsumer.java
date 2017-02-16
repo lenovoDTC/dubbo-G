@@ -21,7 +21,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * GenericConsumer
- * 
+ *
  * @author chao.liuc
  */
 public class MemcachedConsumer {
@@ -41,7 +41,7 @@ public class MemcachedConsumer {
         cache.put("hello", "world");
         value = cache.get("hello");
         System.out.println(value);
-        if (! "world".equals(value)) {
+        if (!"world".equals(value)) {
             throw new IllegalStateException(value + " != world");
         }
         System.in.read();

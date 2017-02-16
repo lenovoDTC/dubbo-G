@@ -28,7 +28,7 @@ import com.alibaba.dubbo.common.serialize.Serialization;
 /**
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
  */
-public class NativeJavaSerialization implements Serialization  {
+public class NativeJavaSerialization implements Serialization {
 
     public static final String NAME = "nativejava";
 

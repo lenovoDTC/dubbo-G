@@ -1,9 +1,9 @@
 /**
- * Function: 
- * 
+ * Function:
+ * <p>
  * File Created at 2010-11-17
  * $Id: Menu.java 185206 2012-07-09 03:06:37Z tony.chenl $
- * 
+ * <p>
  * Copyright 2009 Alibaba.com Croporation Limited.
  * All rights reserved.
  */
@@ -31,25 +31,25 @@ public class Menu {
 
     @Autowired
     private HttpServletRequest request;
-    
+
     @Autowired
     ServletContext servletcontext;
-    
+
     @Autowired
     RegistryServerSync registryServerSync;
 
     public void execute(HttpSession session, Context context, CookieParser parser) {
-        
+
         User user = (User) session.getAttribute(WebConstants.CURRENT_USER_KEY);
         if (user != null) context.put("operator", user.getUsername());
-        
+
         RootContextPath rootContextPath = new RootContextPath(request.getContextPath());
         context.put("rootContextPath", rootContextPath);
-        if (! context.containsKey("bucLogoutAddress")) {
-        	context.put("bucLogoutAddress", rootContextPath.getURI("logout"));
+        if (!context.containsKey("bucLogoutAddress")) {
+            context.put("bucLogoutAddress", rootContextPath.getURI("logout"));
         }
-        if (! context.containsKey("helpUrl")) {
-        	context.put("helpUrl", "http://code.alibabatech.com/wiki/display/dubbo");
+        if (!context.containsKey("helpUrl")) {
+            context.put("helpUrl", "http://code.alibabatech.com/wiki/display/dubbo");
         }
         context.put(WebConstants.CURRENT_USER_KEY, user);
         context.put("language", parser.getString("locale"));

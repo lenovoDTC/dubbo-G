@@ -19,16 +19,16 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * Resetable.
- * 
+ *
  * @author william.liangf
  */
 public interface Resetable {
 
     /**
      * reset.
-     * 
+     *
      * @param url
      */
     void reset(URL url);
-    
+
 }

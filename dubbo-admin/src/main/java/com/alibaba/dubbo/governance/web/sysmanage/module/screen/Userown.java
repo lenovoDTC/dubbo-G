@@ -17,19 +17,19 @@ import com.alibaba.dubbo.governance.web.common.module.screen.Restful;
 
 /**
  * Providers. URI: /services/$service/owners
- * 
+ *
  * @author william.liangf
  */
 public class Userown extends Restful {
 
-	@Autowired
-	private OwnerService ownerDAO;
+    @Autowired
+    private OwnerService ownerDAO;
 
-	public void index(Map<String, Object> context) {
-		String user = (String) context.get("user");
-		List<String> services;
-		services = ownerDAO.findServiceNamesByUsername(user);
-		context.put("user", user);
-		context.put("services", services);
-	}
+    public void index(Map<String, Object> context) {
+        String user = (String) context.get("user");
+        List<String> services;
+        services = ownerDAO.findServiceNamesByUsername(user);
+        context.put("user", user);
+        context.put("services", services);
+    }
 }

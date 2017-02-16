@@ -29,12 +29,12 @@ import com.alibaba.dubbo.config.spring.ServiceBean;
 
 /**
  * SpringStatusChecker
- * 
+ *
  * @author william.liangf
  */
 @Activate
 public class SpringStatusChecker implements StatusChecker {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SpringStatusChecker.class);
 
     public Status check() {
@@ -44,7 +44,7 @@ public class SpringStatusChecker implements StatusChecker {
         }
         Status.Level level = Status.Level.OK;
         if (context instanceof Lifecycle) {
-            if (((Lifecycle)context).isRunning()) {
+            if (((Lifecycle) context).isRunning()) {
                 level = Status.Level.OK;
             } else {
                 level = Status.Level.ERROR;
@@ -64,7 +64,7 @@ public class SpringStatusChecker implements StatusChecker {
                 }
             }
             if (method != null) {
-                if (! method.isAccessible()) {
+                if (!method.isAccessible()) {
                     method.setAccessible(true);
                 }
                 String[] configs = (String[]) method.invoke(context, new Object[0]);

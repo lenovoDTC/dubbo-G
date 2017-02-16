@@ -22,11 +22,10 @@ import com.alibaba.dubbo.common.extensionloader.ext4.NoUrlParamExt;
 
 /**
  * @author ding.lid
- *
  */
 public class Ext4Impl2 implements NoUrlParamExt {
     public String bark(String name, List<Object> list) {
         return null;
     }
-    
+
 }

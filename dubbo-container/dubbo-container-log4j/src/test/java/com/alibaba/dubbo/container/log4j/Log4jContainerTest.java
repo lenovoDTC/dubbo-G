@@ -22,11 +22,11 @@ import com.alibaba.dubbo.container.Container;
 
 /**
  * StandaloneContainerTest
- * 
+ *
  * @author william.liangf
  */
 public class Log4jContainerTest {
-    
+
     @Test
     public void testContainer() {
         Log4jContainer container = (Log4jContainer) ExtensionLoader.getExtensionLoader(Container.class).getExtension("log4j");

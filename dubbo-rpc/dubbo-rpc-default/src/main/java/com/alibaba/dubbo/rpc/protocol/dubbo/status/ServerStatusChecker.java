@@ -25,7 +25,7 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol;
 
 /**
  * ServerStatusChecker
- * 
+ *
  * @author william.liangf
  */
 @Activate
@@ -39,7 +39,7 @@ public class ServerStatusChecker implements StatusChecker {
         Status.Level level = Status.Level.OK;
         StringBuilder buf = new StringBuilder();
         for (ExchangeServer server : servers) {
-            if (! server.isBound()) {
+            if (!server.isBound()) {
                 level = Status.Level.ERROR;
                 buf.setLength(0);
                 buf.append(server.getLocalAddress());

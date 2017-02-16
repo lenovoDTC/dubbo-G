@@ -16,7 +16,7 @@ public class Infos extends Restful {
         User user = userDAO.findById(currentUser.getId());
         context.put("user", user);
     }
-    
+
     public boolean update(Map<String, Object> context) {
         User user = new User();
         user.setId(currentUser.getId());

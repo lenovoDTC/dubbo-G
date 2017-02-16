@@ -41,12 +41,12 @@ import com.alibaba.dubbo.registry.common.domain.Provider;
  * @author tony.chenl
  */
 public class Dump extends Restful {
-    
-    @Autowired
-    ProviderService         providerDAO;
 
     @Autowired
-    ConsumerService         consumerDAO;
+    ProviderService providerDAO;
+
+    @Autowired
+    ConsumerService consumerDAO;
 
     @Autowired
     HttpServletResponse response;
@@ -106,7 +106,7 @@ public class Dump extends Restful {
         writer.flush();
         response.setContentType("text/plain");
     }
-    
+
     public void versions(Map<String, Object> context) throws IOException {
         PrintWriter writer = response.getWriter();
         List<Provider> providers = providerDAO.findAll();
@@ -141,7 +141,7 @@ public class Dump extends Restful {
         writer.flush();
         response.setContentType("text/plain");
     }
-    
+
     private List<String> getNoProviders() {
         List<String> providerServices = providerDAO.findServices();
         List<String> consumerServices = consumerDAO.findServices();

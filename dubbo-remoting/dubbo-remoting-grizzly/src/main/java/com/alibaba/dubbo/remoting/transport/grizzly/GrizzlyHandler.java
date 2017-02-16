@@ -31,7 +31,7 @@ import com.alibaba.dubbo.remoting.RemotingException;
 
 /**
  * GrizzlyHandler
- * 
+ *
  * @author william.liangf
  */
 public class GrizzlyHandler extends BaseFilter {
@@ -39,10 +39,10 @@ public class GrizzlyHandler extends BaseFilter {
     private static final Logger logger = LoggerFactory.getLogger(GrizzlyHandler.class);
 
     private final URL url;
-    
+
     private final ChannelHandler handler;
-    
-    public GrizzlyHandler(URL url, ChannelHandler handler){
+
+    public GrizzlyHandler(URL url, ChannelHandler handler) {
         this.url = url;
         this.handler = handler;
     }
@@ -60,7 +60,7 @@ public class GrizzlyHandler extends BaseFilter {
         }
         return ctx.getInvokeAction();
     }
-    
+
     @Override
     public NextAction handleClose(FilterChainContext ctx) throws IOException {
         Connection<?> connection = ctx.getConnection();
@@ -102,7 +102,7 @@ public class GrizzlyHandler extends BaseFilter {
         }
         return ctx.getInvokeAction();
     }
-    
+
     @Override
     public void exceptionOccurred(FilterChainContext ctx, Throwable error) {
         Connection<?> connection = ctx.getConnection();
@@ -115,5 +115,5 @@ public class GrizzlyHandler extends BaseFilter {
             GrizzlyChannel.removeChannelIfDisconnectd(connection);
         }
     }
-    
+
 }

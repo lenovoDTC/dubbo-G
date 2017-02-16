@@ -27,15 +27,15 @@ import com.alibaba.dubbo.rpc.cluster.RouterFactory;
 import com.alibaba.dubbo.rpc.cluster.router.script.ScriptRouterFactory;
 
 public class FileRouterFactory implements RouterFactory {
-    
+
     public static final String NAME = "file";
-    
+
     private RouterFactory routerFactory;
-    
+
     public void setRouterFactory(RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
     }
-    
+
     public Router getRouter(URL url) {
         try {
             // File URL 转换成 其它Route URL，然后Load
@@ -51,7 +51,7 @@ public class FileRouterFactory implements RouterFactory {
             }
             String rule = IOUtils.read(new FileReader(new File(url.getAbsolutePath())));
             URL script = url.setProtocol(protocol).addParameter(Constants.TYPE_KEY, type).addParameterAndEncoded(Constants.RULE_KEY, rule);
-            
+
             return routerFactory.getRouter(script);
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);

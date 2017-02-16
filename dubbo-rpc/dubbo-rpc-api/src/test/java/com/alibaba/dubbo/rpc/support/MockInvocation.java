@@ -24,7 +24,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 
 /**
  * MockInvocation.java
- * 
+ *
  * @author tony.chenl
  */
 public class MockInvocation implements Invocation {
@@ -34,11 +34,11 @@ public class MockInvocation implements Invocation {
     }
 
     public Class<?>[] getParameterTypes() {
-        return new Class[] { String.class };
+        return new Class[]{String.class};
     }
 
     public Object[] getArguments() {
-        return new Object[] { "aa" };
+        return new Object[]{"aa"};
     }
 
     public Map<String, String> getAttachments() {

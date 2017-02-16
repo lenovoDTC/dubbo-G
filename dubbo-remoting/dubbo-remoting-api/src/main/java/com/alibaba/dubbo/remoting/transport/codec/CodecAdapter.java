@@ -30,16 +30,16 @@ import com.alibaba.dubbo.remoting.buffer.ChannelBuffer;
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
  */
 public class CodecAdapter implements Codec2 {
-    
+
     private Codec codec;
-    
+
     public CodecAdapter(Codec codec) {
         Assert.notNull(codec, "codec == null");
         this.codec = codec;
     }
 
     public void encode(Channel channel, ChannelBuffer buffer, Object message)
-        throws IOException {
+            throws IOException {
         UnsafeByteArrayOutputStream os = new UnsafeByteArrayOutputStream(1024);
         codec.encode(channel, os, message);
         buffer.writeBytes(os.toByteArray());
@@ -54,7 +54,7 @@ public class CodecAdapter implements Codec2 {
         buffer.readerIndex(savedReaderIndex + is.position());
         return result == Codec.NEED_MORE_INPUT ? DecodeResult.NEED_MORE_INPUT : result;
     }
-    
+
     public Codec getCodec() {
         return codec;
     }

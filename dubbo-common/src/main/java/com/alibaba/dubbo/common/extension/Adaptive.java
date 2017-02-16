@@ -25,10 +25,9 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * 在{@link ExtensionLoader}生成Extension的Adaptive Instance时，为{@link ExtensionLoader}提供信息。
- * 
+ *
  * @author ding.lid
  * @export
- * 
  * @see ExtensionLoader
  * @see URL
  */
@@ -36,7 +35,7 @@ import com.alibaba.dubbo.common.URL;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Adaptive {
-    
+
     /**
      * 从{@link URL}的Key名，对应的Value作为要Adapt成的Extension名。
      * <p>
@@ -51,9 +50,9 @@ public @interface Adaptive {
      * <p>
      * 如果不设置则缺省使用Extension接口类名的点分隔小写字串。<br>
      * 即对于Extension接口{@code com.alibaba.dubbo.xxx.YyyInvokerWrapper}的缺省值为<code>String[] {"yyy.invoker.wrapper"}</code>
-     * 
+     *
      * @see SPI#value()
      */
     String[] value() default {};
-    
+
 }

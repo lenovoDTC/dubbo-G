@@ -26,7 +26,7 @@ import com.alibaba.dubbo.common.serialize.Serialization;
 
 /**
  * JsonSerialization
- * 
+ *
  * @author william.liangf
  */
 public class JsonSerialization implements Serialization {
@@ -38,7 +38,7 @@ public class JsonSerialization implements Serialization {
     public String getContentType() {
         return "text/json";
     }
-    
+
     public ObjectOutput serialize(URL url, OutputStream output) throws IOException {
         return new JsonObjectOutput(output, url.getParameter("with.class", true));
     }
@@ -46,5 +46,5 @@ public class JsonSerialization implements Serialization {
     public ObjectInput deserialize(URL url, InputStream input) throws IOException {
         return new JsonObjectInput(input);
     }
-    
+
 }

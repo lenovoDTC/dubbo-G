@@ -39,7 +39,7 @@ public abstract class AbstractSerializationPersionOkTest extends AbstractSeriali
     public void test_Person_withType() throws Exception {
         assertObjectWithType(new Person(), Person.class);
     }
-    
+
     @Test
     public void test_PersonList() throws Exception {
         List<Person> args = new ArrayList<Person>();
@@ -71,7 +71,7 @@ public abstract class AbstractSerializationPersionOkTest extends AbstractSeriali
 
         assertObject(args);
     }
-    
+
     @Test
     public void test_StringPersonListMap() throws Exception {
         Map<String, List<Person>> args = new HashMap<String, List<Person>>();

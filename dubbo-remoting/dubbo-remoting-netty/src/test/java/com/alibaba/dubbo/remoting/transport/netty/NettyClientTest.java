@@ -50,7 +50,7 @@ public class NettyClientTest {
             Thread.sleep(5);
             clients.add(client);
         }
-        for (ExchangeChannel client : clients){
+        for (ExchangeChannel client : clients) {
             client.close();
         }
         Thread.sleep(1000);
@@ -69,11 +69,12 @@ public class NettyClientTest {
         try {
             if (server != null)
                 server.close();
-        } finally {}
+        } finally {
+        }
     }
-    
+
     public static void main(String[] args) throws RemotingException, InterruptedException {
-    	ExchangeChannel client = Exchangers.connect(URL.valueOf("exchange://10.20.153.10:20880?client=netty&heartbeat=1000"));
-    	Thread.sleep(60*1000*50);
-	}
+        ExchangeChannel client = Exchangers.connect(URL.valueOf("exchange://10.20.153.10:20880?client=netty&heartbeat=1000"));
+        Thread.sleep(60 * 1000 * 50);
+    }
 }

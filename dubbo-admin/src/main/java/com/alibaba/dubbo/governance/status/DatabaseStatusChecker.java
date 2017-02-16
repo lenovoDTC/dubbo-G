@@ -1,12 +1,12 @@
 /**
  * Project: dubbo.registry.server-1.1.0-SNAPSHOT
- * 
+ * <p>
  * File Created at 2009-12-27
  * $Id: DatabaseStatusChecker.java 181192 2012-06-21 05:05:47Z tony.chenl $
- * 
+ * <p>
  * Copyright 2008 Alibaba.com Croporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -30,17 +30,17 @@ import com.alibaba.dubbo.common.status.StatusChecker;
 
 /**
  * DatabaseStatus
- * 
+ *
  * @author william.liangf
  */
 public class DatabaseStatusChecker implements StatusChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseStatusChecker.class);
-    
+
     private int version;
-    
+
     private String message;
-    
+
     @Autowired
     private DataSource dataSource;
 
@@ -63,9 +63,9 @@ public class DatabaseStatusChecker implements StatusChecker {
                 }
                 if (message == null) {
                     message = metaData.getURL()
-                        + " (" + metaData.getDatabaseProductName() 
-                        + " " + metaData.getDatabaseProductVersion()
-                        + ", " + getIsolation(metaData.getDefaultTransactionIsolation()) + ")";
+                            + " (" + metaData.getDatabaseProductName()
+                            + " " + metaData.getDatabaseProductVersion()
+                            + ", " + getIsolation(metaData.getDefaultTransactionIsolation()) + ")";
                 }
                 if (version == 0) {
                     version = metaData.getDatabaseMajorVersion();
@@ -77,9 +77,9 @@ public class DatabaseStatusChecker implements StatusChecker {
             logger.error(e.getMessage(), e);
             ok = false;
         }
-        return new Status(! ok ? Status.Level.ERROR : (version < 5 ? Status.Level.WARN : Status.Level.OK), message);
+        return new Status(!ok ? Status.Level.ERROR : (version < 5 ? Status.Level.WARN : Status.Level.OK), message);
     }
-    
+
     private String getIsolation(int i) {
         if (i == Connection.TRANSACTION_READ_COMMITTED) {
             return "READ_COMMITTED";

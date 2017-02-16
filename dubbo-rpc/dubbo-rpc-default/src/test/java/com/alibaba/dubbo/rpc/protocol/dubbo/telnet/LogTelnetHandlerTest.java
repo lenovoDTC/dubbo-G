@@ -26,13 +26,13 @@ import com.alibaba.dubbo.remoting.telnet.TelnetHandler;
 
 /**
  * LogTelnetHandlerTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class LogTelnetHandlerTest {
 
     private static TelnetHandler log = new LogTelnetHandler();
-    private Channel              mockChannel;
+    private Channel mockChannel;
 
     @Test
     public void testChangeLogLevel() throws RemotingException {

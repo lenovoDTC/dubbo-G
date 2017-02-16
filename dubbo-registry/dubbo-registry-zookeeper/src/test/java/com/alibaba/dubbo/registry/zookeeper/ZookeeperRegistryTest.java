@@ -17,28 +17,24 @@ package com.alibaba.dubbo.registry.zookeeper;
 
 import junit.framework.Assert;
 
-import com.alibaba.dubbo.registry.zookeeper.ZookeeperRegistry;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import com.alibaba.dubbo.common.URL;
 
 /**
  * ZookeeperRegistryTest
- * 
+ *
  * @author tony.chenl
  */
 public class ZookeeperRegistryTest {
-	ZookeeperRegistry zookeeperRegistry;
 
-    String            service     = "com.alibaba.dubbo.test.injvmServie";
-    URL               registryUrl = URL.valueOf("zookeeper://239.255.255.255/");
-    URL               serviceUrl  = URL.valueOf("zookeeper://zookeeper/" + service
-                                                + "?notify=false&methods=test1,test2");
-    URL               consumerUrl = URL.valueOf("zookeeper://consumer/" + service + "?notify=false&methods=test1,test2");
+    String service = "com.alibaba.dubbo.test.injvmServie";
+    URL registryUrl = URL.valueOf("zookeeper://239.255.255.255/");
+    URL serviceUrl = URL.valueOf("zookeeper://zookeeper/" + service
+            + "?notify=false&methods=test1,test2");
+    URL consumerUrl = URL.valueOf("zookeeper://consumer/" + service + "?notify=false&methods=test1,test2");
     // ZookeeperRegistry registry    = new ZookeeperRegistry(registryUrl);
 
     /**
@@ -61,12 +57,12 @@ public class ZookeeperRegistryTest {
         URL errorUrl = URL.valueOf("zookeeper://zookeeper/");
         new ZookeeperRegistry(errorUrl);
     }*/
-    
-//    @Test
-//    public void testDefaultPort() {
-//        Assert.assertEquals("10.20.153.10:2181", ZookeeperRegistry.appendDefaultPort("10.20.153.10:0"));
-//        Assert.assertEquals("10.20.153.10:2181", ZookeeperRegistry.appendDefaultPort("10.20.153.10"));
-//    }
+
+    @Test
+    public void testDefaultPort() {
+        Assert.assertEquals("10.20.153.10:2181", ZookeeperRegistry.appendDefaultPort("10.20.153.10:0"));
+        Assert.assertEquals("10.20.153.10:2181", ZookeeperRegistry.appendDefaultPort("10.20.153.10"));
+    }
 
     /**
      * Test method for {@link com.alibaba.dubbo.registry.support.injvm.InjvmRegistry#register(java.util.Map)}.
@@ -109,12 +105,5 @@ public class ZookeeperRegistryTest {
         assertEquals(subscribearg, StringUtils.toQueryString(arg));*/
 
     }
-  /*  @Test
-    public void getAnyEid(){
-    	 
-    	
-    	String xString = zookeeperRegistry.getAnyEid("eid");
-    	System.out.println(xString);
-    }*/
 
 }

@@ -29,12 +29,12 @@ import com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol;
 
 /**
  * RmiProtocol.
- * 
+ *
  * @author qian.lei
  */
 public class RmiProtocol extends AbstractProxyProtocol {
 
-    public static final int              DEFAULT_PORT = 1099;
+    public static final int DEFAULT_PORT = 1099;
 
     public RmiProtocol() {
         super(RemoteAccessException.class, RemoteException.class);

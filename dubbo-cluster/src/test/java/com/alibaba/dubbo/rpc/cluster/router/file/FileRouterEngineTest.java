@@ -49,17 +49,17 @@ import com.alibaba.dubbo.rpc.cluster.support.AbstractClusterInvoker;
 public class FileRouterEngineTest {
     List<Invoker<FileRouterEngineTest>> invokers = new ArrayList<Invoker<FileRouterEngineTest>>();
 
-    Invoker<FileRouterEngineTest>       invoker1 = EasyMock.createMock(Invoker.class);
-    Invoker<FileRouterEngineTest>       invoker2 = EasyMock.createMock(Invoker.class);
-    Invocation                          invocation;
-    Directory<FileRouterEngineTest>     dic;
-    Result                              result   = new RpcResult();
+    Invoker<FileRouterEngineTest> invoker1 = EasyMock.createMock(Invoker.class);
+    Invoker<FileRouterEngineTest> invoker2 = EasyMock.createMock(Invoker.class);
+    Invocation invocation;
+    Directory<FileRouterEngineTest> dic;
+    Result result = new RpcResult();
     private RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getAdaptiveExtension();
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     }
-    
+
     private static boolean isScriptUnsupported = new ScriptEngineManager().getEngineByName("javascript") == null;
 
     @Before
@@ -141,7 +141,7 @@ public class FileRouterEngineTest {
 
     private void initInvocation(String methodName) {
         invocation = new RpcInvocation();
-        ((RpcInvocation)invocation).setMethodName(methodName);
+        ((RpcInvocation) invocation).setMethodName(methodName);
     }
 
     private void initInvokers(URL url) {

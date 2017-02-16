@@ -30,7 +30,7 @@ import com.alibaba.dubbo.registry.support.AbstractRegistryFactory;
 
 /**
  * StatusTest
- * 
+ *
  * @author tony.chenl
  */
 public class RegistryStatusCheckerTest {
@@ -39,6 +39,7 @@ public class RegistryStatusCheckerTest {
         SimpleRegistryExporter.exportIfAbsent(9090);
         SimpleRegistryExporter.exportIfAbsent(9091);
     }
+
     URL registryUrl = URL.valueOf("dubbo://cat:cat@127.0.0.1:9090/");
     URL registryUrl2 = URL.valueOf("dubbo://cat:cat@127.0.0.1:9091");
 

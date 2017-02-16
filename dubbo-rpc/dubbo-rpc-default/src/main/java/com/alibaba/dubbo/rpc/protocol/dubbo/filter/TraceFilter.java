@@ -37,20 +37,20 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * TraceFilter
- * 
+ *
  * @author william.liangf
  */
 @Activate(group = Constants.PROVIDER)
 public class TraceFilter implements Filter {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TraceFilter.class);
-    
+
     private static final String TRACE_MAX = "trace.max";
-    
+
     private static final String TRACE_COUNT = "trace.count";
-    
+
     private static final ConcurrentMap<String, Set<Channel>> tracers = new ConcurrentHashMap<String, Set<Channel>>();
-    
+
     public static void addTracer(Class<?> type, String method, Channel channel, int max) {
         channel.setAttribute(TRACE_MAX, max);
         channel.setAttribute(TRACE_COUNT, new AtomicInteger());
@@ -62,7 +62,7 @@ public class TraceFilter implements Filter {
         }
         channels.add(channel);
     }
-    
+
     public static void removeTracer(Class<?> type, String method, Channel channel) {
         channel.removeAttribute(TRACE_MAX);
         channel.removeAttribute(TRACE_COUNT);
@@ -72,7 +72,7 @@ public class TraceFilter implements Filter {
             channels.remove(channel);
         }
     }
-    
+
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         long start = System.currentTimeMillis();
         Result result = invoker.invoke(invocation);
@@ -102,14 +102,14 @@ public class TraceFilter implements Filter {
                             count = c.getAndIncrement();
                             if (count < max) {
                                 String prompt = channel.getUrl().getParameter(Constants.PROMPT_KEY, Constants.DEFAULT_PROMPT);
-                                channel.send("\r\n" + RpcContext.getContext().getRemoteAddress() + " -> "  
-                                         + invoker.getInterface().getName() 
-                                         + "." + invocation.getMethodName() 
-                                         + "(" + JSON.json(invocation.getArguments()) + ")" + " -> " + JSON.json(result.getValue())
-                                         + "\r\nelapsed: "+(end - start) +" ms."
-                                         + "\r\n\r\n" + prompt);
+                                channel.send("\r\n" + RpcContext.getContext().getRemoteAddress() + " -> "
+                                        + invoker.getInterface().getName()
+                                        + "." + invocation.getMethodName()
+                                        + "(" + JSON.json(invocation.getArguments()) + ")" + " -> " + JSON.json(result.getValue())
+                                        + "\r\nelapsed: " + (end - start) + " ms."
+                                        + "\r\n\r\n" + prompt);
                             }
-                            if(count >= max - 1) {
+                            if (count >= max - 1) {
                                 channels.remove(channel);
                             }
                         } catch (Throwable e) {

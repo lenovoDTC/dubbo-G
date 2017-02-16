@@ -29,7 +29,7 @@ import com.alibaba.dubbo.rpc.support.MyInvoker;
 
 /**
  * DeprecatedFilterTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class DeprecatedFilterTest {
@@ -42,7 +42,7 @@ public class DeprecatedFilterTest {
         LogUtil.start();
         deprecatedFilter.invoke(new MyInvoker<DemoService>(url), new MockInvocation());
         assertEquals(1,
-                     LogUtil.findMessage("The service method com.alibaba.dubbo.rpc.support.DemoService.echo(String) is DEPRECATED"));
+                LogUtil.findMessage("The service method com.alibaba.dubbo.rpc.support.DemoService.echo(String) is DEPRECATED"));
         LogUtil.stop();
     }
 }

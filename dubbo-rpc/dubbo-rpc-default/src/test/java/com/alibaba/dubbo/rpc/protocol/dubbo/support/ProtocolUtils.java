@@ -28,13 +28,13 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol;
 
 /**
  * TODO Comment of ProtocolUtils
- * 
+ *
  * @author william.liangf
  */
 public class ProtocolUtils {
 
-    private static Protocol     protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
-    public static ProxyFactory proxy    = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
+    private static Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
+    public static ProxyFactory proxy = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
 
     public static <T> T refer(Class<T> type, String url) {
         return refer(type, URL.valueOf(url));
@@ -43,9 +43,9 @@ public class ProtocolUtils {
     public static <T> T refer(Class<T> type, URL url) {
         return proxy.getProxy(protocol.refer(type, url));
     }
-    
+
     public static Invoker<?> referInvoker(Class<?> type, URL url) {
-        return (Invoker<?>)protocol.refer(type, url);
+        return (Invoker<?>) protocol.refer(type, url);
     }
 
     public static <T> Exporter<T> export(T instance, Class<T> type, String url) {

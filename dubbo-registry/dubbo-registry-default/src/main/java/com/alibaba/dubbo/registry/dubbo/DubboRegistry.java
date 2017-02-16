@@ -36,16 +36,16 @@ import com.alibaba.dubbo.rpc.Invoker;
 
 /**
  * DubboRegistry
- * 
+ *
  * @author william.liangf
  */
 public class DubboRegistry extends FailbackRegistry {
 
-    private final static Logger logger = LoggerFactory.getLogger(DubboRegistry.class); 
+    private final static Logger logger = LoggerFactory.getLogger(DubboRegistry.class);
 
     // 重连检测周期3秒(单位毫秒)
     private static final int RECONNECT_PERIOD_DEFAULT = 3 * 1000;
-    
+
     // 定时任务执行器
     private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1, new NamedThreadFactory("DubboRegistryReconnectTimer", true));
 
@@ -54,11 +54,11 @@ public class DubboRegistry extends FailbackRegistry {
 
     // 客户端获取过程锁，锁定客户端实例的创建过程，防止重复的客户端
     private final ReentrantLock clientLock = new ReentrantLock();
-    
+
     private final Invoker<RegistryService> registryInvoker;
-    
+
     private final RegistryService registryService;
-    
+
     public DubboRegistry(Invoker<RegistryService> registryInvoker, RegistryService registryService) {
         super(registryInvoker.getUrl());
         this.registryInvoker = registryInvoker;
@@ -97,27 +97,27 @@ public class DubboRegistry extends FailbackRegistry {
                 clientLock.unlock();
             }
         } catch (Throwable t) { // 忽略所有异常，等待下次重试
-             if (getUrl().getParameter(Constants.CHECK_KEY, true)) {
-                 if (t instanceof RuntimeException) {
-                     throw (RuntimeException) t;
-                 }
-                 throw new RuntimeException(t.getMessage(), t);
-             }
-             logger.error("Failed to connect to registry " + getUrl().getAddress() + " from provider/consumer " + NetUtils.getLocalHost() + " use dubbo " + Version.getVersion() + ", cause: " + t.getMessage(), t);
+            if (getUrl().getParameter(Constants.CHECK_KEY, true)) {
+                if (t instanceof RuntimeException) {
+                    throw (RuntimeException) t;
+                }
+                throw new RuntimeException(t.getMessage(), t);
+            }
+            logger.error("Failed to connect to registry " + getUrl().getAddress() + " from provider/consumer " + NetUtils.getLocalHost() + " use dubbo " + Version.getVersion() + ", cause: " + t.getMessage(), t);
         }
     }
-    
+
     public boolean isAvailable() {
         if (registryInvoker == null)
             return false;
         return registryInvoker.isAvailable();
     }
-    
+
     public void destroy() {
         super.destroy();
         try {
             // 取消重连定时器
-            if (! reconnectFuture.isCancelled()) {
+            if (!reconnectFuture.isCancelled()) {
                 reconnectFuture.cancel(true);
             }
         } catch (Throwable t) {
@@ -125,11 +125,11 @@ public class DubboRegistry extends FailbackRegistry {
         }
         registryInvoker.destroy();
     }
-    
+
     protected void doRegister(URL url) {
         registryService.register(url);
     }
-    
+
     protected void doUnregister(URL url) {
         registryService.unregister(url);
     }
@@ -137,7 +137,7 @@ public class DubboRegistry extends FailbackRegistry {
     protected void doSubscribe(URL url, NotifyListener listener) {
         registryService.subscribe(url, listener);
     }
-    
+
     protected void doUnsubscribe(URL url, NotifyListener listener) {
         registryService.unsubscribe(url, listener);
     }
@@ -146,10 +146,4 @@ public class DubboRegistry extends FailbackRegistry {
         return registryService.lookup(url);
     }
 
-
-	public String getAnyEid(String eid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-    
 }

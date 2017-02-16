@@ -34,18 +34,18 @@ import com.alibaba.dubbo.remoting.transport.ServerDelegate;
 
 /**
  * ServerPeer
- * 
+ *
  * @author william.liangf
  */
 public class ServerPeer extends ServerDelegate implements Peer {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ServerPeer.class);
 
     private final Map<URL, Client> clients;
 
     private final Group group;
-    
-    public ServerPeer(Server server, Map<URL, Client> clients, Group group){
+
+    public ServerPeer(Server server, Map<URL, Client> clients, Group group) {
         super(server);
         this.clients = clients;
         this.group = group;
@@ -63,7 +63,7 @@ public class ServerPeer extends ServerDelegate implements Peer {
             logger.error(e.getMessage(), e);
         }
     }
-    
+
     @Override
     public Collection<Channel> getChannels() {
         Collection<Channel> channels = super.getChannels();

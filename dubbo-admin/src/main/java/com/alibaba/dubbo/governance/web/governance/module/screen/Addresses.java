@@ -23,14 +23,14 @@ import com.alibaba.dubbo.governance.web.common.module.screen.Restful;
 /**
  * Providers.
  * URI: /services/$service/providers
- * 
+ *
  * @author william.liangf
  */
 public class Addresses extends Restful {
-    
+
     @Autowired
     private ProviderService providerService;
-    
+
     @Autowired
     private ConsumerService consumerService;
 
@@ -39,19 +39,18 @@ public class Addresses extends Restful {
         String service = (String) context.get("service");
         List<String> providerAddresses = null;
         List<String> consumerAddresses = null;
-        
+
         if (application != null && application.length() > 0) {
             providerAddresses = providerService.findAddressesByApplication(application);
             consumerAddresses = consumerService.findAddressesByApplication(application);
         } else if (service != null && service.length() > 0) {
             providerAddresses = providerService.findAddressesByService(service);
             consumerAddresses = consumerService.findAddressesByService(service);
-        }
-        else {
+        } else {
             providerAddresses = providerService.findAddresses();
             consumerAddresses = consumerService.findAddresses();
         }
-        
+
         Set<String> addresses = new TreeSet<String>();
         if (providerAddresses != null) {
             addresses.addAll(providerAddresses);
@@ -62,17 +61,17 @@ public class Addresses extends Restful {
         context.put("providerAddresses", providerAddresses);
         context.put("consumerAddresses", consumerAddresses);
         context.put("addresses", addresses);
-        
+
         if (context.get("service") == null
                 && context.get("application") == null
                 && context.get("address") == null) {
             context.put("address", "*");
         }
-        
+
         String keyword = (String) context.get("keyword");
         if (StringUtils.isNotEmpty(keyword)) {
-            if("*".equals(keyword)) return;
-            
+            if ("*".equals(keyword)) return;
+
             keyword = keyword.toLowerCase();
             Set<String> newList = new HashSet<String>();
             Set<String> newProviders = new HashSet<String>();
@@ -101,15 +100,15 @@ public class Addresses extends Restful {
 
     public void search(Map<String, Object> context) {
         index(context);
-        
+
         Set<String> newList = new HashSet<String>();
         @SuppressWarnings("unchecked")
-        Set<String> list = (Set<String>)context.get("addresses");
+        Set<String> list = (Set<String>) context.get("addresses");
         String keyword = (String) context.get("keyword");
-        if(StringUtils.isNotEmpty(keyword)){
+        if (StringUtils.isNotEmpty(keyword)) {
             keyword = keyword.toLowerCase();
-            for(String o : list){
-                if(o.toLowerCase().indexOf(keyword)!=-1){
+            for (String o : list) {
+                if (o.toLowerCase().indexOf(keyword) != -1) {
                     newList.add(o);
                 }
             }

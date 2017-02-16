@@ -29,18 +29,18 @@ import com.alibaba.fastjson.JSON;
 
 /**
  * JsonObjectInput
- * 
+ *
  * @author william.liangf
  */
 public class FastJsonObjectInput implements ObjectInput {
 
     private final BufferedReader reader;
 
-    public FastJsonObjectInput(InputStream in){
+    public FastJsonObjectInput(InputStream in) {
         this(new InputStreamReader(in));
     }
 
-    public FastJsonObjectInput(Reader reader){
+    public FastJsonObjectInput(Reader reader) {
         this.reader = new BufferedReader(reader);
     }
 
@@ -54,7 +54,7 @@ public class FastJsonObjectInput implements ObjectInput {
 
     public byte readByte() throws IOException {
         try {
-            return readObject( byte.class);
+            return readObject(byte.class);
         } catch (ClassNotFoundException e) {
             throw new IOException(e.getMessage());
         }
@@ -123,15 +123,14 @@ public class FastJsonObjectInput implements ObjectInput {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T readObject(Class<T> cls, Type type) throws IOException,ClassNotFoundException
-    {
+    public <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException {
         Object value = readObject(cls);
         return (T) PojoUtils.realize(value, cls, type);
     }
 
     private String readLine() throws IOException, EOFException {
         String line = reader.readLine();
-        if(line == null || line.trim().length() == 0) throw new EOFException();
+        if (line == null || line.trim().length() == 0) throw new EOFException();
         return line;
     }
 

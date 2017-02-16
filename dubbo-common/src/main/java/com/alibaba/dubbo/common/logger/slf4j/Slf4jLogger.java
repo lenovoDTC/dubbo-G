@@ -6,13 +6,13 @@ import com.alibaba.dubbo.common.logger.Logger;
 
 public class Slf4jLogger implements Logger, Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final org.slf4j.Logger logger;
+    private final org.slf4j.Logger logger;
 
-	public Slf4jLogger(org.slf4j.Logger logger) {
-		this.logger = logger;
-	}
+    public Slf4jLogger(org.slf4j.Logger logger) {
+        this.logger = logger;
+    }
 
     public void trace(String msg) {
         logger.trace(msg);

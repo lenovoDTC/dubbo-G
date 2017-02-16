@@ -38,7 +38,7 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.support.ProtocolUtils;
 
 /**
  * PortTelnetHandlerTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class PortTelnetHandlerTest {

@@ -26,24 +26,24 @@ import com.alibaba.dubbo.remoting.Server;
 
 /**
  * ServerDelegate
- * 
+ *
  * @author william.liangf
  */
 public class ServerDelegate implements Server {
-    
+
     private transient Server server;
-    
+
     public ServerDelegate() {
     }
 
-    public ServerDelegate(Server server){
+    public ServerDelegate(Server server) {
         setServer(server);
     }
 
     public Server getServer() {
         return server;
     }
-    
+
     public void setServer(Server server) {
         this.server = server;
     }
@@ -55,9 +55,9 @@ public class ServerDelegate implements Server {
     public void reset(URL url) {
         server.reset(url);
     }
-    
+
     @Deprecated
-    public void reset(com.alibaba.dubbo.common.Parameters parameters){
+    public void reset(com.alibaba.dubbo.common.Parameters parameters) {
         reset(getUrl().addParameters(parameters.getParameters()));
     }
 
@@ -92,7 +92,7 @@ public class ServerDelegate implements Server {
     public void close() {
         server.close();
     }
-    
+
     public void close(int timeout) {
         server.close(timeout);
     }

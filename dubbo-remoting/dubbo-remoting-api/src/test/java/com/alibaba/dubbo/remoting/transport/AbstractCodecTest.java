@@ -43,8 +43,7 @@ public class AbstractCodecTest extends TestCase {
 
         try {
             AbstractCodec.checkPayload(channel, 15 * 1024 * 1024);
-        }
-        catch (IOException expected) {
+        } catch (IOException expected) {
             assertThat(expected.getMessage(), allOf(
                     containsString("Data length too large: "),
                     containsString("max payload: " + 8 * 1024 * 1024)

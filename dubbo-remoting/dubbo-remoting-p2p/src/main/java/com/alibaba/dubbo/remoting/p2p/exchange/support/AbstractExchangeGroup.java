@@ -37,29 +37,29 @@ import com.alibaba.dubbo.remoting.p2p.exchange.ExchangePeer;
 
 /**
  * AbstractGroup
- * 
+ *
  * @author william.liangf
  */
 public abstract class AbstractExchangeGroup implements ExchangeGroup {
 
     // 日志输出
     protected static final Logger logger = LoggerFactory.getLogger(AbstractExchangeGroup.class);
-    
+
     protected final URL url;
-    
+
     protected final Map<URL, ExchangeServer> servers = new ConcurrentHashMap<URL, ExchangeServer>();
 
     protected final Map<URL, ExchangeClient> clients = new ConcurrentHashMap<URL, ExchangeClient>();
-    
+
     protected final ExchangeHandlerDispatcher dispatcher = new ExchangeHandlerDispatcher();
 
-    public AbstractExchangeGroup(URL url){
+    public AbstractExchangeGroup(URL url) {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
         this.url = url;
     }
-    
+
     public URL getUrl() {
         return url;
     }
@@ -80,11 +80,11 @@ public abstract class AbstractExchangeGroup implements ExchangeGroup {
             }
         }
     }
-    
+
     public Peer join(URL url, ChannelHandler handler) throws RemotingException {
         return join(url, (ExchangeHandler) handler);
     }
-    
+
     public ExchangePeer join(URL url, ExchangeHandler handler) throws RemotingException {
         ExchangeServer server = servers.get(url);
         if (server == null) { // TODO 有并发间隙

@@ -33,29 +33,29 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * AbstractGroup
- * 
+ *
  * @author william.liangf
  */
 public abstract class AbstractGroup implements Group {
 
     // 日志输出
     protected static final Logger logger = LoggerFactory.getLogger(AbstractGroup.class);
-    
+
     protected final URL url;
-    
+
     protected final Map<URL, Server> servers = new ConcurrentHashMap<URL, Server>();
 
     protected final Map<URL, Client> clients = new ConcurrentHashMap<URL, Client>();
-    
+
     protected final ChannelHandlerDispatcher dispatcher = new ChannelHandlerDispatcher();
 
-    public AbstractGroup(URL url){
+    public AbstractGroup(URL url) {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
         this.url = url;
     }
-    
+
     public URL getUrl() {
         return url;
     }
@@ -76,7 +76,7 @@ public abstract class AbstractGroup implements Group {
             }
         }
     }
-    
+
     public Peer join(URL url, ChannelHandler handler) throws RemotingException {
         Server server = servers.get(url);
         if (server == null) { // TODO 有并发间隙

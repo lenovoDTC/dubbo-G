@@ -36,18 +36,18 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.support.ProtocolUtils;
 
 /**
  * CountTelnetHandlerTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class InvokerTelnetHandlerTest {
 
     private static TelnetHandler invoke = new InvokeTelnetHandler();
-    private Channel              mockChannel;
+    private Channel mockChannel;
     private Invoker<DemoService> mockInvoker;
 
     @After
     public void after() {
-       ProtocolUtils.closeAll();
+        ProtocolUtils.closeAll();
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +93,7 @@ public class InvokerTelnetHandlerTest {
         EasyMock.replay(mockChannel);
         String result = invoke.telnet(mockChannel, null);
         assertEquals("Please input method name, eg: \r\ninvoke xxxMethod(1234, \"abcd\", {\"prop\" : \"value\"})\r\ninvoke XxxService.xxxMethod(1234, \"abcd\", {\"prop\" : \"value\"})\r\ninvoke com.xxx.XxxService.xxxMethod(1234, \"abcd\", {\"prop\" : \"value\"})",
-                     result);
+                result);
         EasyMock.reset(mockChannel);
     }
 

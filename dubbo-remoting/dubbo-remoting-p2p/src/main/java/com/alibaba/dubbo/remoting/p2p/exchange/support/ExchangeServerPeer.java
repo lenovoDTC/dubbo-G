@@ -36,18 +36,18 @@ import com.alibaba.dubbo.remoting.p2p.exchange.ExchangePeer;
 
 /**
  * ServerPeer
- * 
+ *
  * @author william.liangf
  */
 public class ExchangeServerPeer extends ExchangeServerDelegate implements ExchangePeer {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ExchangeServerPeer.class);
 
     private final Map<URL, ExchangeClient> clients;
 
     private final ExchangeGroup group;
-    
-    public ExchangeServerPeer(ExchangeServer server, Map<URL, ExchangeClient> clients, ExchangeGroup group){
+
+    public ExchangeServerPeer(ExchangeServer server, Map<URL, ExchangeClient> clients, ExchangeGroup group) {
         super(server);
         this.clients = clients;
         this.group = group;
@@ -65,8 +65,8 @@ public class ExchangeServerPeer extends ExchangeServerDelegate implements Exchan
             logger.error(e.getMessage(), e);
         }
     }
-    
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<Channel> getChannels() {
         return (Collection) getExchangeChannels();

@@ -1,10 +1,10 @@
 /**
  * File Created at 2011-12-08
  * $Id$
- *
+ * <p>
  * Copyright 2008 Alibaba.com Croporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -43,7 +43,7 @@ public class ThriftProtocolTest extends AbstractTest {
 
         protocol = new ThriftProtocol();
 
-        url = URL.valueOf( ThriftProtocol.NAME + "://127.0.0.1:" + PORT + "/" + Demo.class.getName() );
+        url = URL.valueOf(ThriftProtocol.NAME + "://127.0.0.1:" + PORT + "/" + Demo.class.getName());
 
     }
 
@@ -52,12 +52,12 @@ public class ThriftProtocolTest extends AbstractTest {
 
         destroy();
 
-        if ( protocol != null ) {
+        if (protocol != null) {
             protocol.destroy();
             protocol = null;
         }
 
-        if ( invoker != null ) {
+        if (invoker != null) {
             invoker.destroy();
             invoker = null;
         }

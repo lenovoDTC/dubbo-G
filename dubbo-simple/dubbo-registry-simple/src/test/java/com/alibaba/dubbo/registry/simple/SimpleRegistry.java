@@ -17,8 +17,8 @@ package com.alibaba.dubbo.registry.simple;
 
 public class SimpleRegistry {
 
-	public static void main(String[] args) {
-		 com.alibaba.dubbo.container.Main.main(args);
-	}
+    public static void main(String[] args) {
+        com.alibaba.dubbo.container.Main.main(args);
+    }
 
 }

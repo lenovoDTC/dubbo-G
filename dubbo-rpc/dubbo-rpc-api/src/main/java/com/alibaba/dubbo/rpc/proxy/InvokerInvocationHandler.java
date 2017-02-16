@@ -17,28 +17,24 @@ package com.alibaba.dubbo.rpc.proxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcInvocation;
 
 /**
  * InvokerHandler
- * 
+ *
  * @author william.liangf
  */
 public class InvokerInvocationHandler implements InvocationHandler {
 
-	private final Invoker<?> invoker;
+    private final Invoker<?> invoker;
 
-	public InvokerInvocationHandler(Invoker<?> handler) {
-		this.invoker = handler;
-	}
+    public InvokerInvocationHandler(Invoker<?> handler) {
+        this.invoker = handler;
+    }
 
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (method.getDeclaringClass() == Object.class) {
@@ -53,12 +49,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         if ("equals".equals(methodName) && parameterTypes.length == 1) {
             return invoker.equals(args[0]);
         }
-        String eid = RpcContext.getContext().getHeader(Constants.GENERIC_HEADER_EID);
-        if (eid == null)
-        	eid = Constants.DEFAULT_EID;
-        Map<String, String> attachment = new HashMap<String, String>();
-        attachment.put(Constants.GENERIC_EID, eid);
-        return invoker.invoke(new RpcInvocation(method, args, attachment)).recreate();
+        return invoker.invoke(new RpcInvocation(method, args)).recreate();
     }
 
 }

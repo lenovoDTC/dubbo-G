@@ -29,15 +29,15 @@ import com.alibaba.dubbo.rpc.ProxyFactory;
 
 /**
  * SimpleRegistryExporter
- * 
+ *
  * @author william.liangf
  */
 public class SimpleRegistryExporter {
-    
+
     private static final Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
-    
+
     private static final ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
-    
+
     public synchronized static Exporter<RegistryService> exportIfAbsent(int port) {
         try {
             new ServerSocket(port).close();
@@ -46,21 +46,21 @@ public class SimpleRegistryExporter {
             return null;
         }
     }
-    
+
     public static Exporter<RegistryService> export(int port) {
         return export(port, new SimpleRegistryService());
     }
-    
+
     public static Exporter<RegistryService> export(int port, RegistryService registryService) {
-        return protocol.export(proxyFactory.getInvoker(registryService, RegistryService.class, 
+        return protocol.export(proxyFactory.getInvoker(registryService, RegistryService.class,
                 new URL("dubbo", NetUtils.getLocalHost(), port, RegistryService.class.getName())
-                .setPath(RegistryService.class.getName())
-                .addParameter(Constants.INTERFACE_KEY, RegistryService.class.getName())
-                .addParameter(Constants.CLUSTER_STICKY_KEY, "true")
-                .addParameter(Constants.CALLBACK_INSTANCES_LIMIT_KEY, "1000")
-                .addParameter("ondisconnect", "disconnect")
-                .addParameter("subscribe.1.callback", "true")
-                .addParameter("unsubscribe.1.callback", "false")));
+                        .setPath(RegistryService.class.getName())
+                        .addParameter(Constants.INTERFACE_KEY, RegistryService.class.getName())
+                        .addParameter(Constants.CLUSTER_STICKY_KEY, "true")
+                        .addParameter(Constants.CALLBACK_INSTANCES_LIMIT_KEY, "1000")
+                        .addParameter("ondisconnect", "disconnect")
+                        .addParameter("subscribe.1.callback", "true")
+                        .addParameter("unsubscribe.1.callback", "false")));
     }
 
 }

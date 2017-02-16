@@ -28,13 +28,13 @@ import com.caucho.hessian.client.HessianProxyFactory;
 
 /**
  * HttpClientConnectionFactory
- * 
+ *
  * @author william.liangf
  */
 public class HttpClientConnectionFactory implements HessianConnectionFactory {
-    
+
     private final HttpClient httpClient = new DefaultHttpClient();
-    
+
     public void setHessianProxyFactory(HessianProxyFactory factory) {
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), (int) factory.getConnectTimeout());
         HttpConnectionParams.setSoTimeout(httpClient.getParams(), (int) factory.getReadTimeout());
