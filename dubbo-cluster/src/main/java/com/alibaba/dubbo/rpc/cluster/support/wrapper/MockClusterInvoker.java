@@ -275,10 +275,11 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 				start3 = System.currentTimeMillis();
 				successNumber = 0;
 			}
-			if (total*1000/(System.currentTimeMillis()-start3) >= Integer.parseInt(supervene)) {
-				System.out.println("降   级");
-				return "fail";
-			}
+//			if(System.currentTimeMillis()-start3 == 0){
+//			if (total*1000/(System.currentTimeMillis()-start3) >= Integer.parseInt(supervene)) {
+//				System.out.println("降   级");
+//				return "fail";
+//			}}
 			total++;
 			if (elapsed1 / 1000 >= 10) {
 				if (total == 0 && successNumber == 0) {
