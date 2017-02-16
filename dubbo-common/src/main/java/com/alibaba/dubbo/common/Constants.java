@@ -193,6 +193,8 @@ public class Constants {
     public static final String  MOCK_KEY                           = "mock";
     
     public static final String  ERRORRATE_KEY                      = "errorrate";
+    
+    public static final String  SUPERVENE_KEY                      = "supervene";
 
     public static final String  PROTOCOL_KEY                       = "protocol";
 

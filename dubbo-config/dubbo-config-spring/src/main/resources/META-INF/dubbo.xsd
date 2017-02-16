@@ -69,6 +69,11 @@
 				<xsd:documentation><![CDATA[ Use service limit number. ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="supervene" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[ Use service limit number. ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="cache" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[ Use service cache, lru/threadlocal/jcache. ]]></xsd:documentation>

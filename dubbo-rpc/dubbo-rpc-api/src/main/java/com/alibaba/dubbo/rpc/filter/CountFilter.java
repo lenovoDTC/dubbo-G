@@ -18,7 +18,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 
-public class FuseFilter implements Filter {
+public class CountFilter implements Filter {
 
 	private long start = System.currentTimeMillis();
 	private JSONObject jsonObject = new JSONObject();
