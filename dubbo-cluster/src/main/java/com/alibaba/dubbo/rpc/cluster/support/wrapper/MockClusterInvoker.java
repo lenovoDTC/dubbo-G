@@ -290,8 +290,8 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 				int newtotal = total - 1;
 				if (Float.parseFloat(errorrate) != 0) {
 					if (newtotal != oldtotal) {
-						if (10 - ((float) (newsuccessNumber - oldsuccessNumber)
-								/ (newtotal - oldtotal) * 10) >= Float
+						if (100 - ((float) (newsuccessNumber - oldsuccessNumber)
+								/ (newtotal - oldtotal) * 100) >= Float
 									.parseFloat(errorrate)) {
 							if (elapsed1 / 1000 >= 40) {
 								start1 = System.currentTimeMillis();
