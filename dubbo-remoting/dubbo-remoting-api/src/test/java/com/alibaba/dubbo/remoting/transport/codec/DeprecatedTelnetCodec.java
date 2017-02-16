@@ -64,11 +64,11 @@ public class DeprecatedTelnetCodec implements Codec {
             InetSocketAddress address = channel.getRemoteAddress();
             URL url = channel.getUrl();
             boolean client = url.getPort() == address.getPort()
-                && NetUtils.filterLocalHost(url.getIp()).equals(
-                NetUtils.filterLocalHost(address.getAddress()
-                                             .getHostAddress()));
+                    && NetUtils.filterLocalHost(url.getIp()).equals(
+                    NetUtils.filterLocalHost(address.getAddress()
+                            .getHostAddress()));
             channel.setAttribute(Constants.SIDE_KEY, client ? "client"
-                : "server");
+                    : "server");
             return client;
         }
     }
@@ -284,7 +284,7 @@ public class DeprecatedTelnetCodec implements Codec {
                     i = i + 2;
                 }
             } else if (b == -1 && i < message.length - 2
-                && (message[i + 1] == -3 || message[i + 1] == -5)) { // handshake
+                    && (message[i + 1] == -3 || message[i + 1] == -5)) { // handshake
                 i = i + 2;
             } else {
                 copy[index++] = message[i];

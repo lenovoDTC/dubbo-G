@@ -41,18 +41,18 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.ChannelHandlers;
 
 /**
  * MinaServer
- * 
+ *
  * @author qian.lei
  * @author william.liangf
  * @author ding.lid
  */
 public class MinaServer extends AbstractServer {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(MinaServer.class);
 
     private SocketAcceptor acceptor;
 
-    public MinaServer(URL url, ChannelHandler handler) throws RemotingException{
+    public MinaServer(URL url, ChannelHandler handler) throws RemotingException {
         super(url, ChannelHandlers.wrap(handler, ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME)));
     }
 
@@ -60,14 +60,14 @@ public class MinaServer extends AbstractServer {
     protected void doOpen() throws Throwable {
         // set thread pool.
         acceptor = new SocketAcceptor(getUrl().getPositiveParameter(Constants.IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS),
-                                       Executors.newCachedThreadPool(new NamedThreadFactory("MinaServerWorker",
-                                                                                            true)));
+                Executors.newCachedThreadPool(new NamedThreadFactory("MinaServerWorker",
+                        true)));
         // config
         SocketAcceptorConfig cfg = (SocketAcceptorConfig) acceptor.getDefaultConfig();
         cfg.setThreadModel(ThreadModel.MANUAL);
         // set codec.
         acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaCodecAdapter(getCodec(), getUrl(), this)));
-        
+
         acceptor.bind(getBindAddress(), new MinaHandler(getUrl(), this));
     }
 

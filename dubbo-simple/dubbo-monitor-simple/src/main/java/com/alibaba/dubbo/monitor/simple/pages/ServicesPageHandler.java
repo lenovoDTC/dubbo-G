@@ -28,12 +28,12 @@ import com.alibaba.dubbo.monitor.simple.RegistryContainer;
 
 /**
  * ServicesPageHandler
- * 
+ *
  * @author william.liangf
  */
 @Menu(name = "Services", desc = "Show registered services.", order = 2000)
 public class ServicesPageHandler implements PageHandler {
-    
+
     public Page handle(URL url) {
         Set<String> services = RegistryContainer.getInstance().getServices();
         List<List<String>> rows = new ArrayList<List<String>>();
@@ -53,7 +53,7 @@ public class ServicesPageHandler implements PageHandler {
                     if (providerSize > 0) {
                         URL provider = providers.iterator().next();
                         row.add(provider.getParameter(Constants.APPLICATION_KEY, ""));
-                        row.add(provider.getParameter("owner", "") + (provider.hasParameter("organization") ?  " (" + provider.getParameter("organization") + ")" : ""));
+                        row.add(provider.getParameter("owner", "") + (provider.hasParameter("organization") ? " (" + provider.getParameter("organization") + ")" : ""));
                     } else {
                         row.add("");
                         row.add("");
@@ -67,7 +67,7 @@ public class ServicesPageHandler implements PageHandler {
             }
         }
         return new Page("Services", "Services (" + rows.size() + ")",
-                new String[] { "Service Name:", "Application", "Owner", "Providers(" + providerCount + ")", "Consumers(" + consumerCount + ")", "Statistics", "Charts" }, rows);
+                new String[]{"Service Name:", "Application", "Owner", "Providers(" + providerCount + ")", "Consumers(" + consumerCount + ")", "Statistics", "Charts"}, rows);
     }
 
 }

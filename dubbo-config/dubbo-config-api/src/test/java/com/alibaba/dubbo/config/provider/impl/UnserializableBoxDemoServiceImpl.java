@@ -24,15 +24,15 @@ import com.alibaba.dubbo.config.api.User;
 
 /**
  * DemoServiceImpl
- * 
+ *
  * @author william.liangf
  */
 public class UnserializableBoxDemoServiceImpl implements DemoService {
-    
+
     public String sayName(String name) {
         return "say:" + name;
     }
-    
+
     public Box getBox() {
         return new UnserializableBox();
     }
@@ -48,5 +48,5 @@ public class UnserializableBoxDemoServiceImpl implements DemoService {
     public int echo(int i) {
         return i;
     }
-    
+
 }

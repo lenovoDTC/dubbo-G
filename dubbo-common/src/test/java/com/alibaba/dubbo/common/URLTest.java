@@ -279,7 +279,7 @@ public class URLTest {
 
     @Test
     public void test_getAbsolutePath() throws Exception {
-        URL url = new URL("p1", "1.2.2.2",  33);
+        URL url = new URL("p1", "1.2.2.2", 33);
         assertEquals(null, url.getAbsolutePath());
 
         url = new URL("file", null, 90, "/home/user1/route.js");
@@ -304,7 +304,7 @@ public class URLTest {
         assertThat(url1.toString(), anyOf(
                 equalTo("dubbo://10.20.130.230:20880/context/path?version=1.0.0&application=morgan"),
                 equalTo("dubbo://10.20.130.230:20880/context/path?application=morgan&version=1.0.0"))
-                );
+        );
     }
 
     @Test
@@ -313,7 +313,7 @@ public class URLTest {
         assertThat(url1.toFullString(), anyOf(
                 equalTo("dubbo://admin:hello1234@10.20.130.230:20880/context/path?version=1.0.0&application=morgan"),
                 equalTo("dubbo://admin:hello1234@10.20.130.230:20880/context/path?application=morgan&version=1.0.0"))
-                );
+        );
     }
 
     @Test
@@ -568,7 +568,7 @@ public class URLTest {
     @Test
     public void test_windowAbsolutePathBeginWithSlashIsValid() throws Exception {
         final String osProperty = System.getProperties().getProperty("os.name");
-        if(!osProperty.toLowerCase().contains("windows")) return;
+        if (!osProperty.toLowerCase().contains("windows")) return;
 
         System.out.println("Test Windows valid path string.");
 
@@ -593,7 +593,7 @@ public class URLTest {
         assertEquals("admin:hello1234", url.getUserInfo());
         assertEquals("10.20.130.230", url.getHost());
         assertEquals(20880, url.getPort());
-        assertEquals("/context/path", url.getPath()); 
+        assertEquals("/context/path", url.getPath());
         assertEquals("version=1.0.0&application=morgan", url.getQuery());
         assertEquals("anchor1", url.getRef());
 

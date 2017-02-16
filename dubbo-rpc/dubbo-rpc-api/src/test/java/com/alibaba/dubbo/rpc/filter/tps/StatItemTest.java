@@ -34,7 +34,7 @@ public class StatItemTest {
 
     private StatItem statItem;
 
-    private URL        url        = URL.valueOf("test://localhost");
+    private URL url = URL.valueOf("test://localhost");
 
     private Invocation invocation = new RpcInvocation();
 

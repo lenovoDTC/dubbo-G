@@ -25,10 +25,9 @@ import com.alibaba.dubbo.remoting.RemotingException;
 
 /**
  * @author chao.liuc
- *
  */
 public class MockedChannelHandler implements ChannelHandler {
-//    ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
+    //    ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
     ConcurrentHashSet<Channel> channels = new ConcurrentHashSet<Channel>();
 
     public void connected(Channel channel) throws RemotingException {
@@ -50,9 +49,10 @@ public class MockedChannelHandler implements ChannelHandler {
 
     public void caught(Channel channel, Throwable exception) throws RemotingException {
         throw new RemotingException(channel, exception);
-        
+
     }
-    public Set<Channel> getChannels(){
+
+    public Set<Channel> getChannels() {
         return Collections.unmodifiableSet(channels);
     }
 }

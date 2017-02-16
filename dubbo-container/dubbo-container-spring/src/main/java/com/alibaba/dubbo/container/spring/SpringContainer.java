@@ -25,7 +25,7 @@ import com.alibaba.dubbo.container.Container;
 
 /**
  * SpringContainer. (SPI, Singleton, ThreadSafe)
- * 
+ *
  * @author william.liangf
  */
 public class SpringContainer implements Container {
@@ -33,16 +33,16 @@ public class SpringContainer implements Container {
     private static final Logger logger = LoggerFactory.getLogger(SpringContainer.class);
 
     public static final String SPRING_CONFIG = "dubbo.spring.config";
-    
+
     public static final String DEFAULT_SPRING_CONFIG = "classpath*:META-INF/spring/*.xml";
 
     static ClassPathXmlApplicationContext context;
-    
-    public static ClassPathXmlApplicationContext getContext() {
-		return context;
-	}
 
-	public void start() {
+    public static ClassPathXmlApplicationContext getContext() {
+        return context;
+    }
+
+    public void start() {
         String configPath = ConfigUtils.getProperty(SPRING_CONFIG);
         if (configPath == null || configPath.length() == 0) {
             configPath = DEFAULT_SPRING_CONFIG;

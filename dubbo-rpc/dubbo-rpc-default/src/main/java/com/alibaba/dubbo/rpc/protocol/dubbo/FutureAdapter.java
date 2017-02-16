@@ -28,14 +28,14 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * FutureAdapter
- * 
+ *
  * @author william.liangf
  */
 public class FutureAdapter<V> implements Future<V> {
-    
+
     private final ResponseFuture future;
 
-    public FutureAdapter(ResponseFuture future){
+    public FutureAdapter(ResponseFuture future) {
         this.future = future;
     }
 

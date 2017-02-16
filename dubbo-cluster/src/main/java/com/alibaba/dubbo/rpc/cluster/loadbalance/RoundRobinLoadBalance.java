@@ -33,8 +33,8 @@ import com.alibaba.dubbo.rpc.Invoker;
  */
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
 
-    public static final String NAME = "roundrobin"; 
-    
+    public static final String NAME = "roundrobin";
+
     private final ConcurrentMap<String, AtomicPositiveInteger> sequences = new ConcurrentHashMap<String, AtomicPositiveInteger>();
 
     private final ConcurrentMap<String, AtomicPositiveInteger> weightSequences = new ConcurrentHashMap<String, AtomicPositiveInteger>();

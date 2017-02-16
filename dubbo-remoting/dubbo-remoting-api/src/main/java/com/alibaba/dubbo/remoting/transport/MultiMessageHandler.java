@@ -17,11 +17,11 @@ public class MultiMessageHandler extends AbstractChannelHandlerDelegate {
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public void received(Channel channel, Object message) throws RemotingException {
         if (message instanceof MultiMessage) {
-            MultiMessage list = (MultiMessage)message;
-            for(Object obj : list) {
+            MultiMessage list = (MultiMessage) message;
+            for (Object obj : list) {
                 handler.received(channel, obj);
             }
         } else {

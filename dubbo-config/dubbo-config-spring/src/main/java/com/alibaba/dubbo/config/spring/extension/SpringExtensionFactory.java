@@ -24,13 +24,13 @@ import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
 
 /**
  * SpringExtensionFactory
- * 
+ *
  * @author william.liangf
  */
 public class SpringExtensionFactory implements ExtensionFactory {
-    
+
     private static final Set<ApplicationContext> contexts = new ConcurrentHashSet<ApplicationContext>();
-    
+
     public static void addApplicationContext(ApplicationContext context) {
         contexts.add(context);
     }

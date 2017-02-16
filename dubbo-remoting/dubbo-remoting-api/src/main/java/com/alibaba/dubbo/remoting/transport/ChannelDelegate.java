@@ -24,20 +24,20 @@ import com.alibaba.dubbo.remoting.RemotingException;
 
 /**
  * ChannelDelegate
- * 
+ *
  * @author william.liangf
  */
 public class ChannelDelegate implements Channel {
-    
+
     private transient Channel channel;
-    
+
     public ChannelDelegate() {
     }
 
     public ChannelDelegate(Channel channel) {
         setChannel(channel);
     }
-    
+
     public Channel getChannel() {
         return channel;
     }
@@ -96,6 +96,7 @@ public class ChannelDelegate implements Channel {
     public void close() {
         channel.close();
     }
+
     public void close(int timeout) {
         channel.close(timeout);
     }

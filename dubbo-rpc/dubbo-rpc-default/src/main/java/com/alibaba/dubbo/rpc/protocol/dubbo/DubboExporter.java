@@ -23,16 +23,16 @@ import com.alibaba.dubbo.rpc.protocol.AbstractExporter;
 
 /**
  * DubboExporter
- * 
+ *
  * @author william.liangf
  */
 public class DubboExporter<T> extends AbstractExporter<T> {
 
-    private final String                        key;
+    private final String key;
 
     private final Map<String, Exporter<?>> exporterMap;
 
-    public DubboExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap){
+    public DubboExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap) {
         super(invoker);
         this.key = key;
         this.exporterMap = exporterMap;

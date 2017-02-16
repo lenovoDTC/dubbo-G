@@ -29,7 +29,7 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.filter.TraceFilter;
 
 /**
  * TraceTelnetHandler
- * 
+ *
  * @author william.liangf
  */
 @Activate
@@ -57,7 +57,7 @@ public class TraceTelnetHandler implements TelnetHandler {
         } else {
             times = parts.length > 2 ? parts[2] : "1";
         }
-        if (! StringUtils.isInteger(times)) {
+        if (!StringUtils.isInteger(times)) {
             return "Illegal times " + times + ", must be integer.";
         }
         Invoker<?> invoker = null;
@@ -78,7 +78,7 @@ public class TraceTelnetHandler implements TelnetHandler {
                         break;
                     }
                 }
-                if (! found) {
+                if (!found) {
                     return "No such method " + method + " in class " + invoker.getInterface().getName();
                 }
             }

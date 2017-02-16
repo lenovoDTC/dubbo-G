@@ -1,12 +1,12 @@
 /**
  * Project: dubbo.registry.console-2.1.0-SNAPSHOT
- * 
+ * <p>
  * File Created at Sep 13, 2011
  * $Id: LocaleValve.java 181192 2012-06-21 05:05:47Z tony.chenl $
- * 
+ * <p>
  * Copyright 1999-2100 Alibaba.com Corporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -34,12 +34,13 @@ import com.alibaba.dubbo.governance.web.common.i18n.LocaleUtil;
  * @author guanghui.shigh
  */
 public class LocaleValve extends AbstractValve {
-    
+
     @Autowired
-    private HttpServletRequest       request;
+    private HttpServletRequest request;
 
     //添加拦截器例外设置
     private final static Set<String> TARGET_WITHOUT_CHECK = new HashSet<String>();
+
     static {
         TARGET_WITHOUT_CHECK.add("/ok");
         TARGET_WITHOUT_CHECK.add("/error");

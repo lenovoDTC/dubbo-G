@@ -30,7 +30,7 @@ import com.alibaba.dubbo.rpc.RpcInvocation;
 
 /**
  * ContextInvokerFilter
- * 
+ *
  * @author william.liangf
  */
 @Activate(group = Constants.PROVIDER, order = -10000)
@@ -51,10 +51,10 @@ public class ContextFilter implements Filter {
                 .setInvoker(invoker)
                 .setInvocation(invocation)
                 .setAttachments(attachments)
-                .setLocalAddress(invoker.getUrl().getHost(), 
-                                 invoker.getUrl().getPort());
+                .setLocalAddress(invoker.getUrl().getHost(),
+                        invoker.getUrl().getPort());
         if (invocation instanceof RpcInvocation) {
-            ((RpcInvocation)invocation).setInvoker(invoker);
+            ((RpcInvocation) invocation).setInvoker(invoker);
         }
         try {
             return invoker.invoke(invocation);

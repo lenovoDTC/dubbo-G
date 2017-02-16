@@ -33,7 +33,7 @@ import com.alibaba.dubbo.config.spring.ServiceBean;
 
 /**
  * DataSourceStatusChecker
- * 
+ *
  * @author william.liangf
  */
 @Activate
@@ -65,7 +65,7 @@ public class DataSourceStatusChecker implements StatusChecker {
                     DatabaseMetaData metaData = connection.getMetaData();
                     ResultSet resultSet = metaData.getTypeInfo();
                     try {
-                        if (! resultSet.next()) {
+                        if (!resultSet.next()) {
                             level = Status.Level.ERROR;
                         }
                     } finally {

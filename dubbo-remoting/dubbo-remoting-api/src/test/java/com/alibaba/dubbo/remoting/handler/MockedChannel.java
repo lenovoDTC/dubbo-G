@@ -26,14 +26,13 @@ import com.alibaba.dubbo.remoting.RemotingException;
 
 /**
  * @author chao.liuc
- *
  */
 public class MockedChannel implements Channel {
-    private boolean isClosed ; 
-    private URL url; 
-    private ChannelHandler handler ;
-    private Map <String,Object> map = new HashMap<String, Object>(); 
-    
+    private boolean isClosed;
+    private URL url;
+    private ChannelHandler handler;
+    private Map<String, Object> map = new HashMap<String, Object>();
+
     public MockedChannel() {
         super();
     }
@@ -44,12 +43,12 @@ public class MockedChannel implements Channel {
     }
 
     public ChannelHandler getChannelHandler() {
-        
+
         return this.handler;
     }
 
     public InetSocketAddress getLocalAddress() {
-        
+
         return null;
     }
 

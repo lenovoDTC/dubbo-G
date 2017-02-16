@@ -25,7 +25,7 @@ import com.alibaba.dubbo.registry.support.AbstractRegistryFactory;
 
 /**
  * RegistryStatusChecker
- * 
+ *
  * @author william.liangf
  */
 @Activate
@@ -43,7 +43,7 @@ public class RegistryStatusChecker implements StatusChecker {
                 buf.append(",");
             }
             buf.append(registry.getUrl().getAddress());
-            if (! registry.isAvailable()) {
+            if (!registry.isAvailable()) {
                 level = Status.Level.ERROR;
                 buf.append("(disconnected)");
             } else {

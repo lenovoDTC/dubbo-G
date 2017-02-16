@@ -26,7 +26,7 @@ import com.alibaba.dubbo.common.serialize.Serialization;
 
 /**
  * FastJsonSerialization
- * 
+ *
  * @author william.liangf
  */
 public class FastJsonSerialization implements Serialization {
@@ -38,7 +38,7 @@ public class FastJsonSerialization implements Serialization {
     public String getContentType() {
         return "text/json";
     }
-    
+
     public ObjectOutput serialize(URL url, OutputStream output) throws IOException {
         return new FastJsonObjectOutput(output);
     }

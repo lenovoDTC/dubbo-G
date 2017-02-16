@@ -8,20 +8,20 @@ import com.alibaba.dubbo.governance.service.RouteService;
 
 /**
  * PullTool for accessing message bundle.
- * 
+ *
  * @author gerry
  */
 public class ToolUtil implements ToolFactory {
-	@Autowired
-	OverrideService overrideService;
-	
-	@Autowired
-	RouteService routeService;
+    @Autowired
+    OverrideService overrideService;
+
+    @Autowired
+    RouteService routeService;
 
     public Object createTool() throws Exception {
-    	Tool tool = new Tool();
-    	tool.setOverrideService(overrideService);
-    	tool.setRouteService(routeService);
+        Tool tool = new Tool();
+        tool.setOverrideService(overrideService);
+        tool.setRouteService(routeService);
         return tool;
     }
 
@@ -30,9 +30,9 @@ public class ToolUtil implements ToolFactory {
     public boolean isSingleton() {
         return this.singleton;
     }
-    
+
     public void setSingleton(boolean singleton) {
         this.singleton = singleton;
     }
-    
+
 }

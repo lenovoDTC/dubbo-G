@@ -22,15 +22,15 @@ import com.alibaba.dubbo.examples.annotation.api.AnnotationService;
 
 /**
  * AnnotationAction
- * 
+ *
  * @author william.liangf
  */
 @Component("annotationAction")
 public class AnnotationAction {
-    
+
     @Reference
     private AnnotationService annotationService;
-    
+
     public String doSayHello(String name) {
         return annotationService.sayHello(name);
     }

@@ -24,7 +24,7 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * JCache
- * 
+ *
  * @author william.liangf
  */
 public class JCache implements com.alibaba.dubbo.cache.Cache {

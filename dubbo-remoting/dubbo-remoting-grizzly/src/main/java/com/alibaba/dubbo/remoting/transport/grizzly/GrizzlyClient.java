@@ -36,11 +36,11 @@ import com.alibaba.dubbo.remoting.transport.AbstractClient;
 
 /**
  * GrizzlyClient
- * 
+ *
  * @author william.liangf
  */
 public class GrizzlyClient extends AbstractClient {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(GrizzlyClient.class);
 
     private TCPNIOTransport transport;
@@ -58,7 +58,7 @@ public class GrizzlyClient extends AbstractClient {
         filterChainBuilder.add(new GrizzlyCodecAdapter(getCodec(), getUrl(), this));
         filterChainBuilder.add(new GrizzlyHandler(getUrl(), this));
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
-        ThreadPoolConfig config = builder.getWorkerThreadPoolConfig(); 
+        ThreadPoolConfig config = builder.getWorkerThreadPoolConfig();
         config.setPoolName(CLIENT_THREAD_POOL_NAME)
                 .setQueueLimit(-1)
                 .setCorePoolSize(0)
@@ -72,12 +72,11 @@ public class GrizzlyClient extends AbstractClient {
         transport.start();
     }
 
-    
 
     @Override
     protected void doConnect() throws Throwable {
         connection = transport.connect(getConnectAddress())
-                        .get(getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT), TimeUnit.MILLISECONDS);
+                .get(getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT), TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -97,11 +96,11 @@ public class GrizzlyClient extends AbstractClient {
             logger.warn(e.getMessage(), e);
         }
     }
-    
+
     @Override
     protected Channel getChannel() {
         Connection<?> c = connection;
-        if (c == null || ! c.isOpen())
+        if (c == null || !c.isOpen())
             return null;
         return GrizzlyChannel.getOrAddChannel(c, getUrl(), this);
     }

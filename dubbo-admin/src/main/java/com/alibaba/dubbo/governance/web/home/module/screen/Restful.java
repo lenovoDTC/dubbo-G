@@ -24,22 +24,22 @@ public abstract class Restful {
 
     @Autowired
     private HttpServletResponse response;
-    
+
     @Autowired
     HttpServletRequest request;
-    
+
 //    @Autowired
 //    RegistryValidator          registryService;
 
-    protected String            role            = null;
-    protected String            operator        = null;
-    protected User              currentUser     = null;
-    protected String            operatorAddress = null;
-    protected URL               url = null;
+    protected String role = null;
+    protected String operator = null;
+    protected User currentUser = null;
+    protected String operatorAddress = null;
+    protected URL url = null;
 
     public void execute(Map<String, Object> context) throws Exception {
         Result result = new Result();
-        if(request.getParameter("url")!=null){
+        if (request.getParameter("url") != null) {
             url = URL.valueOf(URL.decode(request.getParameter("url")));
         }
         if (context.get(WebConstants.CURRENT_USER_KEY) != null) {
@@ -50,7 +50,7 @@ public abstract class Restful {
             context.put(WebConstants.CURRENT_USER_KEY, user);
         }
         operatorAddress = (String) context.get("clientid");
-        if(operatorAddress==null || operatorAddress.isEmpty()){
+        if (operatorAddress == null || operatorAddress.isEmpty()) {
             operatorAddress = (String) context.get("request.remoteHost");
         }
         context.put("operator", operator);
@@ -69,7 +69,7 @@ public abstract class Restful {
 //            result.setCode(2);
 //            result.setMessage(t.getMessage());
 //        }
-        catch (Throwable t){
+        catch (Throwable t) {
             result.setStatus("ERROR");
             result.setCode(1);
             result.setMessage(t.getMessage());
@@ -82,7 +82,7 @@ public abstract class Restful {
         } catch (Exception e) {
             response.setStatus(500);
             os.print(e.getMessage());
-        }finally{
+        } finally {
             os.flush();
         }
     }

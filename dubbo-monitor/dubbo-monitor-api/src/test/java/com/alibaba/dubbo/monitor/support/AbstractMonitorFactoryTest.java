@@ -28,38 +28,38 @@ import com.alibaba.dubbo.monitor.MonitorFactory;
 
 /**
  * AbstractMonitorFactoryTest
- * 
+ *
  * @author william.liangf
  */
 public class AbstractMonitorFactoryTest {
-    
+
     private MonitorFactory monitorFactory = new AbstractMonitorFactory() {
-        
+
         protected Monitor createMonitor(final URL url) {
             return new Monitor() {
 
-				public URL getUrl() {
-					return url;
-				}
+                public URL getUrl() {
+                    return url;
+                }
 
-				public boolean isAvailable() {
-					return true;
-				}
+                public boolean isAvailable() {
+                    return true;
+                }
 
                 public void destroy() {
                 }
-                
-				public void collect(URL statistics) {
-				}
 
-				public List<URL> lookup(URL query) {
-					return null;
-				}
-                
+                public void collect(URL statistics) {
+                }
+
+                public List<URL> lookup(URL query) {
+                    return null;
+                }
+
             };
         }
     };
-    
+
     @Test
     public void testMonitorFactoryCache() throws Exception {
         URL url = URL.valueOf("dubbo://" + NetUtils.getLocalAddress().getHostAddress() + ":2233");
@@ -67,7 +67,7 @@ public class AbstractMonitorFactoryTest {
         Monitor monitor2 = monitorFactory.getMonitor(url);
         Assert.assertEquals(monitor1, monitor2);
     }
-    
+
     @Test
     public void testMonitorFactoryIpCache() throws Exception {
         Monitor monitor1 = monitorFactory.getMonitor(URL.valueOf("dubbo://" + NetUtils.getLocalAddress().getHostName() + ":2233"));

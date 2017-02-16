@@ -42,19 +42,19 @@ import com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol;
 
 /**
  * HttpProtocol
- * 
+ *
  * @author william.liangf
  */
 public class HttpProtocol extends AbstractProxyProtocol {
 
-    public static final int              DEFAULT_PORT = 80;
+    public static final int DEFAULT_PORT = 80;
 
     private final Map<String, HttpServer> serverMap = new ConcurrentHashMap<String, HttpServer>();
 
     private final Map<String, HttpInvokerServiceExporter> skeletonMap = new ConcurrentHashMap<String, HttpInvokerServiceExporter>();
 
     private HttpBinder httpBinder;
-    
+
     public HttpProtocol() {
         super(RemoteAccessException.class);
     }
@@ -68,12 +68,12 @@ public class HttpProtocol extends AbstractProxyProtocol {
     }
 
     private class InternalHandler implements HttpHandler {
-        
+
         public void handle(HttpServletRequest request, HttpServletResponse response)
                 throws IOException, ServletException {
             String uri = request.getRequestURI();
             HttpInvokerServiceExporter skeleton = skeletonMap.get(uri);
-            if (! request.getMethod().equalsIgnoreCase("POST")) {
+            if (!request.getMethod().equalsIgnoreCase("POST")) {
                 response.setStatus(500);
             } else {
                 RpcContext.getContext().setRemoteAddress(request.getRemoteAddr(), request.getRemotePort());
@@ -84,7 +84,7 @@ public class HttpProtocol extends AbstractProxyProtocol {
                 }
             }
         }
-        
+
     }
 
     protected <T> Runnable doExport(final T impl, Class<T> type, URL url) throws RpcException {
@@ -118,21 +118,21 @@ public class HttpProtocol extends AbstractProxyProtocol {
         httpProxyFactoryBean.setServiceInterface(serviceType);
         String client = url.getParameter(Constants.CLIENT_KEY);
         if (client == null || client.length() == 0 || "simple".equals(client)) {
-        	SimpleHttpInvokerRequestExecutor httpInvokerRequestExecutor = new SimpleHttpInvokerRequestExecutor() {
-				protected void prepareConnection(HttpURLConnection con,
-						int contentLength) throws IOException {
-					super.prepareConnection(con, contentLength);
-					con.setReadTimeout(url.getParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT));
-					con.setConnectTimeout(url.getParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT));
-				}
-        	};
-        	httpProxyFactoryBean.setHttpInvokerRequestExecutor(httpInvokerRequestExecutor);
+            SimpleHttpInvokerRequestExecutor httpInvokerRequestExecutor = new SimpleHttpInvokerRequestExecutor() {
+                protected void prepareConnection(HttpURLConnection con,
+                                                 int contentLength) throws IOException {
+                    super.prepareConnection(con, contentLength);
+                    con.setReadTimeout(url.getParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT));
+                    con.setConnectTimeout(url.getParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT));
+                }
+            };
+            httpProxyFactoryBean.setHttpInvokerRequestExecutor(httpInvokerRequestExecutor);
         } else if ("commons".equals(client)) {
-        	CommonsHttpInvokerRequestExecutor httpInvokerRequestExecutor = new CommonsHttpInvokerRequestExecutor();
-        	httpInvokerRequestExecutor.setReadTimeout(url.getParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT));
-        	httpProxyFactoryBean.setHttpInvokerRequestExecutor(httpInvokerRequestExecutor);
+            CommonsHttpInvokerRequestExecutor httpInvokerRequestExecutor = new CommonsHttpInvokerRequestExecutor();
+            httpInvokerRequestExecutor.setReadTimeout(url.getParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT));
+            httpProxyFactoryBean.setHttpInvokerRequestExecutor(httpInvokerRequestExecutor);
         } else if (client != null && client.length() > 0) {
-        	throw new IllegalStateException("Unsupported http protocol client " + client + ", only supported: simple, commons");
+            throw new IllegalStateException("Unsupported http protocol client " + client + ", only supported: simple, commons");
         }
         httpProxyFactoryBean.afterPropertiesSet();
         return (T) httpProxyFactoryBean.getObject();

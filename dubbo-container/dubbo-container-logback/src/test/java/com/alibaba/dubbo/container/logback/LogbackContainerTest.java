@@ -24,26 +24,26 @@ import com.alibaba.dubbo.container.Container;
 
 /**
  * StandaloneContainerTest
- * 
+ *
  * @author {@link "mailto:qq55355383@gmail.com" "yi.tong"}
  * @date May 30, 2012
  */
 public class LogbackContainerTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(LogbackContainerTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogbackContainerTest.class);
 
-	@Test
-	public void testContainer() {
-		LogbackContainer container = (LogbackContainer) ExtensionLoader.getExtensionLoader(Container.class)
-				.getExtension("logback");
-		container.start();
+    @Test
+    public void testContainer() {
+        LogbackContainer container = (LogbackContainer) ExtensionLoader.getExtensionLoader(Container.class)
+                .getExtension("logback");
+        container.start();
 
-		logger.debug("Test debug:" + this.getClass().getName());
-		logger.warn("Test warn:" + this.getClass().getName());
-		logger.info("Test info:" + this.getClass().getName());
-		logger.error("Test error:" + this.getClass().getName());
+        logger.debug("Test debug:" + this.getClass().getName());
+        logger.warn("Test warn:" + this.getClass().getName());
+        logger.info("Test info:" + this.getClass().getName());
+        logger.error("Test error:" + this.getClass().getName());
 
-		container.stop();
-	}
+        container.stop();
+    }
 
 }

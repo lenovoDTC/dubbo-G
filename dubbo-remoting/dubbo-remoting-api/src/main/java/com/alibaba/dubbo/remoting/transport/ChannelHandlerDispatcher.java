@@ -26,7 +26,7 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
 
 /**
  * ChannelListenerDispatcher
- * 
+ *
  * @author william.liangf
  */
 public class ChannelHandlerDispatcher implements ChannelHandler {
@@ -34,10 +34,10 @@ public class ChannelHandlerDispatcher implements ChannelHandler {
     private static final Logger logger = LoggerFactory.getLogger(ChannelHandlerDispatcher.class);
 
     private final Collection<ChannelHandler> channelHandlers = new CopyOnWriteArraySet<ChannelHandler>();
-    
+
     public ChannelHandlerDispatcher() {
     }
-    
+
     public ChannelHandlerDispatcher(ChannelHandler... handlers) {
         this(handlers == null ? null : Arrays.asList(handlers));
     }
@@ -111,5 +111,5 @@ public class ChannelHandlerDispatcher implements ChannelHandler {
             }
         }
     }
-    
+
 }

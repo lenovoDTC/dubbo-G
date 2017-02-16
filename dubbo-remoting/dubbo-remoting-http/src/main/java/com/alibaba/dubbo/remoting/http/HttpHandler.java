@@ -23,19 +23,19 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * http invocation handler.
- * 
+ *
  * @author william.liangf
  */
 public interface HttpHandler {
-    
+
     /**
-	 * invoke.
-	 * 
-	 * @param request request.
-	 * @param response response.
-	 * @throws IOException
-	 * @throws ServletException
-	 */
+     * invoke.
+     *
+     * @param request  request.
+     * @param response response.
+     * @throws IOException
+     * @throws ServletException
+     */
     void handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
-    
+
 }

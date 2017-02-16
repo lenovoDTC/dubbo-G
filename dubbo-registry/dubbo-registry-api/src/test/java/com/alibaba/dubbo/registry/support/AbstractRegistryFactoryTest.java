@@ -30,13 +30,13 @@ import com.alibaba.dubbo.registry.support.AbstractRegistryFactory;
 
 /**
  * AbstractRegistryFactoryTest
- * 
+ *
  * @author william.liangf
  */
 public class AbstractRegistryFactoryTest {
-    
+
     private RegistryFactory registryFactory = new AbstractRegistryFactory() {
-        
+
         @Override
         protected Registry createRegistry(final URL url) {
             return new Registry() {
@@ -67,11 +67,11 @@ public class AbstractRegistryFactoryTest {
                 public List<URL> lookup(URL url) {
                     return null;
                 }
-                
+
             };
         }
     };
-    
+
     @Test
     public void testRegistryFactoryCache() throws Exception {
         URL url = URL.valueOf("dubbo://" + NetUtils.getLocalAddress().getHostAddress() + ":2233");
@@ -79,7 +79,7 @@ public class AbstractRegistryFactoryTest {
         Registry registry2 = registryFactory.getRegistry(url);
         Assert.assertEquals(registry1, registry2);
     }
-    
+
     @Test
     public void testRegistryFactoryIpCache() throws Exception {
         Registry registry1 = registryFactory.getRegistry(URL.valueOf("dubbo://" + NetUtils.getLocalAddress().getHostName() + ":2233"));

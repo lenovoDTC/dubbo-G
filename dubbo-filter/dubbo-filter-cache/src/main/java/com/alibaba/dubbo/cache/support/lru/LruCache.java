@@ -24,17 +24,18 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * LruCache
- * 
+ *
  * @author william.liangf
  */
 public class LruCache implements Cache {
-    
+
     private final Map<Object, Object> store;
 
     public LruCache(URL url) {
         final int max = url.getParameter("cache.size", 1000);
         this.store = new LinkedHashMap<Object, Object>() {
             private static final long serialVersionUID = -3834209229668463829L;
+
             @Override
             protected boolean removeEldestEntry(Entry<Object, Object> eldest) {
                 return size() > max;

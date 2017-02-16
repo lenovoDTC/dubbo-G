@@ -34,21 +34,21 @@ import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
 
 /**
  * GrizzlyCodecAdapter
- * 
+ *
  * @author william.liangf
  */
 public class GrizzlyCodecAdapter extends BaseFilter {
 
-    private final Codec2          codec;
+    private final Codec2 codec;
 
-    private final URL             url;
-    
-    private final ChannelHandler  handler;
+    private final URL url;
 
-    private final int             bufferSize;
+    private final ChannelHandler handler;
+
+    private final int bufferSize;
 
     private ChannelBuffer previousData = ChannelBuffers.EMPTY_BUFFER;
-    
+
     public GrizzlyCodecAdapter(Codec2 codec, URL url, ChannelHandler handler) {
         this.codec = codec;
         this.url = url;
@@ -63,10 +63,10 @@ public class GrizzlyCodecAdapter extends BaseFilter {
         GrizzlyChannel channel = GrizzlyChannel.getOrAddChannel(connection, url, handler);
         try {
             ChannelBuffer channelBuffer = ChannelBuffers.dynamicBuffer(1024); // 不需要关闭
-            
+
             Object msg = context.getMessage();
             codec.encode(channel, channelBuffer, msg);
-            
+
             GrizzlyChannel.removeChannelIfDisconnectd(connection);
             Buffer buffer = connection.getTransport().getMemoryManager().allocate(channelBuffer.readableBytes());
             buffer.put(channelBuffer.toByteBuffer());

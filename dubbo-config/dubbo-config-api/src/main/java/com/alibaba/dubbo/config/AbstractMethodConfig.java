@@ -63,7 +63,7 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     
     // 熔断错误率
     protected float              errorrate;
-    
+
     // 降级并发数
     protected int              supervene;
 
@@ -164,7 +164,7 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     public void setValidation(String validation) {
         this.validation = validation;
     }
-    
+
     public int getSupervene() {
         return supervene;
     }
@@ -172,7 +172,7 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     public void setSupervene(int supervene) {
         this.supervene = supervene;
     }
-    
+
     public float getErrorrate() {
         return errorrate;
     }

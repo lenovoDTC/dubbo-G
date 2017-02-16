@@ -23,11 +23,11 @@ import com.alibaba.dubbo.container.Container;
 
 /**
  * StandaloneContainerTest
- * 
+ *
  * @author william.liangf
  */
 public class JettyContainerTest {
-    
+
     @Test
     public void testContainer() {
         JettyContainer container = (JettyContainer) ExtensionLoader.getExtensionLoader(Container.class).getExtension("jetty");

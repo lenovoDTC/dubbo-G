@@ -189,7 +189,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 	 * 返回MockInvoker 契约：
 	 * directory根据invocation中是否有Constants.INVOCATION_NEED_MOCK，来判断获取的是一个normal
 	 * invoker 还是一个 mock invoker 如果directorylist 返回多个mock invoker，只使用第一个invoker.
-	 * 
+	 *
 	 * @param invocation
 	 * @return
 	 */
@@ -215,7 +215,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
 
 	/**
 	 * 计数
-	 * 
+	 *
 	 * @param errorrate
 	 * @param status
 	 * @return

@@ -25,16 +25,16 @@ import com.alibaba.dubbo.common.URL;
 
 /**
  * ZookeeperRegistryTest
- * 
+ *
  * @author tony.chenl
  */
 public class ZookeeperRegistryTest {
 
-    String            service     = "com.alibaba.dubbo.test.injvmServie";
-    URL               registryUrl = URL.valueOf("zookeeper://239.255.255.255/");
-    URL               serviceUrl  = URL.valueOf("zookeeper://zookeeper/" + service
-                                                + "?notify=false&methods=test1,test2");
-    URL               consumerUrl = URL.valueOf("zookeeper://consumer/" + service + "?notify=false&methods=test1,test2");
+    String service = "com.alibaba.dubbo.test.injvmServie";
+    URL registryUrl = URL.valueOf("zookeeper://239.255.255.255/");
+    URL serviceUrl = URL.valueOf("zookeeper://zookeeper/" + service
+            + "?notify=false&methods=test1,test2");
+    URL consumerUrl = URL.valueOf("zookeeper://consumer/" + service + "?notify=false&methods=test1,test2");
     // ZookeeperRegistry registry    = new ZookeeperRegistry(registryUrl);
 
     /**
@@ -57,7 +57,7 @@ public class ZookeeperRegistryTest {
         URL errorUrl = URL.valueOf("zookeeper://zookeeper/");
         new ZookeeperRegistry(errorUrl);
     }*/
-    
+
     @Test
     public void testDefaultPort() {
         Assert.assertEquals("10.20.153.10:2181", ZookeeperRegistry.appendDefaultPort("10.20.153.10:0"));

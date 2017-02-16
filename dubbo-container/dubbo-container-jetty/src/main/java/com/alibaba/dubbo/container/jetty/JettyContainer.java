@@ -32,7 +32,7 @@ import com.alibaba.dubbo.container.page.ResourceFilter;
 
 /**
  * JettyContainer. (SPI, Singleton, ThreadSafe)
- * 
+ *
  * @author william.liangf
  */
 public class JettyContainer implements Container {
@@ -60,17 +60,17 @@ public class JettyContainer implements Container {
         connector = new SelectChannelConnector();
         connector.setPort(port);
         ServletHandler handler = new ServletHandler();
-        
+
         String resources = ConfigUtils.getProperty(JETTY_DIRECTORY);
         if (resources != null && resources.length() > 0) {
             FilterHolder resourceHolder = handler.addFilterWithMapping(ResourceFilter.class, "/*", Handler.DEFAULT);
             resourceHolder.setInitParameter("resources", resources);
         }
-        
+
         ServletHolder pageHolder = handler.addServletWithMapping(PageServlet.class, "/*");
         pageHolder.setInitParameter("pages", ConfigUtils.getProperty(JETTY_PAGES));
         pageHolder.setInitOrder(2);
-        
+
         Server server = new Server();
         server.addConnector(connector);
         server.addHandler(handler);

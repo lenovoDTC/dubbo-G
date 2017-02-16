@@ -45,26 +45,26 @@ import com.alibaba.dubbo.remoting.transport.AbstractClient;
 
 /**
  * Mina client.
- * 
+ *
  * @author qian.lei
  * @author william.liangf
  */
 public class MinaClient extends AbstractClient {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(MinaClient.class);
 
     private static final Map<String, SocketConnector> connectors = new ConcurrentHashMap<String, SocketConnector>();
-    
+
     private String connectorKey;
-    
+
     private SocketConnector connector;
-    
+
     private volatile IoSession session; // volatile, please copy reference to use
 
     public MinaClient(final URL url, final ChannelHandler handler) throws RemotingException {
         super(url, wrapChannelHandler(url, handler));
     }
-    
+
     @Override
     protected void doOpen() throws Throwable {
         connectorKey = getUrl().toFullString();
@@ -73,8 +73,8 @@ public class MinaClient extends AbstractClient {
             connector = c;
         } else {
             // set thread pool.
-            connector = new SocketConnector(Constants.DEFAULT_IO_THREADS, 
-                                            Executors.newCachedThreadPool(new NamedThreadFactory("MinaClientWorker", true)));
+            connector = new SocketConnector(Constants.DEFAULT_IO_THREADS,
+                    Executors.newCachedThreadPool(new NamedThreadFactory("MinaClientWorker", true)));
             // config
             SocketConnectorConfig cfg = (SocketConnectorConfig) connector.getDefaultConfig();
             cfg.setThreadModel(ThreadModel.MANUAL);
@@ -87,7 +87,7 @@ public class MinaClient extends AbstractClient {
             connectors.put(connectorKey, connector);
         }
     }
-    
+
     @Override
     protected void doConnect() throws Throwable {
         ConnectFuture future = connector.connect(getConnectAddress(), new MinaHandler(getUrl(), this));
@@ -139,9 +139,9 @@ public class MinaClient extends AbstractClient {
             finish.await(getTimeout(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             throw new RemotingException(this, "client(url: " + getUrl() + ") failed to connect to server " + getRemoteAddress() + " client-side timeout "
-                                        + getTimeout() + "ms (elapsed: " + (System.currentTimeMillis() - start)
-                                        + "ms) from netty client " + NetUtils.getLocalHost() + " using dubbo version "
-                                        + Version.getVersion() + ", cause: " + e.getMessage(), e);
+                    + getTimeout() + "ms (elapsed: " + (System.currentTimeMillis() - start)
+                    + "ms) from netty client " + NetUtils.getLocalHost() + " using dubbo version "
+                    + Version.getVersion() + ", cause: " + e.getMessage(), e);
         }
         Throwable e = exception.get();
         if (e != null) {
@@ -162,11 +162,11 @@ public class MinaClient extends AbstractClient {
     protected void doClose() throws Throwable {
         //release mina resouces.
     }
-    
+
     @Override
     protected Channel getChannel() {
         IoSession s = session;
-        if (s == null || ! s.isConnected())
+        if (s == null || !s.isConnected())
             return null;
         return MinaChannel.getOrAddChannel(s, getUrl(), this);
     }

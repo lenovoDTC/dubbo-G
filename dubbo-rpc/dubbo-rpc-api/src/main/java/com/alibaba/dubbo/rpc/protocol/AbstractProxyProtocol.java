@@ -29,12 +29,13 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * AbstractProxyProtocol
- * 
+ *
  * @author william.liangf
  */
 public abstract class AbstractProxyProtocol extends AbstractProtocol {
 
-    private final List<Class<?>> rpcExceptions = new CopyOnWriteArrayList<Class<?>>();;
+    private final List<Class<?>> rpcExceptions = new CopyOnWriteArrayList<Class<?>>();
+    ;
 
     private ProxyFactory proxyFactory;
 
@@ -60,11 +61,11 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
     }
 
     @SuppressWarnings("unchecked")
-	public <T> Exporter<T> export(final Invoker<T> invoker) throws RpcException {
+    public <T> Exporter<T> export(final Invoker<T> invoker) throws RpcException {
         final String uri = serviceKey(invoker.getUrl());
         Exporter<T> exporter = (Exporter<T>) exporterMap.get(uri);
         if (exporter != null) {
-        	return exporter;
+            return exporter;
         }
         final Runnable runnable = doExport(proxyFactory.getProxy(invoker), invoker.getInterface(), invoker.getUrl());
         exporter = new AbstractExporter<T>(invoker) {

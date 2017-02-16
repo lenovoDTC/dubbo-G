@@ -68,15 +68,15 @@ public class Logs extends Restful {
         context.put("modified", modified);
         context.put("content", content);
     }
-    
+
     public boolean change(Map<String, Object> context) throws Exception {
-        String contextLevel = (String)context.get("level");
+        String contextLevel = (String) context.get("level");
         if (contextLevel == null || contextLevel.length() == 0) {
             context.put("message", getMessage("MissRequestParameters", "level"));
             return false;
         }
-        if (! User.ROOT.equals(role)) {
-           context.put("message", getMessage("HaveNoRootPrivilege"));
+        if (!User.ROOT.equals(role)) {
+            context.put("message", getMessage("HaveNoRootPrivilege"));
             return false;
         }
         Level level = Level.valueOf(contextLevel);

@@ -37,10 +37,10 @@ import com.alibaba.dubbo.registry.common.domain.Provider;
 public class Versions extends Restful {
     @Autowired
     private ProviderService providerService;
-    
+
     @Autowired
     private ConsumerService consumerService;
-    
+
     public void index(Map<String, Object> context) {
         List<Provider> providers = providerService.findAll();
         List<Consumer> consumers = consumerService.findAll();
@@ -57,7 +57,7 @@ public class Versions extends Restful {
             Map<String, String> parameter = StringUtils.parseQueryString(temp.next());
             if (parameter != null) {
                 String dubbo = parameter.get("dubbo");
-                if(dubbo == null) dubbo = "0.0.0";
+                if (dubbo == null) dubbo = "0.0.0";
                 String application = parameter.get("application");
                 if (versions.get(dubbo) == null) {
                     Set<String> apps = new HashSet<String>();
@@ -70,7 +70,7 @@ public class Versions extends Restful {
     }
 
     public void show(Long[] ids, Map<String, Object> context) {
-        String version =(String)context.get("version");
+        String version = (String) context.get("version");
         if (version != null && version.length() > 0) {
             List<Provider> providers = providerService.findAll();
             List<Consumer> consumers = consumerService.findAll();
@@ -87,7 +87,7 @@ public class Versions extends Restful {
                 Map<String, String> parameter = StringUtils.parseQueryString(temp.next());
                 if (parameter != null) {
                     String dubbo = parameter.get("dubbo");
-                    if(dubbo == null) dubbo = "0.0.0";
+                    if (dubbo == null) dubbo = "0.0.0";
                     String application = parameter.get("application");
                     if (version.equals(dubbo)) {
                         applications.add(application);

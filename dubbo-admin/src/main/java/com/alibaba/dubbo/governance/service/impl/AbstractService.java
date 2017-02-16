@@ -1,11 +1,11 @@
 /**
  * Project: dubbo.registry.server-1.1.0-SNAPSHOT
- * 
+ * <p>
  * File Created at 2010-6-28
- * 
+ * <p>
  * Copyright 1999-2010 Alibaba.com Croporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -27,7 +27,7 @@ import com.alibaba.dubbo.registry.RegistryService;
 
 /**
  * IbatisDAO
- * 
+ *
  * @author william.liangf
  */
 public class AbstractService {
@@ -35,14 +35,14 @@ public class AbstractService {
     protected static final Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
     @Autowired
-    private RegistryServerSync           sync;
-    
+    private RegistryServerSync sync;
+
     @Autowired
     protected RegistryService registryService;
-    
-    public ConcurrentMap<String, ConcurrentMap<String, Map<Long, URL>>> getRegistryCache(){
+
+    public ConcurrentMap<String, ConcurrentMap<String, Map<Long, URL>>> getRegistryCache() {
         return sync.getRegistryCache();
     }
-    
-    
+
+
 }

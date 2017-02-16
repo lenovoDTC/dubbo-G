@@ -25,5 +25,5 @@
 	<dubbo:consumer id="count" filter="count"
 
 		retries="0" />
-		
+
 </beans>

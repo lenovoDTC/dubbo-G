@@ -28,7 +28,7 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol;
 
 /**
  * ServerTelnetHandler
- * 
+ *
  * @author william.liangf
  */
 @Activate
@@ -45,7 +45,7 @@ public class PortTelnetHandler implements TelnetHandler {
                 if ("-l".equals(part)) {
                     detail = true;
                 } else {
-                    if (! StringUtils.isInteger(part)) {
+                    if (!StringUtils.isInteger(part)) {
                         return "Illegal port " + part + ", must be integer.";
                     }
                     port = part;

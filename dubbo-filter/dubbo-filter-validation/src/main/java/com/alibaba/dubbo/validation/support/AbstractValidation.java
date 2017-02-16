@@ -24,7 +24,7 @@ import com.alibaba.dubbo.validation.Validator;
 
 /**
  * AbstractValidation
- * 
+ *
  * @author william.liangf
  */
 public abstract class AbstractValidation implements Validation {

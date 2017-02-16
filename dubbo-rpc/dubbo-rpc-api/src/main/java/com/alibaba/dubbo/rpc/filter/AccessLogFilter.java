@@ -55,19 +55,19 @@ import com.alibaba.dubbo.rpc.RpcException;
  *    &lt;appender-ref ref="foo" /&gt;
  * &lt;/logger&gt;
  * </pre></code>
- * 
+ *
  * @author ding.lid
  */
 @Activate(group = Constants.PROVIDER, value = Constants.ACCESS_LOG_KEY)
 public class AccessLogFilter implements Filter {
-    
-    private static final Logger logger            = LoggerFactory.getLogger(AccessLogFilter.class);
 
-    private static final String  ACCESS_LOG_KEY   = "dubbo.accesslog";
-    
-    private static final String  FILE_DATE_FORMAT   = "yyyyMMdd";
+    private static final Logger logger = LoggerFactory.getLogger(AccessLogFilter.class);
 
-    private static final String  MESSAGE_DATE_FORMAT   = "yyyy-MM-dd HH:mm:ss";
+    private static final String ACCESS_LOG_KEY = "dubbo.accesslog";
+
+    private static final String FILE_DATE_FORMAT = "yyyyMMdd";
+
+    private static final String MESSAGE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     private static final int LOG_MAX_BUFFER = 5000;
 
@@ -89,7 +89,7 @@ public class AccessLogFilter implements Filter {
                             Set<String> logSet = entry.getValue();
                             File file = new File(accesslog);
                             File dir = file.getParentFile();
-                            if (null!=dir&&! dir.exists()) {
+                            if (null != dir && !dir.exists()) {
                                 dir.mkdirs();
                             }
                             if (logger.isDebugEnabled()) {
@@ -98,7 +98,7 @@ public class AccessLogFilter implements Filter {
                             if (file.exists()) {
                                 String now = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date());
                                 String last = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date(file.lastModified()));
-                                if (! now.equals(last)) {
+                                if (!now.equals(last)) {
                                     File archive = new File(file.getAbsolutePath() + "." + last);
                                     file.renameTo(archive);
                                 }
@@ -124,7 +124,7 @@ public class AccessLogFilter implements Filter {
             }
         }
     }
-    
+
     private void init() {
         if (logFuture == null) {
             synchronized (logScheduled) {
@@ -134,7 +134,7 @@ public class AccessLogFilter implements Filter {
             }
         }
     }
-    
+
     private void log(String accesslog, String logmessage) {
         init();
         Set<String> logSet = logQueue.get(accesslog);
@@ -157,8 +157,8 @@ public class AccessLogFilter implements Filter {
                 String group = invoker.getUrl().getParameter(Constants.GROUP_KEY);
                 StringBuilder sn = new StringBuilder();
                 sn.append("[").append(new SimpleDateFormat(MESSAGE_DATE_FORMAT).format(new Date())).append("] ").append(context.getRemoteHost()).append(":").append(context.getRemotePort())
-                .append(" -> ").append(context.getLocalHost()).append(":").append(context.getLocalPort())
-                .append(" - ");
+                        .append(" -> ").append(context.getLocalHost()).append(":").append(context.getLocalPort())
+                        .append(" - ");
                 if (null != group && group.length() > 0) {
                     sn.append(group).append("/");
                 }

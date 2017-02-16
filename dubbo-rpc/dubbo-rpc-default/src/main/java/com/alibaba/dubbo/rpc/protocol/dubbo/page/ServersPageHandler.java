@@ -29,10 +29,10 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol;
 
 /**
  * ServersPageHandler
- * 
+ *
  * @author william.liangf
  */
-@Menu(name = "Servers", desc="Show exported service servers.", order = 14000)
+@Menu(name = "Servers", desc = "Show exported service servers.", order = 14000)
 public class ServersPageHandler implements PageHandler {
 
     public Page handle(URL url) {

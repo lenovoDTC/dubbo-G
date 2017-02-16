@@ -30,7 +30,7 @@ import com.alibaba.dubbo.remoting.transport.AbstractCodec;
 
 /**
  * TransportCodec
- * 
+ *
  * @author william.liangf
  */
 public class TransportCodec extends AbstractCodec {

@@ -28,7 +28,7 @@ import com.alibaba.dubbo.common.serialize.Serialization;
  * @author ding.lid
  */
 public class Hessian2Serialization implements Serialization {
-    
+
     public static final byte ID = 2;
 
     public byte getContentTypeId() {

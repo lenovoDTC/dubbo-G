@@ -34,21 +34,22 @@ import com.alibaba.dubbo.rpc.support.MyInvoker;
 /**
  * ContextFilterTest.java
  * TODO 增强断言
+ *
  * @author tony.chenl
  */
 public class ContextFilterTest {
 
-    Filter               contextFilter = new ContextFilter();
+    Filter contextFilter = new ContextFilter();
     Invoker<DemoService> invoker;
-    Invocation           invocation;
+    Invocation invocation;
 
     @SuppressWarnings("unchecked")
     @Test
     public void testSetContext() {
         invocation = EasyMock.createMock(Invocation.class);
         EasyMock.expect(invocation.getMethodName()).andReturn("$enumlength").anyTimes();
-        EasyMock.expect(invocation.getParameterTypes()).andReturn(new Class<?>[] { Enum.class }).anyTimes();
-        EasyMock.expect(invocation.getArguments()).andReturn(new Object[] { "hello" }).anyTimes();
+        EasyMock.expect(invocation.getParameterTypes()).andReturn(new Class<?>[]{Enum.class}).anyTimes();
+        EasyMock.expect(invocation.getArguments()).andReturn(new Object[]{"hello"}).anyTimes();
         EasyMock.expect(invocation.getAttachments()).andReturn(null).anyTimes();
         EasyMock.replay(invocation);
         invoker = EasyMock.createMock(Invoker.class);

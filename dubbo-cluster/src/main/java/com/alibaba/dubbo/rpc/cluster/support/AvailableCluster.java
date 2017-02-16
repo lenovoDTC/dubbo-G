@@ -27,15 +27,15 @@ import com.alibaba.dubbo.rpc.cluster.LoadBalance;
 
 /**
  * AvailableCluster
- * 
+ *
  * @author william.liangf
  */
 public class AvailableCluster implements Cluster {
-    
+
     public static final String NAME = "available";
 
     public <T> Invoker<T> join(Directory<T> directory) throws RpcException {
-        
+
         return new AbstractClusterInvoker<T>(directory) {
             public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
                 for (Invoker<T> invoker : invokers) {
@@ -46,7 +46,7 @@ public class AvailableCluster implements Cluster {
                 throw new RpcException("No provider available in " + invokers);
             }
         };
-        
+
     }
 
 }

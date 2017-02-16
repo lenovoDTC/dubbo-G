@@ -34,7 +34,7 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol;
 
 /**
  * CountTelnetHandler
- * 
+ *
  * @author william.liangf
  */
 @Activate
@@ -66,7 +66,7 @@ public class CountTelnetHandler implements TelnetHandler {
         } else {
             times = parts.length > 2 ? parts[2] : "1";
         }
-        if (! StringUtils.isInteger(times)) {
+        if (!StringUtils.isInteger(times)) {
             return "Illegal times " + times + ", must be integer.";
         }
         final int t = Integer.parseInt(times);
@@ -86,7 +86,7 @@ public class CountTelnetHandler implements TelnetHandler {
                 final String prompt = channel.getUrl().getParameter("prompt", "telnet");
                 Thread thread = new Thread(new Runnable() {
                     public void run() {
-                        for (int i = 0; i < t; i ++) {
+                        for (int i = 0; i < t; i++) {
                             String result = count(inv, mtd);
                             try {
                                 channel.send("\r\n" + result);
@@ -115,7 +115,7 @@ public class CountTelnetHandler implements TelnetHandler {
         }
         return buf.toString();
     }
-    
+
     private String count(Invoker<?> invoker, String method) {
         URL url = invoker.getUrl();
         List<List<String>> table = new ArrayList<List<String>>();

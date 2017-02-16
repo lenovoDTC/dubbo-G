@@ -27,18 +27,18 @@ import com.alibaba.dubbo.remoting.telnet.support.TelnetUtils;
 
 /**
  * HelpTelnetHandler
- * 
+ *
  * @author william.liangf
  */
 @Activate
 @Help(parameter = "[command]", summary = "Show help.", detail = "Show help.")
 public class HelpTelnetHandler implements TelnetHandler {
-    
+
     private final ExtensionLoader<TelnetHandler> extensionLoader = ExtensionLoader.getExtensionLoader(TelnetHandler.class);
 
     public String telnet(Channel channel, String message) {
         if (message.length() > 0) {
-            if (! extensionLoader.hasExtension(message)) {
+            if (!extensionLoader.hasExtension(message)) {
                 return "No such command " + message;
             }
             TelnetHandler handler = extensionLoader.getExtension(message);

@@ -23,15 +23,15 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
 
 /**
  * MinaHandler
- * 
+ *
  * @author william.liangf
  */
 public class MinaHandler extends IoHandlerAdapter {
 
     private final URL url;
-    
+
     private final ChannelHandler handler;
-    
+
     public MinaHandler(URL url, ChannelHandler handler) {
         if (url == null) {
             throw new IllegalArgumentException("url == null");

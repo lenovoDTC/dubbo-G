@@ -21,7 +21,7 @@ import com.alibaba.citrus.turbine.util.TurbineUtil;
 
 /**
  * MapDataResolverFactory
- * 
+ *
  * @author william.liangf
  */
 public class MapDataResolverFactory implements DataResolverFactory {
@@ -35,12 +35,12 @@ public class MapDataResolverFactory implements DataResolverFactory {
         }
         return null;
     }
-    
+
     public class MapDataResolver implements DataResolver {
-        
+
         public final DataResolverContext context;
 
-        public MapDataResolver(DataResolverContext context){
+        public MapDataResolver(DataResolverContext context) {
             this.context = context;
         }
 
@@ -50,5 +50,5 @@ public class MapDataResolverFactory implements DataResolverFactory {
         }
 
     }
-    
+
 }

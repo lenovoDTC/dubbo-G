@@ -25,11 +25,11 @@ import com.alibaba.dubbo.registry.common.StatusManager;
 /**
  * @author tony.chenl
  */
-public class Status{
+public class Status {
     @Autowired
     private HttpServletResponse response;
 
-    public void execute(Map<String,Object> context) throws Exception {
+    public void execute(Map<String, Object> context) throws Exception {
         //FIXME cache监控存在性能问题 汇总页面去掉
         Map<String, com.alibaba.dubbo.common.status.Status> statuses = StatusManager.getInstance().getStatusList(new String[]{"cache"});
         com.alibaba.dubbo.common.status.Status status = StatusManager.getInstance().getStatusSummary(statuses);
@@ -45,7 +45,7 @@ public class Status{
         writer.print(context.get("message").toString());
         writer.flush();
     }
-    
+
     private static final Pattern OK_PATTERN = Pattern.compile("o(k)", Pattern.CASE_INSENSITIVE);
 
     public static String filterOK(String message) {

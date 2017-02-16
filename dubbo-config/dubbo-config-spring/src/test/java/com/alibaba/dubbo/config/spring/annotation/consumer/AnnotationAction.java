@@ -22,17 +22,17 @@ import com.alibaba.dubbo.config.spring.api.DemoService;
 
 /**
  * AnnotationAction
- * 
+ *
  * @author william.liangf
  */
 @Controller("annotationAction")
 public class AnnotationAction {
-    
+
     @Reference(version = "1.2")
     private DemoService demoService;
-    
+
     public String doSayName(String name) {
         return demoService.sayName(name);
     }
-    
+
 }

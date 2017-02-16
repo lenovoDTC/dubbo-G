@@ -326,8 +326,8 @@ public class UrlUtilsTest {
     public void testIsServiceKeyMatch() throws Exception {
         URL url = URL.valueOf("test://127.0.0.0");
         URL pattern = url.addParameter(Constants.GROUP_KEY, "test")
-            .addParameter(Constants.INTERFACE_KEY, "test")
-            .addParameter(Constants.VERSION_KEY, "test");
+                .addParameter(Constants.INTERFACE_KEY, "test")
+                .addParameter(Constants.VERSION_KEY, "test");
         URL value = pattern;
         assertTrue(UrlUtils.isServiceKeyMatch(pattern, value));
 

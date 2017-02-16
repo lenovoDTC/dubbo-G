@@ -33,7 +33,7 @@ import javassist.LoaderClassPath;
 
 /**
  * JavassistCompiler. (SPI, Singleton, ThreadSafe)
- * 
+ *
  * @author william.liangf
  */
 public class JavassistCompiler extends AbstractCompiler {
@@ -43,7 +43,7 @@ public class JavassistCompiler extends AbstractCompiler {
     private static final Pattern EXTENDS_PATTERN = Pattern.compile("\\s+extends\\s+([\\w\\.]+)[^\\{]*\\{\n");
 
     private static final Pattern IMPLEMENTS_PATTERN = Pattern.compile("\\s+implements\\s+([\\w\\.]+)\\s*\\{\n");
-    
+
     private static final Pattern METHODS_PATTERN = Pattern.compile("\n(private|public|protected)\\s+");
 
     private static final Pattern FIELD_PATTERN = Pattern.compile("[^\n]+=[^\n]+;");
@@ -66,10 +66,10 @@ public class JavassistCompiler extends AbstractCompiler {
             } else {
                 int pi = pkg.lastIndexOf('.');
                 if (pi > 0) {
-	                String pkgName = pkg.substring(0, pi);
-	                pool.importPackage(pkgName);
-	                importPackages.add(pkgName);
-	                fullNames.put(pkg.substring(pi + 1), pkg);
+                    String pkgName = pkg.substring(0, pi);
+                    pool.importPackage(pkgName);
+                    importPackages.add(pkgName);
+                    fullNames.put(pkg.substring(pi + 1), pkg);
                 }
             }
         }

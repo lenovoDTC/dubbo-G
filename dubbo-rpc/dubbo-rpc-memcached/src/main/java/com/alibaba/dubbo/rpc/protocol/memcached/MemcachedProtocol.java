@@ -39,7 +39,7 @@ import com.alibaba.dubbo.rpc.protocol.AbstractProtocol;
 
 /**
  * MemcachedProtocol
- * 
+ *
  * @author william.liangf
  */
 public class MemcachedProtocol extends AbstractProtocol {
@@ -100,6 +100,7 @@ public class MemcachedProtocol extends AbstractProtocol {
                         throw re;
                     }
                 }
+
                 public void destroy() {
                     super.destroy();
                     try {

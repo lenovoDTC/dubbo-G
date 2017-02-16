@@ -39,17 +39,17 @@ import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
  */
 final class MinaCodecAdapter implements ProtocolCodecFactory {
 
-    private final ProtocolEncoder encoder            = new InternalEncoder();
+    private final ProtocolEncoder encoder = new InternalEncoder();
 
-    private final ProtocolDecoder decoder            = new InternalDecoder();
+    private final ProtocolDecoder decoder = new InternalDecoder();
 
-    private final Codec2          codec;
+    private final Codec2 codec;
 
-    private final URL             url;
+    private final URL url;
 
-    private final ChannelHandler  handler;
+    private final ChannelHandler handler;
 
-    private final int            bufferSize;
+    private final int bufferSize;
 
     public MinaCodecAdapter(Codec2 codec, URL url, ChannelHandler handler) {
         this.codec = codec;
@@ -76,7 +76,7 @@ final class MinaCodecAdapter implements ProtocolCodecFactory {
             ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(1024);
             MinaChannel channel = MinaChannel.getOrAddChannel(session, url, handler);
             try {
-            	codec.encode(channel, buffer, msg);
+                codec.encode(channel, buffer, msg);
             } finally {
                 MinaChannel.removeChannelIfDisconnectd(session);
             }

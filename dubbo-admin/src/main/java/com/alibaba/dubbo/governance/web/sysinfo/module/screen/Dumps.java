@@ -33,10 +33,10 @@ import com.alibaba.dubbo.governance.web.common.module.screen.Restful;
 public class Dumps extends Restful {
 
     @Autowired
-    ProviderService         providerDAO;
+    ProviderService providerDAO;
 
     @Autowired
-    ConsumerService         consumerDAO;
+    ConsumerService consumerDAO;
 
     @Autowired
     HttpServletResponse response;

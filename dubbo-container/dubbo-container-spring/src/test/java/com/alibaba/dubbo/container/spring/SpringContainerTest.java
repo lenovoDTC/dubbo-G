@@ -23,11 +23,11 @@ import com.alibaba.dubbo.container.Container;
 
 /**
  * StandaloneContainerTest
- * 
+ *
  * @author william.liangf
  */
 public class SpringContainerTest {
-    
+
     @Test
     public void testContainer() {
         SpringContainer container = (SpringContainer) ExtensionLoader.getExtensionLoader(Container.class).getExtension("spring");

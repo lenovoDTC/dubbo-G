@@ -10,16 +10,16 @@ import com.alibaba.dubbo.common.logger.LoggerAdapter;
 
 public class JclLoggerAdapter implements LoggerAdapter {
 
-	public Logger getLogger(String key) {
-		return new JclLogger(LogFactory.getLog(key));
-	}
+    public Logger getLogger(String key) {
+        return new JclLogger(LogFactory.getLog(key));
+    }
 
     public Logger getLogger(Class<?> key) {
         return new JclLogger(LogFactory.getLog(key));
     }
 
     private Level level;
-    
+
     private File file;
 
     public void setLevel(Level level) {

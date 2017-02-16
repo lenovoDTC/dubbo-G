@@ -97,7 +97,7 @@ public class ThreadNameTest {
 
         private void output(String method) {
             System.out.println(Thread.currentThread().getName()
-                                   + " " + (client ? "client " + method : "server " + method));
+                    + " " + (client ? "client " + method : "server " + method));
         }
 
         @Override

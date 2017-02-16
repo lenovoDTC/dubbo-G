@@ -38,7 +38,7 @@ import com.alibaba.dubbo.common.Constants;
 
 /**
  * ResourceServlet
- * 
+ *
  * @author william.liangf
  */
 public class ResourceFilter implements Filter {
@@ -67,7 +67,7 @@ public class ResourceFilter implements Filter {
 
     public void destroy() {
     }
-    
+
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
@@ -79,25 +79,25 @@ public class ResourceFilter implements Filter {
         String context = request.getContextPath();
         if (uri.endsWith("/favicon.ico")) {
             uri = "/favicon.ico";
-        } else if (context != null && ! "/".equals(context)) {
+        } else if (context != null && !"/".equals(context)) {
             uri = uri.substring(context.length());
         }
-        if (! uri.startsWith("/")) {
+        if (!uri.startsWith("/")) {
             uri = "/" + uri;
         }
         long lastModified = getLastModified(uri);
         long since = request.getDateHeader("If-Modified-Since");
         if (since >= lastModified) {
-        	response.sendError(HttpServletResponse.SC_NOT_MODIFIED);
-        	return;
+            response.sendError(HttpServletResponse.SC_NOT_MODIFIED);
+            return;
         }
         byte[] data;
         InputStream input = getInputStream(uri);
-    	if (input == null) {
-    	    chain.doFilter(req, res);
+        if (input == null) {
+            chain.doFilter(req, res);
             return;
         }
-    	try {
+        try {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             byte[] buffer = new byte[8192];
             int n = 0;
@@ -113,13 +113,13 @@ public class ResourceFilter implements Filter {
         output.write(data);
         output.flush();
     }
-    
+
     private boolean isFile(String path) {
         return path.startsWith("/") || path.indexOf(":") <= 1;
     }
-	
-	private long getLastModified(String uri) {
-	    for (String resource : resources) {
+
+    private long getLastModified(String uri) {
+        for (String resource : resources) {
             if (resource != null && resource.length() > 0) {
                 String path = resource + uri;
                 if (isFile(path)) {
@@ -131,9 +131,9 @@ public class ResourceFilter implements Filter {
             }
         }
         return start;
-	}
-	
-	private InputStream getInputStream(String uri) {
+    }
+
+    private InputStream getInputStream(String uri) {
         for (String resource : resources) {
             String path = resource + uri;
             try {
@@ -148,6 +148,6 @@ public class ResourceFilter implements Filter {
             }
         }
         return null;
-	}
+    }
 
 }

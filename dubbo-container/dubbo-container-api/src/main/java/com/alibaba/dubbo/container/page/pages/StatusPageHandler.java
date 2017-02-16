@@ -32,7 +32,7 @@ import com.alibaba.dubbo.container.page.PageHandler;
 
 /**
  * StatusPageHandler
- * 
+ *
  * @author william.liangf
  */
 @Menu(name = "Status", desc = "Show system status.", order = Integer.MAX_VALUE - 12000)
@@ -47,7 +47,7 @@ public class StatusPageHandler implements PageHandler {
             List<String> row = new ArrayList<String>();
             row.add(name);
             Status status = checker.check();
-            if (status != null && ! Status.Level.UNKNOWN.equals(status.getLevel())) {
+            if (status != null && !Status.Level.UNKNOWN.equals(status.getLevel())) {
                 statuses.put(name, status);
                 row.add(getLevelHtml(status.getLevel()));
                 row.add(status.getMessage());
@@ -63,7 +63,7 @@ public class StatusPageHandler implements PageHandler {
             row.add(getLevelHtml(status.getLevel()));
             row.add("<a href=\"/status\" target=\"_blank\">summary</a>");
             rows.add(row);
-            return new Page("Status (<a href=\"/status\" target=\"_blank\">summary</a>)", "Status", new String[] {"Name", "Status", "Description"}, rows);
+            return new Page("Status (<a href=\"/status\" target=\"_blank\">summary</a>)", "Status", new String[]{"Name", "Status", "Description"}, rows);
         }
     }
 

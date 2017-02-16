@@ -46,7 +46,7 @@ public class RandomLoadBalance extends AbstractLoadBalance {
                 sameWeight = false; // 计算所有权重是否一样
             }
         }
-        if (totalWeight > 0 && ! sameWeight) {
+        if (totalWeight > 0 && !sameWeight) {
             // 如果权重不相同且权重大于0则按总权重数随机
             int offset = random.nextInt(totalWeight);
             // 并确定随机值落在哪个片断上

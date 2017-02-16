@@ -27,13 +27,13 @@ import com.alibaba.dubbo.remoting.telnet.TelnetHandler;
 
 /**
  * CountTelnetHandlerTest.java
- * 
+ *
  * @author tony.chenl
  */
 public class CurrentTelnetHandlerTest {
 
     private static TelnetHandler count = new CurrentTelnetHandler();
-    private Channel              mockChannel;
+    private Channel mockChannel;
 
     @After
     public void after() {
@@ -57,7 +57,7 @@ public class CurrentTelnetHandlerTest {
         String result = count.telnet(mockChannel, "");
         assertEquals("/", result);
     }
-    
+
     @Test
     public void testMessageError() throws RemotingException {
         mockChannel = EasyMock.createMock(Channel.class);

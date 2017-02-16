@@ -64,17 +64,17 @@ class StatItem {
     long getLastResetTime() {
         return lastResetTime;
     }
-    
+
     int getToken() {
         return token.get();
     }
-    
+
     public String toString() {
         return new StringBuilder(32).append("StatItem ")
-            .append("[name=").append(name).append(", ")
-            .append("rate = ").append(rate).append(", ")
-            .append("interval = ").append(interval).append("]")
-            .toString();
+                .append("[name=").append(name).append(", ")
+                .append("rate = ").append(rate).append(", ")
+                .append("interval = ").append(interval).append("]")
+                .toString();
     }
 
 }
