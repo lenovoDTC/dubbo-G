@@ -24,6 +24,7 @@ public class CountFilter implements Filter {
     @Activate(group = Constants.CONSUMER)
     public Result invoke(Invoker<?> invoker, Invocation invocation)
             throws RpcException {
+        invocation.getMethodName();
         long elapsed = System.currentTimeMillis() - start;
         if (elapsed / 1000 >= 300) {
             start = System.currentTimeMillis();
