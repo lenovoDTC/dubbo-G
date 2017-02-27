@@ -59,7 +59,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
     private Map<String,Long> mapnumber = new ConcurrentHashMap<String, Long>();
     private Map<String,Long> maptotal = new ConcurrentHashMap<String, Long>();
     private Map<String,Double> averagemap = new ConcurrentHashMap<String, Double>();
-    private double xiancheng = 100;
+    private double xiancheng = 0;
     private static final Logger logger = LoggerFactory
             .getLogger(MockClusterInvoker.class);
 
@@ -239,7 +239,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                 if (zkStatus.getAndIncrement() == 0) {
                     start = System.currentTimeMillis();
                     averagemap = new ConcurrentHashMap<String, Double>();
-					xiancheng = 100;
+					xiancheng = 0;
                     jsonObject.put(consumerIp + "/" + "total", "" + total.get());
                     for (String key : maptotal.keySet()) {
                         jsonObject.put(key + "/Number", maptotal.get(key));
@@ -255,7 +255,14 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                             String bb = "{}";
                             List<String> consumerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/consumers", null);
                             List<String> providerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/providers", null);
-                            xiancheng = xiancheng*providerChild.size();//根据prvider计算线程总数线程数
+                            for (int providerInt = 0; providerInt < providerChild.size(); providerInt++) {//根据prvider计算线程总数线程数
+                                if(providerChild.get(providerInt).indexOf("threads%3D")==-1){
+                                    xiancheng=xiancheng+100;
+                                }else {
+                                    String threads = providerChild.get(providerInt).substring(providerChild.get(providerInt).indexOf("threads%3D")).substring(10, providerChild.get(providerInt).substring(providerChild.get(providerInt).indexOf("threads%3D")).indexOf("%26"));
+                                    xiancheng=xiancheng+Integer.parseInt(threads);
+                                }
+                            }
                             byte[] aa = zkClient.getData("/dubbo/"
                                             + directory.getUrl().getServiceInterface(),
                                     false, null);
