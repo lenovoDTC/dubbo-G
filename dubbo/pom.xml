@@ -106,11 +106,11 @@
             <artifactId>dubbo-rpc-injvm</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.alibaba</groupId>-->
-            <!--<artifactId>dubbo-rpc-rmi</artifactId>-->
-            <!--<version>${project.parent.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo-rpc-rmi</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo-rpc-hessian</artifactId>
@@ -319,7 +319,7 @@
                                     <include>com.alibaba:dubbo-rpc-api</include>
                                     <include>com.alibaba:dubbo-rpc-default</include>
                                     <include>com.alibaba:dubbo-rpc-injvm</include>
-                                    <!--<include>com.alibaba:dubbo-rpc-rmi</include>-->
+                                    <include>com.alibaba:dubbo-rpc-rmi</include>
                                     <include>com.alibaba:dubbo-rpc-hessian</include>
                                     <include>com.alibaba:dubbo-rpc-http</include>
                                     <!--<include>com.alibaba:dubbo-rpc-webservice</include>-->
