@@ -42,6 +42,11 @@ public final class DubboCountCodec implements Codec2 {
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
         int save = buffer.readerIndex();
         MultiMessage result = MultiMessage.create();
+//        if(buffer.getByte(0)==71||buffer.getByte(1)==69||buffer.getByte(2)==84){
+//            Object obj = codec.decode(channel, buffer);
+//            result.addMessage(obj);
+//            return result;
+//        }
         do {
             Object obj = codec.decode(channel, buffer);
             if (Codec2.DecodeResult.NEED_MORE_INPUT == obj) {

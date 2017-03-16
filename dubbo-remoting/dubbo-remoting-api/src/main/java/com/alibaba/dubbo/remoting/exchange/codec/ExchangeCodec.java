@@ -36,6 +36,8 @@ import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import com.alibaba.dubbo.remoting.telnet.codec.TelnetCodec;
 import com.alibaba.dubbo.remoting.transport.CodecSupport;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
 /**
  * ExchangeCodec.
@@ -91,6 +93,9 @@ public class ExchangeCodec extends TelnetCodec {
         // check magic number.
         if (readable > 0 && header[0] != MAGIC_HIGH
                 || readable > 1 && header[1] != MAGIC_LOW) {
+//            if(buffer.getByte(0)==71||buffer.getByte(1)==69||buffer.getByte(2)==84){
+//                return decodeBody(channel,buffer);
+//            }
             int length = header.length;
             if (header.length < readable) {
                 header = Bytes.copyOf(header, readable);
@@ -198,6 +203,12 @@ public class ExchangeCodec extends TelnetCodec {
             return req;
         }
     }
+//    protected Object decodeBody(Channel channel,ChannelBuffer buffer) throws IOException {
+//            Request req = new Request();
+//            return req;
+//        }
+
+
 
     protected Object getRequestData(long id) {
         DefaultFuture future = DefaultFuture.getFuture(id);

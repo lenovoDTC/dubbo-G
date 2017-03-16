@@ -15,8 +15,10 @@
  */
 package com.alibaba.dubbo.rpc.protocol.dubbo;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
@@ -32,6 +34,8 @@ import com.alibaba.dubbo.common.utils.ReflectUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.Codec2;
+import com.alibaba.dubbo.remoting.buffer.ChannelBuffer;
+import com.alibaba.dubbo.remoting.buffer.ChannelBufferInputStream;
 import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.remoting.exchange.codec.ExchangeCodec;
@@ -153,6 +157,20 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
             return req;
         }
     }
+//    protected Object decodeBody(Channel channel,ChannelBuffer buffer) throws IOException {
+//        // decode request.
+//        Request req = new Request();
+//        HttpDecodeableRpcInvocation inv;
+//        byte[] a = buffer.array();
+//        inv = new HttpDecodeableRpcInvocation(channel,buffer);
+//        String str = new String(a, "UTF-8");
+//
+//        System.out.println(str);
+//        inv.decode(channel,buffer);
+//        req.setData(inv);
+//            return req;
+//        }
+
 
     private ObjectInput deserialize(Serialization serialization, URL url, InputStream is)
             throws IOException {

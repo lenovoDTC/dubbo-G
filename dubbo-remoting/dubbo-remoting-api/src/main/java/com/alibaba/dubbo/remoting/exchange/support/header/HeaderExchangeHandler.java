@@ -33,6 +33,15 @@ import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.util.CharsetUtil;
+
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * ExchangeReceiver
@@ -47,6 +56,8 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
     public static String KEY_READ_TIMESTAMP = HeartbeatHandler.KEY_READ_TIMESTAMP;
 
     public static String KEY_WRITE_TIMESTAMP = HeartbeatHandler.KEY_WRITE_TIMESTAMP;
+
+    private final StringBuilder buf = new StringBuilder();
 
     private final ExchangeHandler handler;
 
@@ -167,8 +178,21 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                     handlerEvent(channel, request);
                 } else {
                     if (request.isTwoWay()) {
-                        Response response = handleRequest(exchangeChannel, request);
-                        channel.send(response);
+                        Object response;
+                        response =handleRequest(exchangeChannel, request);
+                        if(request.getVersion().equals("http1.0.0")){
+                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, OK);
+                            httpResponse.setContent(ChannelBuffers.copiedBuffer(response.toString(), CharsetUtil.UTF_8));
+                            httpResponse.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
+                            if (true) {
+                                // Add 'Content-Length' header only for a keep-alive connection.
+                                httpResponse.setHeader(CONTENT_LENGTH, httpResponse.getContent().readableBytes());
+                            }
+                            channel.send(httpResponse);
+                        }
+                        else {
+                            channel.send(response);
+                        }
                     } else {
                         handler.received(exchangeChannel, request.getData());
                     }

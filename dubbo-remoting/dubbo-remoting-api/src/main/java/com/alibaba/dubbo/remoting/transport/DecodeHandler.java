@@ -16,14 +16,25 @@
 
 package com.alibaba.dubbo.remoting.transport;
 
+import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
-import com.alibaba.dubbo.remoting.Channel;
-import com.alibaba.dubbo.remoting.ChannelHandler;
-import com.alibaba.dubbo.remoting.Decodeable;
-import com.alibaba.dubbo.remoting.RemotingException;
+import com.alibaba.dubbo.common.utils.ReflectUtils;
+import com.alibaba.dubbo.common.utils.StringUtils;
+import com.alibaba.dubbo.remoting.*;
 import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
+import com.alibaba.dubbo.rpc.RpcInvocation;
+import org.jboss.netty.handler.codec.http.*;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import com.alibaba.fastjson.JSON;
+import org.json.JSONObject;
+
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
@@ -31,6 +42,9 @@ import com.alibaba.dubbo.remoting.exchange.Response;
 public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(DecodeHandler.class);
+
+    private static final Map<String,String[]> methodPtypeMap = new HashMap<String, String[]>();
+
 
     public DecodeHandler(ChannelHandler handler) {
         super(handler);
@@ -48,11 +62,72 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         if (message instanceof Response) {
             decode(((Response) message).getResult());
         }
-
+        if(message instanceof DefaultHttpRequest){
+            Object req = decodeRequest(channel,message);
+            message = req;
+        }
         handler.received(channel, message);
     }
+    private Object decodeRequest(Channel channel,Object message) {
+        DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
+        String uri = httpRequst.getUri();
+        JSONObject jsonObject = new JSONObject(uri);
+//        Method[] a = SpringContainer.getContext().getBean(channel.getUrl().getPath()).getClass();
+        RpcInvocation rpcInvocation = new RpcInvocation();
+        Request req = new Request();
+        req.setVersion("http1.0.0");
+        rpcInvocation.setAttachment(Constants.DUBBO_VERSION_KEY, "2.0.0");
+        rpcInvocation.setAttachment(Constants.PATH_KEY, channel.getUrl().getPath());
+        rpcInvocation.setAttachment(Constants.VERSION_KEY, "0.0.0");
 
-    private void decode(Object message) {
+        rpcInvocation.setMethodName(jsonObject.getString("method"));
+            try {
+                Object[] args;
+                Class<?>[] pts = new Class<?>[0];
+                String[] desc = (String[]) jsonObject.get("schema");
+                if (desc.length == 0) {
+                    pts =  null;
+                    args = null;
+                } else {
+                    for(String des : desc){
+                    Class<?> pt = ReflectUtils.name2class(des);
+                        Arrays.fill(pts,pt);
+                    }
+                    args = new Object[pts.length];
+                    for (int i = 0; i < args.length; i++) {
+                        try {
+                            args[i] = JSON.parseObject(((String[])jsonObject.get("args"))[i], pts[i]);
+                        } catch (Exception e) {
+                            if (log.isWarnEnabled()) {
+                                log.warn("Decode argument failed: " + e.getMessage(), e);
+                            }
+                        }
+                    }
+                }
+                rpcInvocation.setParameterTypes(pts);
+
+//            Map<String, String> map = (Map<String, String>) in.readObject(Map.class);
+                Map<String,String> map = new HashMap<String, String>();
+                if (map != null && map.size() > 0) {
+                    Map<String, String> attachment = rpcInvocation.getAttachments();
+                    if (attachment == null) {
+                        attachment = new HashMap<String, String>();
+                    }
+                    attachment.putAll(map);
+                    rpcInvocation.setAttachments(attachment);
+                }
+                rpcInvocation.setArguments(args);
+                req.setData(rpcInvocation);
+            } catch (ClassNotFoundException e) {
+                try {
+                    throw new IOException(StringUtils.toString("Read invocation data failed.", e));
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            return  req;
+    }
+    private void decode(Object message)  {
         if (message != null && message instanceof Decodeable) {
             try {
                 ((Decodeable) message).decode();
@@ -71,5 +146,4 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             } // ~ end of catch
         } // ~ end of if
     } // ~ end of method decode
-
 }
