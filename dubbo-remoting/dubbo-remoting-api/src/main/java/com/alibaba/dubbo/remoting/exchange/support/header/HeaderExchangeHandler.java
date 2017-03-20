@@ -33,15 +33,19 @@ import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
+import com.alibaba.fastjson.JSON;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static org.jboss.netty.handler.codec.rtsp.RtspHeaders.Names.CONTENT_LENGTH;
 
 /**
  * ExchangeReceiver
@@ -180,13 +184,20 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                     if (request.isTwoWay()) {
                         Object response;
                         response =handleRequest(exchangeChannel, request);
+                        // Decide whether to close the connection or not.
                         if(request.getVersion().equals("http1.0.0")){
-                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, OK);
-                            httpResponse.setContent(ChannelBuffers.copiedBuffer(response.toString(), CharsetUtil.UTF_8));
-                            httpResponse.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
+                            Object result = ((Response)response).getResult();
+
+                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1,HttpResponseStatus.OK);
+                            httpResponse.setContent(ChannelBuffers.copiedBuffer(JSON.toJSONString(result), CharsetUtil.UTF_8));
+                            httpResponse.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+                            // Add 'Content-Length' header only for a keep-alive connection.
                             if (true) {
                                 // Add 'Content-Length' header only for a keep-alive connection.
-                                httpResponse.setHeader(CONTENT_LENGTH, httpResponse.getContent().readableBytes());
+                                httpResponse.headers().set(CONTENT_LENGTH, httpResponse.getContent().readableBytes());
+                                // Add keep alive header as per:
+                                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+                                httpResponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
                             }
                             channel.send(httpResponse);
                         }

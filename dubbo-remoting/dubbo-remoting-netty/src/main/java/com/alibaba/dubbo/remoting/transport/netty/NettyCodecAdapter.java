@@ -77,7 +77,7 @@ final class NettyCodecAdapter {
         protected Object encode(ChannelHandlerContext ctx, Channel ch, Object msg) throws Exception {
             if (msg instanceof DefaultHttpResponse) {
                 ctx.getPipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
-                ctx.getPipeline().remove(this  );
+                ctx.getPipeline().remove(this);
                 return msg;
             }
             else {
@@ -96,19 +96,24 @@ final class NettyCodecAdapter {
 
     private class InternalDecoder extends SimpleChannelUpstreamHandler {
 
-        private HttpRequestDecoder httpRequestDecoder = new HttpRequestDecoder();
-
         private com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =
                 com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
         @Override
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) throws Exception {
             Object o = event.getMessage();
+            ChannelBuffer input = (ChannelBuffer) o;
             if (!(o instanceof ChannelBuffer)) {
                 ctx.sendUpstream(event);
                 return;
             }
-            ChannelBuffer input = (ChannelBuffer) o;
-            if(input.getByte(0)!=71||input.getByte(1)!=69||input.getByte(2)!=84) {
+//            if((input.getByte(0)==71&&input.getByte(1)==69&&input.getByte(2)==84)||(input.getByte(0)==80&&input.getByte(1)==79&&input.getByte(2)==83&&input.getByte(3)==84)) {
+              if (new String(input.array(),"UTF-8").indexOf("HTTP/1.1\r\n")!=-1){
+                ctx.getPipeline().addAfter("decoder","httpdecoder",new HttpRequestDecoder());
+                ctx.getPipeline().remove(this);
+                ctx.sendUpstream(event);
+                return;
+            }
+            else {
             int readable = input.readableBytes();
             if (readable <= 0) {
                 return;
@@ -134,44 +139,40 @@ final class NettyCodecAdapter {
 
             int saveReaderIndex;
 
-                try {
+            try {
 
-                    // decode object.
-                    do {
-                        saveReaderIndex = message.readerIndex();
-                        try {
-                            msg = codec.decode(channel, message);
-                        } catch (IOException e) {
-                            buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
-                            throw e;
-                        }
-                        if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) {
-                            message.readerIndex(saveReaderIndex);
-                            break;
-                        } else {
-                            if (saveReaderIndex == message.readerIndex()) {
-                                buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
-                                throw new IOException("Decode without read data.");
-                            }
-                            if (msg != null) {
-                                Channels.fireMessageReceived(ctx, msg, event.getRemoteAddress());
-                            }
-                        }
-                    } while (message.readable());
-
-                } finally {
-                    if (message.readable()) {
-                        message.discardReadBytes();
-                        buffer = message;
-                    } else {
+                // decode object.
+                do {
+                    saveReaderIndex = message.readerIndex();
+                    try {
+                        msg = codec.decode(channel, message);
+                    } catch (IOException e) {
                         buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
+                        throw e;
                     }
-                    NettyChannel.removeChannelIfDisconnected(ctx.getChannel());
+                    if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) {
+                        message.readerIndex(saveReaderIndex);
+                        break;
+                    } else {
+                        if (saveReaderIndex == message.readerIndex()) {
+                            buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
+                            throw new IOException("Decode without read data.");
+                        }
+                        if (msg != null) {
+                            Channels.fireMessageReceived(ctx, msg, event.getRemoteAddress());
+                        }
+                    }
+                } while (message.readable());
+
+            } finally {
+                if (message.readable()) {
+                    message.discardReadBytes();
+                    buffer = message;
+                } else {
+                    buffer = com.alibaba.dubbo.remoting.buffer.ChannelBuffers.EMPTY_BUFFER;
                 }
-        }
-        else {
-                httpRequestDecoder.messageReceived(ctx,event);
                 NettyChannel.removeChannelIfDisconnected(ctx.getChannel());
+            }
             }
         }
 

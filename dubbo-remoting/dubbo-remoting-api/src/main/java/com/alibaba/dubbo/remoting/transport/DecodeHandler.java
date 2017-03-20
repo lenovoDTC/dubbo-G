@@ -25,16 +25,18 @@ import com.alibaba.dubbo.remoting.*;
 import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.rpc.RpcInvocation;
-import org.jboss.netty.handler.codec.http.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+
 import com.alibaba.fastjson.JSON;
+import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.json.JSONObject;
 
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static org.jboss.netty.handler.codec.rtsp.RtspHeaders.Names.CONTENT_LENGTH;
+
 
 /**
  * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
@@ -42,9 +44,6 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(DecodeHandler.class);
-
-    private static final Map<String,String[]> methodPtypeMap = new HashMap<String, String[]>();
-
 
     public DecodeHandler(ChannelHandler handler) {
         super(handler);
@@ -62,16 +61,44 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         if (message instanceof Response) {
             decode(((Response) message).getResult());
         }
-        if(message instanceof DefaultHttpRequest){
+        if(message instanceof DefaultHttpRequest || message instanceof DefaultHttpChunk){
             Object req = decodeRequest(channel,message);
             message = req;
         }
+
         handler.received(channel, message);
     }
     private Object decodeRequest(Channel channel,Object message) {
+        String parem = "";
+        if(message instanceof DefaultHttpRequest){
         DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
-        String uri = httpRequst.getUri();
-        JSONObject jsonObject = new JSONObject(uri);
+            if (httpRequst.getUri().length()>5) {
+                parem = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
+            }else {
+                if(httpRequst.getContent().array().length>0){
+                try {
+                    parem = new String(httpRequst.getContent().array(), "UTF-8").replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                }else {
+                    return null;
+                }
+            }
+        }
+        else if(message instanceof DefaultHttpChunk){
+            DefaultHttpChunk httpChunk = (DefaultHttpChunk)message;
+            try {
+                parem = new String(httpChunk.getContent().array(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        if(parem.indexOf("{")==-1||parem.indexOf("}")==-1){
+            return null;
+        }
+        //        localhost:20880/{"method":"sayHello","schema":"java.lang.String,int","args":"\"world\",1"}
+        JSONObject jsonObject = new JSONObject(parem);
 //        Method[] a = SpringContainer.getContext().getBean(channel.getUrl().getPath()).getClass();
         RpcInvocation rpcInvocation = new RpcInvocation();
         Request req = new Request();
@@ -83,20 +110,23 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         rpcInvocation.setMethodName(jsonObject.getString("method"));
             try {
                 Object[] args;
-                Class<?>[] pts = new Class<?>[0];
-                String[] desc = (String[]) jsonObject.get("schema");
+                List<Class<?>> ptsl = new ArrayList<Class<?>>();
+                Class<?>[] pts ;
+                String[] desc = jsonObject.getString("schema").split(",");
                 if (desc.length == 0) {
                     pts =  null;
                     args = null;
                 } else {
                     for(String des : desc){
                     Class<?> pt = ReflectUtils.name2class(des);
-                        Arrays.fill(pts,pt);
+                        ptsl.add(pt);
                     }
+                    pts = new Class[ptsl.size()];
+                    ptsl.toArray(pts);
                     args = new Object[pts.length];
                     for (int i = 0; i < args.length; i++) {
                         try {
-                            args[i] = JSON.parseObject(((String[])jsonObject.get("args"))[i], pts[i]);
+                            args[i] = JSON.parseObject(jsonObject.getString("args").split(",")[i], pts[i]);
                         } catch (Exception e) {
                             if (log.isWarnEnabled()) {
                                 log.warn("Decode argument failed: " + e.getMessage(), e);
@@ -107,15 +137,15 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 rpcInvocation.setParameterTypes(pts);
 
 //            Map<String, String> map = (Map<String, String>) in.readObject(Map.class);
-                Map<String,String> map = new HashMap<String, String>();
-                if (map != null && map.size() > 0) {
+//                Map<String,String> map = new HashMap<String, String>();
+//                if (map != null && map.size() > 0) {
                     Map<String, String> attachment = rpcInvocation.getAttachments();
                     if (attachment == null) {
                         attachment = new HashMap<String, String>();
                     }
-                    attachment.putAll(map);
+//                    attachment.putAll(map);
                     rpcInvocation.setAttachments(attachment);
-                }
+//                }
                 rpcInvocation.setArguments(args);
                 req.setData(rpcInvocation);
             } catch (ClassNotFoundException e) {
