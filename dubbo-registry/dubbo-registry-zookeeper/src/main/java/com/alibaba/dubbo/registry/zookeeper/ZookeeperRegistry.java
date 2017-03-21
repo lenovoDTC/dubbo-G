@@ -15,20 +15,19 @@
  */
 package com.alibaba.dubbo.registry.zookeeper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.json.JSONObject;
+import com.alibaba.dubbo.common.utils.*;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
-import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
-import com.alibaba.dubbo.common.utils.UrlUtils;
 import com.alibaba.dubbo.registry.NotifyListener;
 import com.alibaba.dubbo.registry.support.FailbackRegistry;
 import com.alibaba.dubbo.remoting.zookeeper.ChildListener;
@@ -98,6 +97,24 @@ public class ZookeeperRegistry extends FailbackRegistry {
     protected void doRegister(URL url) {
         try {
             zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
+//            zkClient.create(toUrlPath(url)+"/http", url.getParameter(Constants.DYNAMIC_KEY, true));
+//            zkClient.create("/http/"+url.getPath(),false);
+            JSONObject jsonObject = new JSONObject();
+            Class<?> interfaceClass = Class.forName(url.getPath(), true, Thread.currentThread()
+                    .getContextClassLoader());
+            Method[] methods = interfaceClass.getMethods();
+            for (Method method : methods) {
+                String total = null;
+                Class<?>[] types = method.getParameterTypes();
+                for(Class type : types){
+                    if(total==null){
+                        total = com.alibaba.fastjson.JSON.toJSONString(type);
+                    }else {
+                    total = total+","+com.alibaba.fastjson.JSON.toJSONString(type);}
+                }
+                jsonObject.put(method.getName(),total.replace("\"",""));
+            }
+            zkClient.setData(toUrlPath(url),jsonObject.toString());
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }

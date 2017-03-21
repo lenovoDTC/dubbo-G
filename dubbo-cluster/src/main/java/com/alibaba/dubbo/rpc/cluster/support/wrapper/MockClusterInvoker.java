@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MockClusterInvoker<T> implements Invoker<T> {
     private String consumerIp ;
     private AtomicInteger total = new AtomicInteger();
-    private AtomicInteger timetotal = new AtomicInteger();
+//    private AtomicInteger timetotal = new AtomicInteger();
     private AtomicInteger successNumber = new AtomicInteger();
     private AtomicInteger zkStatus = new AtomicInteger();
     private AtomicInteger fuseStatus = new AtomicInteger();
@@ -264,7 +264,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                                 }
                             }
                             byte[] aa = zkClient.getData("/dubbo/"
-                                            + directory.getUrl().getServiceInterface(),
+                                            + directory.getUrl().getServiceInterface()+"/consumers",
                                     false, null);
                             if (aa != null) {
                                 bb = new String(aa);
@@ -278,7 +278,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                                 aaJsonObject.put(key, value2);
                             }
                             zkClient.setData("/dubbo/"
-                                            + directory.getUrl().getServiceInterface(),
+                                            + directory.getUrl().getServiceInterface()+"/consumers",
                                     (aaJsonObject.toString()).getBytes(), -1);
                             zkClient.close();
                             Map<String, Integer> NATmap = new ConcurrentHashMap<String, Integer>();
@@ -354,7 +354,6 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                     }
                 }
             }
-
             if (Float.parseFloat(errorrate) != 0) {
                 if (elapsed1 / 1000 >= 10) {// 10秒检测熔断
                     if (total.get() == 0 && successNumber.get() == 0) {

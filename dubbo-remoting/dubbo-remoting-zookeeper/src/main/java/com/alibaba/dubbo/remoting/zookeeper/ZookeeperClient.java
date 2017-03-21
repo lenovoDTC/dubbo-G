@@ -10,6 +10,8 @@ public interface ZookeeperClient {
 
     void delete(String path);
 
+    void setData(String path,String data);
+
     List<String> getChildren(String path);
 
     List<String> addChildListener(String path, ChildListener listener);
