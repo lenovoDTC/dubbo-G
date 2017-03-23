@@ -16,12 +16,15 @@
 package com.alibaba.dubbo.registry.zookeeper;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.json.JSONObject;
+
 import com.alibaba.dubbo.common.utils.*;
+
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 
 import com.alibaba.dubbo.common.Constants;
@@ -104,13 +107,39 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     .getContextClassLoader());
             Method[] methods = interfaceClass.getMethods();
             for (Method method : methods) {
-                String total = null;
+                String total = "";
                 Class<?>[] types = method.getParameterTypes();
-                for(Class type : types){
-                    if(total==null){
-                        total = com.alibaba.fastjson.JSON.toJSONString(type);
-                    }else {
-                    total = total+","+com.alibaba.fastjson.JSON.toJSONString(type);}
+                Type[] type = method.getGenericParameterTypes();
+                for(int i=0;i<types.length;i++){
+                    if(total.equals("")){
+                        if ("boolean".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("byte".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("char".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("double".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("float".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("int".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("long".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if ("short".equals(type[i].toString())) total = type[i].toString()+"()";
+                        else if (type[i].toString().indexOf("java.lang")!=-1) total = type[i].toString()+"()";
+                        else if(type[i].toString().indexOf("java.util")!=-1)total = type[i].toString()+"()";
+                        else {
+                            total = type[i].toString()+"("+ObjAnalysis.ConvertObjToMap(types[i].newInstance())+")";
+                        }
+                    }else{
+                        if ("boolean".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("byte".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("char".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("double".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("float".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("int".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("long".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if ("short".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                        else if (type[i].toString().indexOf("java.lang")!=-1) total = total+","+type[i].toString()+"()";
+                        else if(type[i].toString().indexOf("java.util")!=-1)total = type[i].toString()+"()";
+                        else {
+                            total = total+","+type[i].toString()+"("+ObjAnalysis.ConvertObjToMap(types[i].newInstance())+")";
+                        }
+                    }
                 }
                 jsonObject.put(method.getName(),total.replace("\"",""));
             }

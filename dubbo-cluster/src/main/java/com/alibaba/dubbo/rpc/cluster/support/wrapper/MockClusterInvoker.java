@@ -35,7 +35,10 @@ import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MockClusterInvoker<T> implements Invoker<T> {
     private String consumerIp ;
     private AtomicInteger total = new AtomicInteger();
-//    private AtomicInteger timetotal = new AtomicInteger();
+    //    private AtomicInteger timetotal = new AtomicInteger();
     private AtomicInteger successNumber = new AtomicInteger();
     private AtomicInteger zkStatus = new AtomicInteger();
     private AtomicInteger fuseStatus = new AtomicInteger();
@@ -60,6 +63,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
     private Map<String,Long> maptotal = new ConcurrentHashMap<String, Long>();
     private Map<String,Double> averagemap = new ConcurrentHashMap<String, Double>();
     private double xiancheng = 0;
+    private ExecutorService pool = Executors.newSingleThreadExecutor();
     private static final Logger logger = LoggerFactory
             .getLogger(MockClusterInvoker.class);
 
@@ -70,13 +74,11 @@ public class MockClusterInvoker<T> implements Invoker<T> {
     public MockClusterInvoker(Directory<T> directory, Invoker<T> invoker)  {
         this.directory = directory;
         this.invoker = invoker;
-        {
             try {
                 consumerIp = InetAddress.getLocalHost().getHostAddress().toString()+"/"+directory.getUrl().getParameter(Constants.PID_KEY);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
-        }
     }
 
     public URL getUrl() {
@@ -237,99 +239,105 @@ public class MockClusterInvoker<T> implements Invoker<T> {
             long elapsed1 = System.currentTimeMillis() - start1;
             if (elapsed / 1000 >= 30) {// 30秒后数据上传zk
                 if (zkStatus.getAndIncrement() == 0) {
-                    start = System.currentTimeMillis();
-                    averagemap = new ConcurrentHashMap<String, Double>();
-					xiancheng = 0;
-                    jsonObject.put(consumerIp + "/" + "total", "" + total.get());
-                    for (String key : maptotal.keySet()) {
-                        jsonObject.put(key + "/Number", maptotal.get(key));
-                        jsonObject.put(key + "/time", maptime.get(key) / mapnumber.get(key));
-                    }
-                    try {
-                        ZooKeeper zkClient = new ZooKeeper(directory.getUrl().getHost(),
-                                30000, new Watcher() {
-                            public void process(WatchedEvent arg0) {
+                    Runnable run = new Runnable() {
+                        public void run()  {
+                            start = System.currentTimeMillis();
+                            averagemap = new ConcurrentHashMap<String, Double>();
+                            xiancheng = 0;
+                            jsonObject.put(consumerIp + "/" + "total", "" + total.get());
+                            for (String key : maptotal.keySet()) {
+                                jsonObject.put(key + "/Number", maptotal.get(key));
+                                jsonObject.put(key + "/time", maptime.get(key) / mapnumber.get(key));
                             }
-                        });
-                        try {
-                            String bb = "{}";
-                            List<String> consumerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/consumers", null);
-                            List<String> providerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/providers", null);
-                            for (int providerInt = 0; providerInt < providerChild.size(); providerInt++) {//根据prvider计算线程总数线程数
-                                if(providerChild.get(providerInt).indexOf("threads%3D")==-1){
-                                    xiancheng=xiancheng+100;
-                                }else {
-                                    String threads = providerChild.get(providerInt).substring(providerChild.get(providerInt).indexOf("threads%3D")).substring(10, providerChild.get(providerInt).substring(providerChild.get(providerInt).indexOf("threads%3D")).indexOf("%26"));
-                                    xiancheng=xiancheng+Integer.parseInt(threads);
-                                }
-                            }
-                            byte[] aa = zkClient.getData("/dubbo/"
-                                            + directory.getUrl().getServiceInterface()+"/consumers",
-                                    false, null);
-                            if (aa != null) {
-                                bb = new String(aa);
-                            }
-                            JSONObject aaJsonObject = new JSONObject(bb);
-                            Iterator iterator2 = jsonObject.keys();
-                            while (iterator2.hasNext()) {
-                                String key = (String) iterator2.next();
-                                Long value2 = Long.parseLong(jsonObject
-                                        .get(key).toString());
-                                aaJsonObject.put(key, value2);
-                            }
-                            zkClient.setData("/dubbo/"
-                                            + directory.getUrl().getServiceInterface()+"/consumers",
-                                    (aaJsonObject.toString()).getBytes(), -1);
-                            zkClient.close();
-                            Map<String, Integer> NATmap = new ConcurrentHashMap<String, Integer>();
-                            String[] methods = providerChild.get(0).substring(providerChild.get(0).indexOf("methods%3D")).substring(10, providerChild.get(0).substring(providerChild.get(0).indexOf("methods%3D")).indexOf("%26")).split("%2C");
-                            for (String method : methods) {
-                                for (int consumerInt = 0; consumerInt < consumerChild.size(); consumerInt++) {
-                                    String IP = consumerChild.get(consumerInt).substring(17).substring(0, consumerChild.get(consumerInt).substring(17).indexOf("%2F"));
-                                    String pid = consumerChild.get(consumerInt).substring(consumerChild.get(consumerInt).indexOf("pid%3D")).substring(6, consumerChild.get(consumerInt).substring(consumerChild.get(consumerInt).indexOf("pid%3D")).indexOf("%26"));
-                                    if (aaJsonObject.toString().indexOf(IP + "/" + pid +"/"+ method) != -1) {
-                                        int aNumber = Integer.parseInt(aaJsonObject.get(IP + "/" + pid +"/"+ method + "/Number").toString());
-                                        int atime = Integer.parseInt(aaJsonObject.get(IP + "/" + pid +
-                                                "/"+ method + "/time").toString());
-                                        if (NATmap.containsKey(method)) {
-                                            NATmap.put(method, NATmap.get(method) + aNumber * atime);
-                                        } else {
-                                            NATmap.put(method, aNumber*atime);
+                            try {
+                                ZooKeeper zkClient = new ZooKeeper(directory.getUrl().getHost(),
+                                        30000, new Watcher() {
+                                    public void process(WatchedEvent arg0) {
+                                    }
+                                });
+                                try {
+                                    String bb = "{}";
+                                    List<String> consumerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/consumers", null);
+                                    List<String> providerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/providers", null);
+                                    for (int providerInt = 0; providerInt < providerChild.size(); providerInt++) {//根据prvider计算线程总数线程数
+                                        if(providerChild.get(providerInt).indexOf("threads%3D")==-1){
+                                            xiancheng=xiancheng+100;
+                                        }else {
+                                            String threads = providerChild.get(providerInt).substring(providerChild.get(providerInt).indexOf("threads%3D")).substring(10, providerChild.get(providerInt).substring(providerChild.get(providerInt).indexOf("threads%3D")).indexOf("%26"));
+                                            xiancheng=xiancheng+Integer.parseInt(threads);
                                         }
                                     }
-                                }
-                            }
-                            int timeAll = 0;
-                            for (String key : NATmap.keySet()) {
-                                timeAll = timeAll + NATmap.get(key);
-                            }
+                                    byte[] aa = zkClient.getData("/dubbo/"
+                                                    + directory.getUrl().getServiceInterface()+"/consumers",
+                                            false, null);
+                                    if (aa != null) {
+                                        bb = new String(aa);
+                                    }
+                                    JSONObject aaJsonObject = new JSONObject(bb);
+                                    Iterator iterator2 = jsonObject.keys();
+                                    while (iterator2.hasNext()) {
+                                        String key = (String) iterator2.next();
+                                        Long value2 = Long.parseLong(jsonObject
+                                                .get(key).toString());
+                                        aaJsonObject.put(key, value2);
+                                    }
+                                    zkClient.setData("/dubbo/"
+                                                    + directory.getUrl().getServiceInterface()+"/consumers",
+                                            (aaJsonObject.toString()).getBytes(), -1);
+                                    zkClient.close();
+                                    Map<String, Integer> NATmap = new ConcurrentHashMap<String, Integer>();
+                                    String[] methods = providerChild.get(0).substring(providerChild.get(0).indexOf("methods%3D")).substring(10, providerChild.get(0).substring(providerChild.get(0).indexOf("methods%3D")).indexOf("%26")).split("%2C");
+                                    for (String method : methods) {
+                                        for (int consumerInt = 0; consumerInt < consumerChild.size(); consumerInt++) {
+                                            String IP = consumerChild.get(consumerInt).substring(17).substring(0, consumerChild.get(consumerInt).substring(17).indexOf("%2F"));
+                                            String pid = consumerChild.get(consumerInt).substring(consumerChild.get(consumerInt).indexOf("pid%3D")).substring(6, consumerChild.get(consumerInt).substring(consumerChild.get(consumerInt).indexOf("pid%3D")).indexOf("%26"));
+                                            if (aaJsonObject.toString().indexOf(IP + "/" + pid +"/"+ method) != -1) {
+                                                int aNumber = Integer.parseInt(aaJsonObject.get(IP + "/" + pid +"/"+ method + "/Number").toString());
+                                                int atime = Integer.parseInt(aaJsonObject.get(IP + "/" + pid +
+                                                        "/"+ method + "/time").toString());
+                                                if (NATmap.containsKey(method)) {
+                                                    NATmap.put(method, NATmap.get(method) + aNumber * atime);
+                                                } else {
+                                                    NATmap.put(method, aNumber*atime);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    int timeAll = 0;
+                                    for (String key : NATmap.keySet()) {
+                                        timeAll = timeAll + NATmap.get(key);
+                                    }
 
-                            for (String method : methods) {//每个提供者每个方法
-                                if (!aaJsonObject.isNull(consumerIp + "/" + method + "/Number")) {
-                                    int bNumber = Integer.parseInt(aaJsonObject.get(consumerIp + "/" + method + "/Number").toString());
-                                    int btime = Integer.parseInt(aaJsonObject.get(consumerIp + "/" + method + "/time").toString());
+                                    for (String method : methods) {//每个提供者每个方法
+                                        if (!aaJsonObject.isNull(consumerIp + "/" + method + "/Number")) {
+                                            int bNumber = Integer.parseInt(aaJsonObject.get(consumerIp + "/" + method + "/Number").toString());
+//                                            int btime = Integer.parseInt(aaJsonObject.get(consumerIp + "/" + method + "/time").toString());
 //									averagemap.put(method,(xiancheng / timeAll) * bNumber * btime);//线程数
-                                    averagemap.put(method, (xiancheng / timeAll) * bNumber * 1000);//并发量
+                                            averagemap.put(method, (xiancheng / timeAll) * bNumber * 1000);//并发量
+                                        }
+                                    }
+                                } catch (KeeperException e) {
+                                    e.printStackTrace();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
                                 }
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                        } catch (KeeperException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            jsonObject = new JSONObject();
+                            maptotal = new ConcurrentHashMap<String, Long>();
+                            maptime = new ConcurrentHashMap<String, Long>();
+                            mapnumber = new ConcurrentHashMap<String, Long>();
+                            total.set(0);
+                            start3 = System.currentTimeMillis();
+                            successNumber.set(0);
+                            zkStatus.set(0);
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    jsonObject = new JSONObject();
-                    maptotal = new ConcurrentHashMap<String, Long>();
-                    maptime = new ConcurrentHashMap<String, Long>();
-                    mapnumber = new ConcurrentHashMap<String, Long>();
-                    total.set(0);
-                    start3 = System.currentTimeMillis();
-                    successNumber.set(0);
+                    };
+                    pool.execute(run);
                 }
-                zkStatus.set(0);
             }
+
             if (Integer.parseInt(supervene) != 0) {
                 if (System.currentTimeMillis() - start3 != 0) {//通过配置降级
                     if ((float) total.get() * 1000 / (System.currentTimeMillis() -
