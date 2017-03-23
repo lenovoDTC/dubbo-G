@@ -113,8 +113,11 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 List<Class<?>> ptsl = new ArrayList<Class<?>>();
                 Class<?>[] pts ;
                 String[] desc = jsonObject.getString("schema").split(",");
-                if (desc.length == 0) {
+                if (desc.length < 1) {
                     pts =  null;
+                    args = null;
+                }else if(desc.length==1&&desc[0].equals("")){
+                	pts =  null;
                     args = null;
                 } else {
                     for(String des : desc){
