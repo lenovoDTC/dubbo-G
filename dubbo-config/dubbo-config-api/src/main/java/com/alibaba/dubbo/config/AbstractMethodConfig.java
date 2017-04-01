@@ -67,6 +67,9 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     // 降级并发数
     protected int              supervene;
 
+    // 降级并发数
+    protected boolean              httpport;
+
     // 自定义参数
     protected Map<String, String> parameters;
 
@@ -171,6 +174,14 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
 
     public void setSupervene(int supervene) {
         this.supervene = supervene;
+    }
+
+    public boolean isHttpport() {
+        return httpport;
+    }
+
+    public void setHttpport(boolean httpport) {
+        this.httpport = httpport;
     }
 
     public float getErrorrate() {

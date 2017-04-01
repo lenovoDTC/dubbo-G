@@ -71,16 +71,13 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
     private Object decodeRequest(Channel channel,Object message) {
         String parem = "";
         if(message instanceof DefaultHttpRequest){
-        DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
+            DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
             if (httpRequst.getUri().length()>5) {
                 parem = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
             }else {
                 if(httpRequst.getContent().array().length>0){
-                try {
-                    parem = new String(httpRequst.getContent().array(), "UTF-8").replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+                    //                    parem = new String(httpRequst.getContent().array(),"utf-8" );
+                    parem = new String(httpRequst.getContent().array());
                 }else {
                     return null;
                 }
@@ -99,7 +96,6 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         }
         //        localhost:20880/{"method":"sayHello","schema":"java.lang.String,int","args":"\"world\",1"}
         JSONObject jsonObject = new JSONObject(parem);
-//        Method[] a = SpringContainer.getContext().getBean(channel.getUrl().getPath()).getClass();
         RpcInvocation rpcInvocation = new RpcInvocation();
         Request req = new Request();
         req.setVersion("http1.0.0");
@@ -108,57 +104,51 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         rpcInvocation.setAttachment(Constants.VERSION_KEY, "0.0.0");
 
         rpcInvocation.setMethodName(jsonObject.getString("method"));
-            try {
-                Object[] args;
-                List<Class<?>> ptsl = new ArrayList<Class<?>>();
-                Class<?>[] pts ;
-                String[] desc = jsonObject.getString("schema").split(",");
-                if (desc.length < 1) {
-                    pts =  null;
-                    args = null;
-                }else if(desc.length==1&&desc[0].equals("")){
-                	pts =  null;
-                    args = null;
-                } else {
-                    for(String des : desc){
+        try {
+            Object[] args;
+            List<Class<?>> ptsl = new ArrayList<Class<?>>();
+            Class<?>[] pts ;
+            String[] desc = jsonObject.getString("schema").split(",");
+            if (desc.length < 1) {
+                pts =  null;
+                args = null;
+            }else if(desc.length==1&&desc[0].equals("")){
+                pts =  null;
+                args = null;
+            } else {
+                for(String des : desc){
                     Class<?> pt = ReflectUtils.name2class(des);
-                        ptsl.add(pt);
-                    }
-                    pts = new Class[ptsl.size()];
-                    ptsl.toArray(pts);
-                    args = new Object[pts.length];
-                    for (int i = 0; i < args.length; i++) {
-                        try {
-                            args[i] = JSON.parseObject(jsonObject.getString("args").split(",")[i], pts[i]);
-                        } catch (Exception e) {
-                            if (log.isWarnEnabled()) {
-                                log.warn("Decode argument failed: " + e.getMessage(), e);
-                            }
+                    ptsl.add(pt);
+                }
+                pts = new Class[ptsl.size()];
+                ptsl.toArray(pts);
+                args = new Object[pts.length];
+                for (int i = 0; i < args.length; i++) {
+                    try {
+                        args[i] = JSON.parseObject(jsonObject.getString("args").split(",")[i], pts[i]);
+                    } catch (Exception e) {
+                        if (log.isWarnEnabled()) {
+                            log.warn("Decode argument failed: " + e.getMessage(), e);
                         }
                     }
                 }
-                rpcInvocation.setParameterTypes(pts);
-
-//            Map<String, String> map = (Map<String, String>) in.readObject(Map.class);
-//                Map<String,String> map = new HashMap<String, String>();
-//                if (map != null && map.size() > 0) {
-                    Map<String, String> attachment = rpcInvocation.getAttachments();
-                    if (attachment == null) {
-                        attachment = new HashMap<String, String>();
-                    }
-//                    attachment.putAll(map);
-                    rpcInvocation.setAttachments(attachment);
-//                }
-                rpcInvocation.setArguments(args);
-                req.setData(rpcInvocation);
-            } catch (ClassNotFoundException e) {
-                try {
-                    throw new IOException(StringUtils.toString("Read invocation data failed.", e));
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
             }
-            return  req;
+            rpcInvocation.setParameterTypes(pts);
+            Map<String, String> attachment = rpcInvocation.getAttachments();
+            if (attachment == null) {
+                attachment = new HashMap<String, String>();
+            }
+            rpcInvocation.setAttachments(attachment);
+            rpcInvocation.setArguments(args);
+            req.setData(rpcInvocation);
+        } catch (ClassNotFoundException e) {
+            try {
+                throw new IOException(StringUtils.toString("Read invocation data failed.", e));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+        return  req;
     }
     private void decode(Object message)  {
         if (message != null && message instanceof Decodeable) {

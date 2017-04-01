@@ -19,6 +19,7 @@ import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
+import com.alibaba.dubbo.common.utils.ConfigUtils;
 import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.rpc.*;
 import com.alibaba.dubbo.rpc.cluster.Directory;
@@ -46,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MockClusterInvoker<T> implements Invoker<T> {
     private String consumerIp ;
+    private String group;
     private AtomicInteger total = new AtomicInteger();
     //    private AtomicInteger timetotal = new AtomicInteger();
     private AtomicInteger successNumber = new AtomicInteger();
@@ -79,6 +81,10 @@ public class MockClusterInvoker<T> implements Invoker<T> {
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
+            group =  ConfigUtils.getProperty("dubbo.registry.group");
+        if(group==null||group.equals("")){
+            group = "/dubbo";
+        }
     }
 
     public URL getUrl() {
@@ -257,8 +263,8 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                                 });
                                 try {
                                     String bb = "{}";
-                                    List<String> consumerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/consumers", null);
-                                    List<String> providerChild = zkClient.getChildren("/dubbo/" + directory.getUrl().getServiceInterface() + "/providers", null);
+                                    List<String> consumerChild = zkClient.getChildren(group+ "/" + directory.getUrl().getServiceInterface() + "/consumers", null);
+                                    List<String> providerChild = zkClient.getChildren(group+ "/" + directory.getUrl().getServiceInterface() + "/providers", null);
                                     for (int providerInt = 0; providerInt < providerChild.size(); providerInt++) {//根据prvider计算线程总数线程数
                                         if(providerChild.get(providerInt).indexOf("threads%3D")==-1){
                                             xiancheng=xiancheng+100;
@@ -267,7 +273,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                                             xiancheng=xiancheng+Integer.parseInt(threads);
                                         }
                                     }
-                                    byte[] aa = zkClient.getData("/dubbo/"
+                                    byte[] aa = zkClient.getData(group+ "/"
                                                     + directory.getUrl().getServiceInterface()+"/consumers",
                                             false, null);
                                     if (aa != null) {
@@ -281,7 +287,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
                                                 .get(key).toString());
                                         aaJsonObject.put(key, value2);
                                     }
-                                    zkClient.setData("/dubbo/"
+                                    zkClient.setData(group+ "/"
                                                     + directory.getUrl().getServiceInterface()+"/consumers",
                                             (aaJsonObject.toString()).getBytes(), -1);
                                     zkClient.close();

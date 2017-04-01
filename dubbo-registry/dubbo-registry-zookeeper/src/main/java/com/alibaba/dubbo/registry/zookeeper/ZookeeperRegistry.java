@@ -101,49 +101,56 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
             zkClient.create(toUrlPath(url), url.getParameter(Constants.DYNAMIC_KEY, true));
 //            zkClient.create(toUrlPath(url)+"/http", url.getParameter(Constants.DYNAMIC_KEY, true));
-//            zkClient.create("/http/"+url.getPath(),false);
-            JSONObject jsonObject = new JSONObject();
-            Class<?> interfaceClass = Class.forName(url.getPath(), true, Thread.currentThread()
-                    .getContextClassLoader());
-            Method[] methods = interfaceClass.getMethods();
-            for (Method method : methods) {
-                String total = "";
-                Class<?>[] types = method.getParameterTypes();
-                Type[] type = method.getGenericParameterTypes();
-                for(int i=0;i<types.length;i++){
-                    if(total.equals("")){
-                        if ("boolean".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("byte".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("char".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("double".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("float".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("int".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("long".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if ("short".equals(type[i].toString())) total = type[i].toString()+"()";
-                        else if (type[i].toString().indexOf("java.lang")!=-1) total = type[i].toString()+"()";
-                        else if(type[i].toString().indexOf("java.util")!=-1)total = type[i].toString()+"()";
-                        else {
-                            total = type[i].toString()+"("+ObjAnalysis.ConvertObjToMap(types[i].newInstance())+")";
-                        }
-                    }else{
-                        if ("boolean".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("byte".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("char".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("double".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("float".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("int".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("long".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if ("short".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
-                        else if (type[i].toString().indexOf("java.lang")!=-1) total = total+","+type[i].toString()+"()";
-                        else if(type[i].toString().indexOf("java.util")!=-1)total = type[i].toString()+"()";
-                        else {
-                            total = total+","+type[i].toString()+"("+ObjAnalysis.ConvertObjToMap(types[i].newInstance())+")";
+            if(url.getParameter(Constants.HTTPPORT_KEY,true)){
+                zkClient.create("/http"+toUrlPath(url),true);
+                JSONObject jsonObject = new JSONObject();
+                Class<?> interfaceClass = Class.forName(url.getPath(), true, Thread.currentThread()
+                        .getContextClassLoader());
+                Method[] methods = interfaceClass.getMethods();
+                for (Method method : methods) {
+                    String total = "";
+                    Class<?>[] types = method.getParameterTypes();
+                    Type[] type = method.getGenericParameterTypes();
+                    for(int i=0;i<types.length;i++){
+                        if(total.equals("")){
+                            if ("boolean".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("byte".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("char".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("double".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("float".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("int".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("long".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if ("short".equals(type[i].toString())) total = type[i].toString()+"()";
+                            else if (type[i].toString().indexOf("java.lang")!=-1) total = type[i].toString()+"()";
+                            else if(type[i].toString().indexOf("java.util")!=-1)total = type[i].toString()+"()";
+                            else {
+                                total = type[i].toString()+"("+ObjAnalysis.ConvertObjToMap(types[i].newInstance())+")";
+                            }
+                        }else{
+                            if ("boolean".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("byte".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("char".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("double".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("float".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("int".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("long".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if ("short".equals(type[i].toString())) total = total+","+type[i].toString()+"()";
+                            else if (type[i].toString().indexOf("java.lang")!=-1) total = total+","+type[i].toString()+"()";
+                            else if(type[i].toString().indexOf("java.util")!=-1)total = type[i].toString()+"()";
+                            else {
+                                total = total+","+type[i].toString()+"("+ObjAnalysis.ConvertObjToMap(types[i].newInstance())+")";
+                            }
                         }
                     }
+                    jsonObject.put(method.getName(),total.replace("\"",""));
                 }
-                jsonObject.put(method.getName(),total.replace("\"",""));
+                System.out.println(jsonObject.toString());
+                String[] a = toUrlPath(url).split("/");
+                zkClient.setData("/http/"+a[1]+"/"+a[2]+"/providers",jsonObject.toString());
+                for(String key:jsonObject.keySet()){
+                zkClient.create("/http/"+a[1]+"/"+a[2]+"/loadbalance/"+key,false);
+                }
             }
-            zkClient.setData(toUrlPath(url),jsonObject.toString());
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
@@ -152,6 +159,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
     protected void doUnregister(URL url) {
         try {
             zkClient.delete(toUrlPath(url));
+            if(url.getParameter(Constants.HTTPPORT_KEY,true)){
+            zkClient.delete("/http"+toUrlPath(url));
+            }
         } catch (Throwable e) {
             throw new RpcException("Failed to unregister " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
@@ -226,6 +236,9 @@ public class ZookeeperRegistry extends FailbackRegistry {
             ChildListener zkListener = listeners.get(listener);
             if (zkListener != null) {
                 zkClient.removeChildListener(toUrlPath(url), zkListener);
+                if(url.getParameter(Constants.HTTPPORT_KEY,true)){
+                zkClient.removeChildListener("/http"+toUrlPath(url), zkListener);
+                }
             }
         }
     }

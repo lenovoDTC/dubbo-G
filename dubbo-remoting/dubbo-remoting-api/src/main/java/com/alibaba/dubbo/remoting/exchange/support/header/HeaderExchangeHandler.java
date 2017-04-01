@@ -187,10 +187,11 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         // Decide whether to close the connection or not.
                         if(request.getVersion().equals("http1.0.0")){
                             Object result = ((Response)response).getResult();
-
                             HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1,HttpResponseStatus.OK);
                             httpResponse.setContent(ChannelBuffers.copiedBuffer(JSON.toJSONString(result), CharsetUtil.UTF_8));
-                            httpResponse.headers().set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+                            System.out.println(JSON.toJSONString(result));
+                            httpResponse.headers().set("Content-Type", "text/html; charset=UTF-8");
+                            
                             // Add 'Content-Length' header only for a keep-alive connection.
                             if (true) {
                                 // Add 'Content-Length' header only for a keep-alive connection.
