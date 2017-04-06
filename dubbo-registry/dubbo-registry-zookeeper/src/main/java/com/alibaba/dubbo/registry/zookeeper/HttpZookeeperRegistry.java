@@ -32,10 +32,16 @@ public class HttpZookeeperRegistry implements HttpClient{
 
     private Map<String,Map<String,Map<String,String>>> loadBalanceMap = new HashMap<String, Map<String, Map<String, String>>>();
 
+    private float errorrate;
+
     private ZkClient zkClient;
 
     private HttpMockinterface httpMockinterface;
-    public HttpZookeeperRegistry() {
+    public HttpZookeeperRegistry(float errorrate) {
+    	new ZKLoadBalanceDataListener();
+    	new ZKProviderDataListener();
+    	new ZKProviderChildListener();
+        this.errorrate = errorrate;
         httpMockinterface = new HttpMock();
         String host = ConfigUtils.getProperty("dubbo.registry.address");
         if(host!=null){
@@ -143,7 +149,7 @@ public class HttpZookeeperRegistry implements HttpClient{
         	providers.put(provider, Integer.parseInt(map.get(group).get(rinterface).get(provider).get(0).toString()));
         }
         String methodloadBalance = loadBalanceMap.get(group).get(rinterface).get(method);
-        return httpMockinterface.httpMockCluster(methodloadBalance,providers,method,schema,args);
+        return httpMockinterface.httpMockCluster(errorrate,methodloadBalance,providers,method,schema,args);
     }
     public Map<String,Map<String,Map<String,List<Object>>>> getMap(){
         return map;

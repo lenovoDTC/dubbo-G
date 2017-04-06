@@ -1,8 +1,6 @@
 package com.alibaba.dubbo.rpc.cluster.loadbalance;
 
 import com.alibaba.dubbo.common.utils.HttpClient;
-import com.alibaba.dubbo.rpc.cluster.HttpMockinterface;
-import com.alibaba.dubbo.rpc.cluster.support.wrapper.HttpMock;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class HttpRoundRobinLoadBalance extends HttpAbstractLoadBalance {
     private static Integer pos = 0;
-    protected String httpDoSelect(Map<String,Integer> providers, String method, String schema, String args)
+    protected String httpDoSelect(Map<String, List<AtomicInteger>> map,float errorrate, Map<String, Integer> providers, String method, String schema, String args)
     {
         // 重建一个Map，避免服务器的上下线导致的并发问题
         Map<String, Integer> serverMap = providers;
@@ -30,6 +28,6 @@ public class HttpRoundRobinLoadBalance extends HttpAbstractLoadBalance {
             server = keyList.get(pos);
             pos ++;
         }
-        return HttpClient.httpClient(server,method,schema,args);
+        return HttpClient.httpClient(map,errorrate,server,method,schema,args);
     }
 }

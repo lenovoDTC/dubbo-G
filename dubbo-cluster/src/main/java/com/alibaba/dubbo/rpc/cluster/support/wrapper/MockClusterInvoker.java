@@ -77,7 +77,7 @@ public class MockClusterInvoker<T> implements Invoker<T> {
         this.directory = directory;
         this.invoker = invoker;
             try {
-                consumerIp = InetAddress.getLocalHost().getHostAddress().toString()+"/"+directory.getUrl().getParameter(Constants.PID_KEY);
+                consumerIp = InetAddress.getLocalHost().getHostAddress().toString()+":"+directory.getUrl().getParameter(Constants.PID_KEY);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
