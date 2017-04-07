@@ -1,11 +1,10 @@
 package com.alibaba.dubbo.rpc.cluster.loadbalance;
 
+import com.alibaba.dubbo.common.logger.Logger;
+import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.common.utils.HttpClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -13,19 +12,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class HttpRandomLoadBalance extends HttpAbstractLoadBalance {
 
-    protected String httpDoSelect(Map<String, List<AtomicInteger>> map,float errorrate, Map<String, Integer> providers, String method, String schema, String args)
+    private static final Logger logger = LoggerFactory.getLogger(HttpRandomLoadBalance.class);
+
+    protected String httpDoSelect(Map<String, List<AtomicInteger>> map, float errorrate, Map<String, Integer> providers, String method, String schema, String args)
     {
-        // 重建一个Map，避免服务器的上下线导致的并发问题
-        Map<String, Integer> serverMap = providers;
-
-        // 取得Ip地址List
-        Set<String> keySet = serverMap.keySet();
-        ArrayList<String> keyList = new ArrayList<String>();
-        keyList.addAll(keySet);
-
-        java.util.Random random = new java.util.Random();
-        int randomPos = random.nextInt(keyList.size());
-
-        return HttpClient.httpClient(map,errorrate,keyList.get(randomPos),method,schema,args);
+        TreeMap<Double, String> weightMap = new TreeMap<Double, String>();
+        Set<String> keySet = providers.keySet();
+        for (String key : keySet) {
+            double lastWeight = weightMap.size() == 0 ? 0 : weightMap.lastKey().doubleValue();//统一转为double
+            weightMap.put(providers.get(key).doubleValue() + lastWeight, key);//权重累加
+        }
+        if (weightMap.lastKey().doubleValue()==0)return "no providers";
+        double randomWeight = weightMap.lastKey() * Math.random();
+        SortedMap<Double, String> tailMap = weightMap.tailMap(randomWeight,false);
+        return HttpClient.httpClient(map,errorrate,weightMap.get(tailMap.firstKey()),method,schema,args);
     }
 }
