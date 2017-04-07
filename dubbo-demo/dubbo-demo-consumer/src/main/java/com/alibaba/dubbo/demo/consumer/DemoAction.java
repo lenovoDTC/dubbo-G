@@ -15,10 +15,10 @@
  */
 package com.alibaba.dubbo.demo.consumer;
 
+import com.alibaba.dubbo.demo.DemoService;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import com.alibaba.dubbo.demo.DemoService;
 
 public class DemoAction {
 
@@ -31,13 +31,12 @@ public class DemoAction {
     public void start() throws Exception {
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             try {
-                String hello = demoService.sayHello("world" + i);
-                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello);
+//                String hello = demoService.sayHello("world" + i,1);
+                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + "");
             } catch (Exception e) {
                 e.printStackTrace();
             }
             Thread.sleep(1000);
         }
     }
-
 }
