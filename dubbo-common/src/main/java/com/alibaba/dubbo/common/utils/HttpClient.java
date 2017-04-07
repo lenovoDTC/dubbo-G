@@ -12,23 +12,32 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpClient {
+    private static long start = System.currentTimeMillis();
+    private static Map<String,AtomicInteger> maptotal = new HashMap<String, AtomicInteger>();
     public static String httpClient(Map<String, List<AtomicInteger>> map,float errorrate,String uri, String method, String schema, String args){
+        if(System.currentTimeMillis()-start>1000)start = System.currentTimeMillis();
         String response = "dubbo.http.error";
         String threads="100";
         if(uri.indexOf("threads%3D")!=-1){
             threads = uri.substring(uri.indexOf("threads%3D")).substring(10, uri.substring(uri.indexOf("threads%3D")).indexOf("%26"));
         }
         uri = "http://"+uri.substring(14).substring(0,uri.substring(14).indexOf("%2F")).replace("%3A", ":");
+        if(maptotal.containsKey(uri)){
+            maptotal.get(uri).incrementAndGet();
+        }else {
+            maptotal.put(uri,new AtomicInteger(1));
+        }
         if (map.containsKey(uri)){
             float i = (float)map.get(uri).get(1).get() / (map.get(uri).get(0).get() + map.get(uri).get(1).get());
             if (i*100>errorrate)return response+uri;//熔断
-            int env = Integer.parseInt(threads)/(map.get(uri).get(2).get()/map.get(uri).get(0).get())*1000;
-            if (map.get(uri).get(1).get()+map.get(uri).get(0).get()>env)return response+uri;//降级 
+            float env = Float.parseFloat(threads)/(map.get(uri).get(2).get()/map.get(uri).get(0).get())*1000;
+            if (maptotal.get(uri).get()>env)return response+uri;//降级
         }
         org.apache.http.client.HttpClient httpClient = new DefaultHttpClient();
         //        请求超时

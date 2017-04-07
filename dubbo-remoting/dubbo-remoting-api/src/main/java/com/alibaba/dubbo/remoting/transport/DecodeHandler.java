@@ -33,6 +33,7 @@ import java.util.*;
 import com.alibaba.fastjson.JSON;
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import static org.jboss.netty.handler.codec.rtsp.RtspHeaders.Names.CONTENT_LENGTH;
@@ -108,24 +109,28 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             Object[] args;
             List<Class<?>> ptsl = new ArrayList<Class<?>>();
             Class<?>[] pts ;
-            String[] desc = jsonObject.getString("schema").split(",");
-            if (desc.length < 1) {
+//            String[] desc = jsonObject.getString("schema").split(",");
+            JSONArray jsonArray = new JSONArray(jsonObject.getString("schema"));
+            JSONArray jsonArrayargs = new JSONArray(jsonObject.getString("args"));
+            if (jsonArray.length() < 1) {
                 pts =  null;
                 args = null;
-            }else if(desc.length==1&&desc[0].equals("")){
+            }else if(jsonArray.length()==1&&jsonArray.getString(0).equals("")){
                 pts =  null;
                 args = null;
             } else {
-                for(String des : desc){
-                    Class<?> pt = ReflectUtils.name2class(des);
+                for(int i = 0; i<jsonArray.length();i++){
+                    Class<?> pt = ReflectUtils.name2class(jsonArray.getString(i));
                     ptsl.add(pt);
                 }
                 pts = new Class[ptsl.size()];
                 ptsl.toArray(pts);
                 args = new Object[pts.length];
                 for (int i = 0; i < args.length; i++) {
+                   String addString =  jsonArrayargs.get(i).toString();
+                    if (jsonArray.getString(i).equals("java.lang.String"))addString = "\""+addString+"\"";
                     try {
-                        args[i] = JSON.parseObject(jsonObject.getString("args").split(",")[i], pts[i]);
+                        args[i] = JSON.parseObject(addString, pts[i]);
                     } catch (Exception e) {
                         if (log.isWarnEnabled()) {
                             log.warn("Decode argument failed: " + e.getMessage(), e);
