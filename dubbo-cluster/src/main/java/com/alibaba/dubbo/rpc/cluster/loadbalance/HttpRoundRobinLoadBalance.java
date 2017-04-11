@@ -56,6 +56,7 @@ public class HttpRoundRobinLoadBalance extends HttpAbstractLoadBalance {
                 weightSum += weight;
             }
         }
+        if(maxWeight == 0)return "no providers";
         AtomicPositiveInteger sequence = sequences.get(key);
         if (sequence == null) {
             sequences.putIfAbsent(key, new AtomicPositiveInteger());
