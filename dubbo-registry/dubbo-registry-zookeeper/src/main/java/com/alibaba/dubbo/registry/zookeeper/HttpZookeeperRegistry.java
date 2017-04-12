@@ -37,16 +37,12 @@ public class HttpZookeeperRegistry implements HttpClient{
     private ZkClient zkClient;
 
     private HttpMockinterface httpMockinterface;
-    public HttpZookeeperRegistry(float errorrate) {
+    public HttpZookeeperRegistry(float errorrate,String host) {
     	new ZKLoadBalanceDataListener();
     	new ZKProviderDataListener();
     	new ZKProviderChildListener();
         this.errorrate = errorrate;
         httpMockinterface = new HttpMock();
-        String host = ConfigUtils.getProperty("dubbo.registry.address");
-        if(host!=null){
-        	host = host.substring(host.indexOf("//")+2);
-        }
         zkClient = new ZkClient(host);
         List<String> groups = zkClient.getChildren("/http");
         for(String group:groups){
