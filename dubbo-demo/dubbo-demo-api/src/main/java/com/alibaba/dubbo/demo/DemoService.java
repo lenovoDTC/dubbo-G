@@ -15,9 +15,11 @@
  */
 package com.alibaba.dubbo.demo;
 
+import java.util.List;
+
 public interface DemoService {
 
-    String sayHello(String name);
-    String sayHello1(String name);
+    String sayHello(String name, List<String> strings);
+    String sayHello1();
 
 }

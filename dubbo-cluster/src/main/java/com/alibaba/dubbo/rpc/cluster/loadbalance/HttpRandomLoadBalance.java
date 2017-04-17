@@ -3,6 +3,7 @@ package com.alibaba.dubbo.rpc.cluster.loadbalance;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.common.utils.HttpClient;
+import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
