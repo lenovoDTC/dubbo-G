@@ -15,6 +15,7 @@
  */
 package com.alibaba.dubbo.config.spring;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -24,6 +25,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.alibaba.dubbo.config.annotation.Parameter;
+import com.alibaba.dubbo.config.annotation.Request;
+import com.alibaba.dubbo.remoting.http.Mapping;
+import com.alibaba.dubbo.remoting.http.ParameterMeta;
+import com.alibaba.dubbo.remoting.http.RequestMeta;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -221,7 +227,56 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                     logger.error("Failed to init remote service reference at method " + name + " in class " + bean.getClass().getName() + ", cause: " + e.getMessage(), e);
                 }
             }
+
+            Request request = method.getAnnotation(Request.class);
+
+            if (request != null) {
+                String[] args = new String[method.getTypeParameters().length];
+                String[] values = request.value();
+                Request.Method[] requestAnnotationMethods = request.method();
+                String[] requestMethods = new String[requestAnnotationMethods.length];
+                for (int i = 0; i < requestMethods.length; i++) {
+                    requestMethods[i] = requestAnnotationMethods[i].name();
+                }
+                RequestMeta requestMeta = new RequestMeta();
+                requestMeta.setHeaders(request.headers());
+                requestMeta.setMethod(requestMethods);
+                for (String uri : values) {
+
+                    Mapping.push(method, uri, requestMeta);
+                }
+
+                Annotation[][] annotations = method.getParameterAnnotations();
+                if (annotations.length == 0) {
+                    Mapping.push(method);
+                } else {
+                    String[] parameterNames = Mapping.getParameters(method);
+                    ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
+                    for (int i = 0; i < parameterNames.length; i++) {
+                        Annotation[] parameterAnnotations = annotations[i];
+                        boolean hasAnnotation = false;
+                        ParameterMeta parameterMeta = new ParameterMeta();
+                        for (Annotation annotation : parameterAnnotations) {
+                            if (!hasAnnotation && annotation instanceof Parameter) {
+                                parameterMeta.setName(((Parameter) annotation).value());
+                                parameterMeta.setRequired(((Parameter) annotation).required());
+                                parameterMetas[i++] = parameterMeta;
+                                hasAnnotation = true;
+                            }
+                        }
+                        if (!hasAnnotation) {
+                            parameterMeta.setName(parameterNames[i]);
+                            parameterMeta.setRequired(true);
+                            parameterMetas[i++] = parameterMeta;
+                        }
+                    }
+
+                    requestMeta.setParameterMetas(parameterMetas);
+
+                }
+            }
         }
+
         Field[] fields = bean.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {

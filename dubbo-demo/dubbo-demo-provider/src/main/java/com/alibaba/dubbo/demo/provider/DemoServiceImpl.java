@@ -19,18 +19,27 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.alibaba.dubbo.config.annotation.Parameter;
+import com.alibaba.dubbo.config.annotation.Request;
+import com.alibaba.dubbo.config.annotation.Response;
 import com.alibaba.dubbo.demo.DemoService;
 import com.alibaba.dubbo.rpc.RpcContext;
 
 public class DemoServiceImpl implements DemoService {
 
-    public String sayHello(String name, List<String> strings) {
+    public String sayHello(String name) {
         System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Hello " + name + ", request from consumer: " + RpcContext.getContext().getRemoteAddress());
         return "Hello$$*(&^*() " + name + ", response form provider: " + RpcContext.getContext().getLocalAddress();
     }
-    public String sayHello1() {
+    public String sayHello1(String name) {
         System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] Hello sayHello1, request from consumer: " + RpcContext.getContext().getRemoteAddress());
         return "Hello sayHello1, response form provider: " + RpcContext.getContext().getLocalAddress();
+    }
+
+    @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
+    @Response(headers = {""})
+    public byte[] sayHello2(@Parameter(value = "name", required = false) String name) {
+        return new byte[]{1,2,3,4};
     }
 
 }

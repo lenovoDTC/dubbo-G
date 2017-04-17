@@ -58,6 +58,11 @@ public class JSON {
     private JSON() {
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     /**
      * json string.
      *

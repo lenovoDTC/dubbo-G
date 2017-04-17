@@ -29,7 +29,7 @@ import com.alibaba.dubbo.common.extension.SPI;
  * @author ding.lid
  * @author william.liangf
  */
-@SPI("hessian2")
+@SPI("kryo")
 public interface Serialization {
 
     /**
