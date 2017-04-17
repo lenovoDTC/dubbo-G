@@ -141,7 +141,7 @@
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
-            <artifactId>dubbo-config-api</artifactId>
+            <artifactId>dubbo-remoting-api</artifactId>
             <version>2.5.3-Galpha</version>
         </dependency>
     </dependencies>
