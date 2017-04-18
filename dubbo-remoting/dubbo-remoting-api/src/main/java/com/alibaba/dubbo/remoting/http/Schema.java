@@ -7,6 +7,7 @@ import java.util.Map;
  */
 public class Schema {
     private String methodName;
+    private String interfaceName;
 //    private ParameterMeta[] parameterMeta;
 //    private String[] parameterName;
 
@@ -28,7 +29,15 @@ public class Schema {
         this.parameterMeta = parameterMeta;
     }
 
-//    public String[] getParameterName() {
+    public String getInterfaceName() {
+        return interfaceName;
+    }
+
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
+    }
+
+    //    public String[] getParameterName() {
 //        return parameterName;
 //    }
 //
