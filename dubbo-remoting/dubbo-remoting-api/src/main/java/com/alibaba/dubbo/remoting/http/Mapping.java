@@ -17,9 +17,9 @@ import java.util.regex.Pattern;
  */
 public class Mapping {
     private static LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
-    public static LinkedHashMap<Method, Schema> cache;
-    public static LinkedHashMap<String, Method> mapping;
-    public static LinkedHashMap<String, RequestMeta> metas;
+    public static Map<Method, Schema> cache = new LinkedHashMap<Method, Schema>();
+    public static Map<String, Method> mapping = new LinkedHashMap<String, Method>();
+    public static Map<String, RequestMeta> metas = new LinkedHashMap<String, RequestMeta>();
 //    public static LinkedHashMap<Method, ParameterMeta[]> params;
 
     public static void push(Method method) {
