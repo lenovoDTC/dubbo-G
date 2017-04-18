@@ -20,12 +20,8 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-	<dubbo:reference id="demoService"
-<<<<<<< Updated upstream
-		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
-=======
-		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35"/>
->>>>>>> Stashed changes
+	<dubbo:reference id="demoService1"
+		interface="com.alibaba.dubbo.demo.DemoService1"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
 	<!--<dubbo:consumer id="count" filter="count"-->
 
 		<!--retries="0" />-->

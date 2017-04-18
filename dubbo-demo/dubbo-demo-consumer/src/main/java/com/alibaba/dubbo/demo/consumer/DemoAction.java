@@ -16,22 +16,23 @@
 package com.alibaba.dubbo.demo.consumer;
 
 import com.alibaba.dubbo.demo.DemoService;
+import com.alibaba.dubbo.demo.DemoService1;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DemoAction {
 
-    private DemoService demoService;
+    private DemoService1 demoService;
 
-    public void setDemoService(DemoService demoService) {
+    public void setDemoService1(DemoService1 demoService) {
         this.demoService = demoService;
     }
 
     public void start() throws Exception {
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             try {
-//                String hello = demoService.sayHello("world" + i,1);
+                String hello = demoService.sayHello("world" + i);
                 System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + "");
             } catch (Exception e) {
                 e.printStackTrace();

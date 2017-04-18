@@ -78,7 +78,8 @@ public class Mapping {
     }
 
     public static boolean isMapping(String uri) {
-        return mapping.containsValue(uri);
+        return mapping.containsKey(uri);
+//        return true;
     }
 
     public static boolean isGet(String uri) throws Exception {
