@@ -141,8 +141,8 @@
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
-            <artifactId>dubbo-remoting-api</artifactId>
-            <version>2.5.3-Galpha</version>
+            <artifactId>dubbo-config-api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
     <build>
