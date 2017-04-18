@@ -50,7 +50,7 @@ public class Mapping {
 
     }
 
-    private static String getType (String parameterType) {
+    public static String getType (String parameterType) {
         String type = "";
         if (parameterType.matches("(byte|short|int|long|float|double|boolean|char)")) return parameterType;
         if (parameterType.equals("java.lang.Byte")) return "int";
@@ -79,7 +79,6 @@ public class Mapping {
 
     public static boolean isMapping(String uri) {
         return mapping.containsKey(uri);
-//        return true;
     }
 
     public static boolean isGet(String uri) throws Exception {

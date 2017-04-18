@@ -28,6 +28,10 @@
 
     <dubbo:service interface="com.alibaba.dubbo.demo.DemoService1" ref="demoService1" httpport="true"/>
 
+    <bean id="demoServiceOne" class="com.alibaba.dubbo.demo.provider.DemoServiceOneImpl"/>
+
+    <dubbo:service interface="com.alibaba.dubbo.demo.DemoServiceOne" ref="demoServiceOne" httpport="true"/>
+
     <dubbo:annotation package="com.alibaba.dubbo.demo" />
 
 </beans>

@@ -76,9 +76,14 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         if(message instanceof DefaultHttpRequest){
             DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
             if (httpRequst.getMethod().getName().equals("GET")){
-                if(Mapping.isMapping(httpRequst.getUri())){
+                if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
+                    String[] parameters = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1).split("&");
+                    for(String p : parameters){
+                        String[] ps = p.split("=");
+                        parameter.put(ps[0],ps[1]);
+                    }
                 try {
-                    param = Mapping.decode(httpRequst.getUri(),parameter);
+                    param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -86,7 +91,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 param = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
             }else if(httpRequst.getMethod().getName().equals("POST")){
 //                                        parem = new String(httpRequst.getContent().array(),"utf-8" );
-                if(Mapping.isMapping(httpRequst.getUri())){
+                if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
                     String uri = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1) + "&" +new String(httpRequst.getContent().array());
                     String[] parameters = uri.split("&");
                     for(String p : parameters){
@@ -100,7 +105,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                         if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
                     }
                     try {
-                        param = Mapping.decode(httpRequst.getUri(),parameter);
+                        param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

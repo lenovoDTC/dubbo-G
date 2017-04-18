@@ -22,7 +22,10 @@
 
 	<dubbo:reference id="demoService1"
 		interface="com.alibaba.dubbo.demo.DemoService1"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
-	<!--<dubbo:consumer id="count" filter="count"-->
+	<dubbo:reference id="demoService"
+		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
+	<dubbo:reference id="demoServiceOne"
+					 interface="com.alibaba.dubbo.demo.DemoServiceOne"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
 
 		<!--retries="0" />-->
 
