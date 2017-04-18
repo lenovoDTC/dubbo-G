@@ -19,9 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -30,6 +29,7 @@ import com.alibaba.dubbo.config.annotation.Request;
 import com.alibaba.dubbo.remoting.http.Mapping;
 import com.alibaba.dubbo.remoting.http.ParameterMeta;
 import com.alibaba.dubbo.remoting.http.RequestMeta;
+import com.alibaba.dubbo.remoting.http.Schema;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -242,7 +242,6 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                 requestMeta.setHeaders(request.headers());
                 requestMeta.setMethod(requestMethods);
                 for (String uri : values) {
-
                     Mapping.push(method, uri, requestMeta);
                 }
 
@@ -252,26 +251,44 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                 } else {
                     String[] parameterNames = Mapping.getParameters(method);
                     ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
+                    Type[] types = method.getGenericParameterTypes();
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    Map<String, ParameterMeta> parameterMetaMap = new HashMap<String, ParameterMeta>();
                     for (int i = 0; i < parameterNames.length; i++) {
                         Annotation[] parameterAnnotations = annotations[i];
                         boolean hasAnnotation = false;
                         ParameterMeta parameterMeta = new ParameterMeta();
+                        String parameterName = parameterNames[i];
+                        Class<?> classType = parameterTypes[i];
+                        String parameterType = classType.getName();
                         for (Annotation annotation : parameterAnnotations) {
                             if (!hasAnnotation && annotation instanceof Parameter) {
                                 parameterMeta.setName(((Parameter) annotation).value());
                                 parameterMeta.setRequired(((Parameter) annotation).required());
-                                parameterMetas[i++] = parameterMeta;
+                                parameterMeta.setDesc(((Parameter) annotation).desc());
+                                parameterMeta.setType(((Parameter) annotation).type().name());
                                 hasAnnotation = true;
                             }
                         }
                         if (!hasAnnotation) {
                             parameterMeta.setName(parameterNames[i]);
                             parameterMeta.setRequired(true);
+                            parameterMeta.setType(Mapping.getType(parameterType));
                             parameterMetas[i++] = parameterMeta;
                         }
+
+                        parameterMeta.setRealname(parameterName);
+                        parameterMeta.setParameterType(parameterType);
+                        parameterMeta.setIndex(i);
+                        parameterMetas[i++] = parameterMeta;
+                        parameterMetaMap.put(parameterMeta.getName(), parameterMeta);
                     }
 
                     requestMeta.setParameterMetas(parameterMetas);
+                    Schema schema = new Schema();
+                    schema.setMethodName(method.getName());
+                    schema.setParameterMeta(parameterMetaMap);
+                    Mapping.push(method, schema);
 
                 }
             }

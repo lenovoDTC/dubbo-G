@@ -50,7 +50,7 @@ public class Mapping {
 
     }
 
-    private static String getType (String parameterType) {
+    public static String getType (String parameterType) {
         String type = "";
         if (parameterType.matches("(byte|short|int|long|float|double|boolean|char)")) return parameterType;
         if (parameterType.equals("java.lang.Byte")) return "int";
