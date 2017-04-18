@@ -21,11 +21,10 @@
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
 	<dubbo:reference id="demoService"
-<<<<<<< Updated upstream
 		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
-=======
-		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35"/>
->>>>>>> Stashed changes
+
+	<dubbo:reference id="demoServiceOne"
+					 interface="com.alibaba.dubbo.demo.DemoServiceOne"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
 	<!--<dubbo:consumer id="count" filter="count"-->
 
 		<!--retries="0" />-->

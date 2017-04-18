@@ -24,9 +24,9 @@
 
     <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" httpport="true"/>
 
-    <dubbo:annotation package="com.alibaba.dubbo.demo" />
+    <bean id="demoServiceOne" class="com.alibaba.dubbo.demo.provider.DemoServiceOneImpl"/>
 
-    <dubbo:annotation package="com.alibaba.dubbo.demo" />
+    <dubbo:service interface="com.alibaba.dubbo.demo.DemoServiceOne" ref="demoServiceOne" httpport="true"/>
 
     <dubbo:annotation package="com.alibaba.dubbo.demo" />
 
