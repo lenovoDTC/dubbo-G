@@ -208,7 +208,18 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
         if (!isMatchPackage(bean)) {
             return bean;
         }
-        Method[] methods = bean.getClass().getMethods();
+
+        Map<String, String> interfaceMap = new HashMap<String, String>();
+        Class<?> classType = bean.getClass();
+        Class<?>[] interfaces = classType.getInterfaces();
+        for (Class<?> interfaceType : interfaces) {
+            Method[] methods = interfaceType.getDeclaredMethods();
+            for (Method method : methods) {
+                interfaceMap.put(method.getName(), interfaceType.getName());
+            }
+        }
+        Method[] methods = classType.getMethods();
+
         for (Method method : methods) {
             String name = method.getName();
             if (name.length() > 3 && name.startsWith("set")
@@ -230,66 +241,71 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
             Request request = method.getAnnotation(Request.class);
 
-            if (request != null) {
-                String[] args = new String[method.getTypeParameters().length];
-                String[] values = request.value();
-                Request.Method[] requestAnnotationMethods = request.method();
-                String[] requestMethods = new String[requestAnnotationMethods.length];
-                for (int i = 0; i < requestMethods.length; i++) {
-                    requestMethods[i] = requestAnnotationMethods[i].name();
-                }
-                RequestMeta requestMeta = new RequestMeta();
-                requestMeta.setHeaders(request.headers());
-                requestMeta.setMethod(requestMethods);
-                for (String uri : values) {
-                    Mapping.push(method, uri, requestMeta);
-                }
-
-                Annotation[][] annotations = method.getParameterAnnotations();
-                if (annotations.length == 0) {
-                    Mapping.push(method);
-                } else {
-                    String[] parameterNames = Mapping.getParameters(method);
-                    ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
-                    Type[] types = method.getGenericParameterTypes();
-                    Class<?>[] parameterTypes = method.getParameterTypes();
-                    Map<String, ParameterMeta> parameterMetaMap = new HashMap<String, ParameterMeta>();
-                    for (int i = 0; i < parameterNames.length; i++) {
-                        Annotation[] parameterAnnotations = annotations[i];
-                        boolean hasAnnotation = false;
-                        ParameterMeta parameterMeta = new ParameterMeta();
-                        String parameterName = parameterNames[i];
-                        Class<?> classType = parameterTypes[i];
-                        String parameterType = classType.getName();
-                        for (Annotation annotation : parameterAnnotations) {
-                            if (!hasAnnotation && annotation instanceof Parameter) {
-                                parameterMeta.setName(((Parameter) annotation).value());
-                                parameterMeta.setRequired(((Parameter) annotation).required());
-                                parameterMeta.setDesc(((Parameter) annotation).desc());
-                                parameterMeta.setType(((Parameter) annotation).type().name());
-                                hasAnnotation = true;
-                            }
-                        }
-                        if (!hasAnnotation) {
-                            parameterMeta.setName(parameterNames[i]);
-                            parameterMeta.setRequired(true);
-                            parameterMeta.setType(Mapping.getType(parameterType));
-                            parameterMetas[i++] = parameterMeta;
-                        }
-
-                        parameterMeta.setRealname(parameterName);
-                        parameterMeta.setParameterType(parameterType);
-                        parameterMeta.setIndex(i);
-                        parameterMetas[i++] = parameterMeta;
-                        parameterMetaMap.put(parameterMeta.getName(), parameterMeta);
+            if (interfaceMap.containsKey(method.getName())) {
+                if (request != null) {
+                    String[] args = new String[method.getTypeParameters().length];
+                    String[] values = request.value();
+                    Request.Method[] requestAnnotationMethods = request.method();
+                    String[] requestMethods = new String[requestAnnotationMethods.length];
+                    for (int i = 0; i < requestMethods.length; i++) {
+                        requestMethods[i] = requestAnnotationMethods[i].name();
+                    }
+                    RequestMeta requestMeta = new RequestMeta();
+                    requestMeta.setHeaders(request.headers());
+                    requestMeta.setMethod(requestMethods);
+                    for (String uri : values) {
+                        Mapping.push(method, uri, requestMeta);
                     }
 
-                    requestMeta.setParameterMetas(parameterMetas);
-                    Schema schema = new Schema();
-                    schema.setMethodName(method.getName());
-                    schema.setParameterMeta(parameterMetaMap);
-                    Mapping.push(method, schema);
+                    Annotation[][] annotations = method.getParameterAnnotations();
+                    if (annotations.length == 0) {
+                        Mapping.push(method);
+                    } else {
+                        String[] parameterNames = Mapping.getParameters(method);
+                        ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
+                        Type[] types = method.getGenericParameterTypes();
+                        Class<?>[] parameterTypes = method.getParameterTypes();
+                        Map<String, ParameterMeta> parameterMetaMap = new HashMap<String, ParameterMeta>();
+                        for (int i = 0; i < parameterNames.length; i++) {
+                            Annotation[] parameterAnnotations = annotations[i];
+                            boolean hasAnnotation = false;
+                            ParameterMeta parameterMeta = new ParameterMeta();
+                            String parameterName = parameterNames[i];
+                            Class<?> parameterClassType = parameterTypes[i];
+                            String parameterType = parameterClassType.getName();
+                            for (Annotation annotation : parameterAnnotations) {
+                                if (!hasAnnotation && annotation instanceof Parameter) {
+                                    parameterMeta.setName(((Parameter) annotation).value());
+                                    parameterMeta.setRequired(((Parameter) annotation).required());
+                                    parameterMeta.setDesc(((Parameter) annotation).desc());
+                                    parameterMeta.setType(((Parameter) annotation).type().name());
+                                    hasAnnotation = true;
+                                }
+                            }
+                            if (!hasAnnotation) {
+                                parameterMeta.setName(parameterNames[i]);
+                                parameterMeta.setRequired(true);
+                                parameterMeta.setType(Mapping.getType(parameterType));
+                                parameterMetas[i++] = parameterMeta;
+                            }
 
+                            parameterMeta.setRealname(parameterName);
+                            parameterMeta.setParameterType(parameterType);
+                            parameterMeta.setIndex(i);
+                            parameterMetas[i++] = parameterMeta;
+                            parameterMetaMap.put(parameterMeta.getName(), parameterMeta);
+                        }
+
+                        requestMeta.setParameterMetas(parameterMetas);
+                        Schema schema = new Schema();
+                        schema.setMethodName(method.getName());
+                        schema.setParameterMeta(parameterMetaMap);
+                        schema.setInterfaceName(interfaceMap.get(method.getName()));
+                        Mapping.push(method, schema);
+
+                    }
+                } else {
+                    Mapping.push(method);
                 }
             }
         }

@@ -121,28 +121,41 @@ public class Mapping {
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         Map<String, ParameterMeta> parameterMetas = schema.getParameterMeta();
         String[] parameterValues = new String[parameterMetas.size()];
+        String[] parameterTypes = new String[parameterMetas.size()];
+        String result = "{\"interface\":\"%s\",\"method\":\"%s\",\"schema\":\"%s\",\"args\":\"%s\"}";
         StringBuffer json = new StringBuffer("[");
+        StringBuffer schemaJson = new StringBuffer("[");
         for (int i = 0; i < parameterMetas.size(); i++) {
-            if (i > 0)
+            if (i > 0) {
                 json.append(",");
+                schemaJson.append(",");
+            }
             json.append("%s");
+            schemaJson.append("%s");
         }
         json.append("]");
+        schemaJson.append("]");
+
         for (String key : parameterMetas.keySet()) {
             ParameterMeta meta = parameterMetas.get(key);
             Object value = parameters.get(key);
             if (!isValid(key)) continue;
+            parameterTypes[meta.getIndex()] = meta.getParameterType();
             if (value instanceof String) {
                 String v = value.toString();
                 if (v.startsWith("[")) {
                     if (meta.getType().equals("JSONArray"))
                         parameterValues[meta.getIndex()] = v;
+                    else if (meta.getType().equals("String"))
+                        parameterValues[meta.getIndex()] = "\"" + v + "\"";
                     else
                         throw new Exception(String.format("%s is valid", key));
                 }
                 else if (v.startsWith("{")) {
                     if (meta.getType().equals("JSONString"))
                         parameterValues[meta.getIndex()] = v;
+                    else if (meta.getType().equals("String"))
+                        parameterValues[meta.getIndex()] = "\"" + v + "\"";
                     else
                         throw new Exception(String.format("%s is valid", key));
                 }
@@ -161,7 +174,9 @@ public class Mapping {
             }
         }
 
-        return String.format(json.toString(), parameterValues);
+        String schemas = String.format(schemaJson.toString(), parameterTypes);
+        String args = String.format(json.toString(), parameterValues);
+        return String.format(result, schema.getInterfaceName(), schema.getMethodName(), schemas, args);
     }
 
     private static String pojo (List<String> list) {
