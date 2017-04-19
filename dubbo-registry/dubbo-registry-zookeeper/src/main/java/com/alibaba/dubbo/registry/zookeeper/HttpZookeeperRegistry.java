@@ -145,7 +145,7 @@ public class HttpZookeeperRegistry implements HttpClient{
         	providers.put(provider, Integer.parseInt(map.get(group).get(rinterface).get(provider).get(0).toString()));
         }
         String methodloadBalance = loadBalanceMap.get(group).get(rinterface).get(method);
-        return httpMockinterface.httpMockCluster(errorrate,methodloadBalance,providers,method,schema,args);
+        return httpMockinterface.httpMockCluster(errorrate,methodloadBalance,providers,rinterface,method,schema,args);
     }
     public Map<String,Map<String,Map<String,List<Object>>>> getMap(){
         return map;

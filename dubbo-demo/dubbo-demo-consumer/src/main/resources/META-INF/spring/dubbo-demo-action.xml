@@ -21,6 +21,8 @@
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
     <bean class="com.alibaba.dubbo.demo.consumer.DemoAction" init-method="start">
+        <!--suppress SpringFacetInspection -->
+        <property name="demoService1" ref="demoService1"/>
         <property name="demoService" ref="demoService"/>
         <property name="demoServiceOne" ref="demoServiceOne"/>
     </bean>

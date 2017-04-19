@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class HttpAbstractLoadBalance implements HttpLoadBalance {
 
-    public String httpSelect(Map<String, List<AtomicInteger>> map,float errorrate, Map<String, Integer> providers, String method, String schema, String args) {
+    public String httpSelect(Map<String, List<AtomicInteger>> map, float errorrate, Map<String, Integer> providers, String rinterface, String method, String schema, String args) {
         if (providers == null || providers.size() == 0)
             return "no providers";
-        return httpDoSelect(map,errorrate,providers,method,schema,args);
+        return httpDoSelect(map,errorrate,providers,rinterface,method,schema,args);
     }
-    protected abstract String httpDoSelect(Map<String, List<AtomicInteger>> map,float errorrate, Map<String, Integer> providers, String method, String schema, String args);
+    protected abstract String httpDoSelect(Map<String, List<AtomicInteger>> map, float errorrate, Map<String, Integer> providers, String rinterface, String method, String schema, String args);
 }

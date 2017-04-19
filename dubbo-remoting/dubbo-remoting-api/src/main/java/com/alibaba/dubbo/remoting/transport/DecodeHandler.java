@@ -24,6 +24,7 @@ import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.remoting.*;
 import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
+import com.alibaba.dubbo.remoting.http.Mapping;
 import com.alibaba.dubbo.rpc.RpcInvocation;
 
 import java.io.IOException;
@@ -70,38 +71,73 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         handler.received(channel, message);
     }
     private Object decodeRequest(Channel channel,Object message) {
-        String parem = "";
+        String param = "";
+        Map<String,Object> parameter = new HashMap<String, Object>();
         if(message instanceof DefaultHttpRequest){
             DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
-            if (httpRequst.getUri().length()>5) {
-                parem = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
-            }else {
-                if(httpRequst.getContent().array().length>0){
-                    //                    parem = new String(httpRequst.getContent().array(),"utf-8" );
-                    parem = new String(httpRequst.getContent().array());
-                }else {
-                    return null;
+            if (httpRequst.getMethod().getName().equals("GET")){
+                if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
+                    String[] parameters = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1).split("&");
+                    for(String p : parameters){
+                        String[] ps = p.split("=");
+                        if(parameter.containsKey(ps[0])){
+                            parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
+                        }else parameter.put(ps[0],ps[1]);
+                    }
+                    for(String p : parameters){
+                        String[] ps = p.split("=");
+                        if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
+                    }
+                try {
+                    param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                }else
+                param = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
+            }else if(httpRequst.getMethod().getName().equals("POST")){
+//                                        parem = new String(httpRequst.getContent().array(),"utf-8" );
+                if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
+                    String uri = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1) + "&" +new String(httpRequst.getContent().array());
+                    String[] parameters = uri.split("&");
+                    for(String p : parameters){
+                        String[] ps = p.split("=");
+                        if(parameter.containsKey(ps[0])){
+                            parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
+                        }else parameter.put(ps[0],ps[1]);
+                    }
+                    for(String p : parameters){
+                        String[] ps = p.split("=");
+                        if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
+                    }
+                    try {
+                        param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }else param = new String(httpRequst.getContent().array());
             }
         }
         else if(message instanceof DefaultHttpChunk){
             DefaultHttpChunk httpChunk = (DefaultHttpChunk)message;
             try {
-                parem = new String(httpChunk.getContent().array(), "UTF-8");
+                param = new String(httpChunk.getContent().array(), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         }
-        if(parem.indexOf("{")==-1||parem.indexOf("}")==-1){
+        if(param.indexOf("{")==-1||param.indexOf("}")==-1){
             return null;
         }
-        //        localhost:20880/{"method":"sayHello","schema":"java.lang.String,int","args":"\"world\",1"}
-        JSONObject jsonObject = new JSONObject(parem);
+        System.out.println(param);
+        //        localhost:20880/{"interface":"com.alibaba.dubbo.demo.DemoService","method":"sayHello","schema":"[java.lang.String,int]","args":"[\"world\",1]"}
+        JSONObject jsonObject = new JSONObject(param);
         RpcInvocation rpcInvocation = new RpcInvocation();
         Request req = new Request();
         req.setVersion("http1.0.0");
         rpcInvocation.setAttachment(Constants.DUBBO_VERSION_KEY, "2.0.0");
-        rpcInvocation.setAttachment(Constants.PATH_KEY, channel.getUrl().getPath());
+//        rpcInvocation.setAttachment(Constants.PATH_KEY, channel.getUrl().getPath());
+        rpcInvocation.setAttachment(Constants.PATH_KEY, jsonObject.getString("interface"));
         rpcInvocation.setAttachment(Constants.VERSION_KEY, "0.0.0");
 
         rpcInvocation.setMethodName(jsonObject.getString("method"));

@@ -22,8 +22,8 @@ public class HttpClient {
 	private static Map<String, AtomicInteger> maptotal = new HashMap<String, AtomicInteger>();
 
 	public static String httpClient(Map<String, List<AtomicInteger>> map,
-			float errorrate, String uri, String method, String schema,
-			String args) {
+									float errorrate, String uri, String rinterface, String method, String schema,
+									String args) {
 		if (System.currentTimeMillis() - start > 1000) {
 			start = System.currentTimeMillis();
 			maptotal = new HashMap<String, AtomicInteger>();
@@ -64,6 +64,7 @@ public class HttpClient {
 		HttpPost httpPost = new HttpPost(uri);
 		StringEntity entity = null;
 		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("interface",rinterface);
 		jsonObject.put("method", method);
 		jsonObject.put("schema", schema);
 		jsonObject.put("args", args);

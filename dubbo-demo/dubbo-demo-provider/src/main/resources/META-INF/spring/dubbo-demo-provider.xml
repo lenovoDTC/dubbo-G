@@ -22,7 +22,11 @@
 
     <bean id="demoService" class="com.alibaba.dubbo.demo.provider.DemoServiceImpl"/>
 
+    <bean id="demoService1" class="com.alibaba.dubbo.demo.provider.DemoServiceImpl1"/>
+
     <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService" httpport="true"/>
+
+    <dubbo:service interface="com.alibaba.dubbo.demo.DemoService1" ref="demoService1" httpport="true"/>
 
     <bean id="demoServiceOne" class="com.alibaba.dubbo.demo.provider.DemoServiceOneImpl"/>
 
