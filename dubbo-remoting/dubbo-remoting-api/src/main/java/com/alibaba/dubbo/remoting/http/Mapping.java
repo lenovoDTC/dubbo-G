@@ -147,7 +147,7 @@ public class Mapping {
                     if (meta.getType().equals("JSONArray"))
                         parameterValues[meta.getIndex()] = v;
                     else if (meta.getType().equals("String"))
-                        parameterValues[meta.getIndex()] = "\"" + v + "\"";
+                        parameterValues[meta.getIndex()] = "\\\"" + v + "\\\"";
                     else
                         throw new Exception(String.format("%s is valid", key));
                 }
@@ -155,14 +155,14 @@ public class Mapping {
                     if (meta.getType().equals("JSONString"))
                         parameterValues[meta.getIndex()] = v;
                     else if (meta.getType().equals("String"))
-                        parameterValues[meta.getIndex()] = "\"" + v + "\"";
+                        parameterValues[meta.getIndex()] = "\\\"" + v + "\\\"";
                     else
                         throw new Exception(String.format("%s is valid", key));
                 }
 
-                else if (v.isEmpty()) parameterValues[meta.getIndex()] = "\"\"";
+                else if (v.isEmpty()) parameterValues[meta.getIndex()] = "\\\"\"";
                 else if (v.matches("([0-9]+|true|false)")) parameterValues[meta.getIndex()] = v;
-                else parameterValues[meta.getIndex()] = "\"" + v + "\"";
+                else parameterValues[meta.getIndex()] = "\\\"" + v + "\\\"";
 
             }
 
@@ -188,7 +188,7 @@ public class Mapping {
             if (v.startsWith("[") || v.startsWith("{") || v.matches("([0-9]+|true|false)"))
                 json.append(v);
             else
-                json.append("\"" + v + "\"");
+                json.append("\\\"" + v + "\\\"");
         }
         json.append("]");
         return json.toString();
