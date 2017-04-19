@@ -1,6 +1,8 @@
 package com.alibaba.dubbo.remoting.http;
 
-import com.alibaba.dubbo.common.json.*;
+import com.alibaba.fastjson.*;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.omg.Dynamic.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
@@ -9,6 +11,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -120,20 +124,16 @@ public class Mapping {
     private static String pojo(Map<String, Object> parameters, Schema schema) throws Exception{
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         Map<String, ParameterMeta> parameterMetas = schema.getParameterMeta();
-        String[] parameterValues = new String[parameterMetas.size()];
         String[] parameterTypes = new String[parameterMetas.size()];
-        String result = "{\"interface\":\"%s\",\"method\":\"%s\",\"schema\":\"%s\",\"args\":\"%s\"}";
-        StringBuffer json = new StringBuffer("[");
+        JSONObject result = new JSONObject();
+        JSONArray args = new JSONArray();
         StringBuffer schemaJson = new StringBuffer("[");
         for (int i = 0; i < parameterMetas.size(); i++) {
             if (i > 0) {
-                json.append(",");
                 schemaJson.append(",");
             }
-            json.append("%s");
             schemaJson.append("%s");
         }
-        json.append("]");
         schemaJson.append("]");
 
         for (String key : parameterMetas.keySet()) {
@@ -145,24 +145,27 @@ public class Mapping {
                 String v = value.toString();
                 if (v.startsWith("[")) {
                     if (meta.getType().equals("JSONArray"))
-                        parameterValues[meta.getIndex()] = v;
+                        args.add(JSON.parseArray(v));
                     else if (meta.getType().equals("String"))
-                        parameterValues[meta.getIndex()] = "\\\"" + v + "\\\"";
+                        args.add(v);
                     else
                         throw new Exception(String.format("%s is valid", key));
                 }
                 else if (v.startsWith("{")) {
                     if (meta.getType().equals("JSONString"))
-                        parameterValues[meta.getIndex()] = v;
+                        args.add(JSON.parseObject(v));
                     else if (meta.getType().equals("String"))
-                        parameterValues[meta.getIndex()] = "\\\"" + v + "\\\"";
+                        args.add(v);
                     else
                         throw new Exception(String.format("%s is valid", key));
                 }
 
-                else if (v.isEmpty()) parameterValues[meta.getIndex()] = "\\\"\"";
-                else if (v.matches("([0-9]+|true|false)")) parameterValues[meta.getIndex()] = v;
-                else parameterValues[meta.getIndex()] = "\\\"" + v + "\\\"";
+                else if (v.isEmpty()) args.add("");
+                else if (v.matches("([0-9]+(.[0-9]+)*)"))
+                    args.add(NumberFormat.getInstance().parse(v));
+                else if (v.matches("(true|false)"))
+                    args.add(Boolean.parseBoolean(v));
+                else args.add(v);
 
             }
 
@@ -170,28 +173,36 @@ public class Mapping {
                 if (!meta.getType().equals("JSONArray"))
                     throw new Exception("parameter is valid");
 
-
+                //String json = JSON.toJSONString(value);
+                args.add(pojo((List<String>)value));
             }
         }
 
         String schemas = String.format(schemaJson.toString(), parameterTypes);
-        String args = String.format(json.toString(), parameterValues);
-        return String.format(result, schema.getInterfaceName(), schema.getMethodName(), schemas, args);
+
+        result.put("interface", schema.getInterfaceName());
+        result.put("method", schema.getMethodName());
+        result.put("schema", schemas);
+        result.put("args", args.toJSONString());
+
+        return result.toJSONString();
     }
 
-    private static String pojo (List<String> list) {
-        StringBuffer json = new StringBuffer("[");
-        int i = 0;
+    private static List<Object> pojo (List<String> list) throws ParseException {
+        List<Object> result = new ArrayList<Object>();
         for (String v : list) {
-            if (i > 0)
-                json.append(",");
-            if (v.startsWith("[") || v.startsWith("{") || v.matches("([0-9]+|true|false)"))
-                json.append(v);
+            if (v.startsWith("[") )
+                result.add(JSONArray.parse(v));
+            else if (v.startsWith("{"))
+                result.add(JSONObject.parse(v));
+            else if (v.matches("([0-9]+(.[0-9]+)*)"))
+                result.add(NumberFormat.getInstance().parse(v));
+            else if (v.matches("(true|false)"))
+                result.add(Boolean.parseBoolean(v));
             else
-                json.append("\\\"" + v + "\\\"");
+                result.add(v);
         }
-        json.append("]");
-        return json.toString();
+        return result;
     }
 
     private static boolean isValid (String key) {
