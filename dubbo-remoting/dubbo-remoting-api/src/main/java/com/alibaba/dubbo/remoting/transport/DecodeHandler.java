@@ -80,7 +80,13 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                     String[] parameters = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1).split("&");
                     for(String p : parameters){
                         String[] ps = p.split("=");
-                        parameter.put(ps[0],ps[1]);
+                        if(parameter.containsKey(ps[0])){
+                            parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
+                        }else parameter.put(ps[0],ps[1]);
+                    }
+                    for(String p : parameters){
+                        String[] ps = p.split("=");
+                        if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
                     }
                 try {
                     param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
@@ -123,6 +129,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         if(param.indexOf("{")==-1||param.indexOf("}")==-1){
             return null;
         }
+        System.out.println(param);
         //        localhost:20880/{"interface":"com.alibaba.dubbo.demo.DemoService","method":"sayHello","schema":"[java.lang.String,int]","args":"[\"world\",1]"}
         JSONObject jsonObject = new JSONObject(param);
         RpcInvocation rpcInvocation = new RpcInvocation();
