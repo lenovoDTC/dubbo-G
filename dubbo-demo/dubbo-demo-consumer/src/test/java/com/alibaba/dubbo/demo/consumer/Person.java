@@ -3,6 +3,15 @@ package com.alibaba.dubbo.demo.consumer;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.ByteArraySerializer;
+import javafx.beans.binding.ObjectExpression;
+import javassist.bytecode.ByteArray;
+
+import java.io.UnsupportedEncodingException;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Map;
 
 /**
  * Created by haoning1 on 2017/3/16.
@@ -48,13 +57,30 @@ public class Person {
 //        System.out.println(JSON.toJSONString(jsonObject));
 
         JSONObject json = new JSONObject();
+        System.out.println(JSON.parseObject("{\"a\":1}", Map.class).getClass());
         JSONArray array = new JSONArray();
         array.add("hahha");
         array.add("hahha1");
         json.put("a", array.toJSONString());
-
+//        json.put("b", new byte[]{1,2,3,4});
         System.out.println(json.toJSONString());
 
+//        System.out.println(new String(new byte[]{1,2,3,4}));
+
+//        System.out.println(JSON.toJSONString(new byte[]{1,2,3,4}));
+
+//        String a = "AQIDBA==";
+//        byte[] b = (byte[])JSON.parseObject(a, byte[].class);
+
+//        System.out.println(b.length);
+
+        String a = "true";
+        try {
+            Number number = NumberFormat.getInstance().parse(a);
+            System.out.println(number instanceof Double);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 }
