@@ -15,13 +15,11 @@
  */
 package com.alibaba.dubbo.demo;
 
-import java.util.List;
-
 public interface DemoService {
 
     String sayHello(String name);
     String sayHello1( String name);
 
-    byte[] sayHello2(String name);
+    String sayHello2(String name);
 
 }

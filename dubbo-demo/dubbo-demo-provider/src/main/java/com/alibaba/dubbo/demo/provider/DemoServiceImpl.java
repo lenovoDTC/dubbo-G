@@ -17,7 +17,6 @@ package com.alibaba.dubbo.demo.provider;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import com.alibaba.dubbo.config.annotation.Parameter;
 import com.alibaba.dubbo.config.annotation.Request;
@@ -38,8 +37,9 @@ public class DemoServiceImpl implements DemoService {
 
     @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
     @Response(headers = {""})
-    public byte[] sayHello2(@Parameter(value = "name", required = false) String name) {
-        return new byte[]{1,2,3,4};
+    public String sayHello2(@Parameter(value = "name", required = false) String name) {
+//        return new byte[]{1,2,3,4};
+        return name;
     }
 
 }

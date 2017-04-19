@@ -29,6 +29,7 @@ import com.alibaba.dubbo.rpc.RpcInvocation;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 import com.alibaba.fastjson.JSON;
@@ -77,7 +78,13 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
             if (httpRequst.getMethod().getName().equals("GET")){
                 if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
-                    String[] parameters = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1).split("&");
+
+                    String[] parameters = new String[0];
+                    try {
+                        parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1),"UTF-8").split("&");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                     for(String p : parameters){
                         String[] ps = p.split("=");
                         if(parameter.containsKey(ps[0])){
@@ -140,6 +147,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         rpcInvocation.setAttachment(Constants.PATH_KEY, jsonObject.getString("interface"));
         rpcInvocation.setAttachment(Constants.VERSION_KEY, "0.0.0");
 
+
         rpcInvocation.setMethodName(jsonObject.getString("method"));
         try {
             Object[] args;
@@ -166,6 +174,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                    String addString =  jsonArrayargs.get(i).toString();
                     if (jsonArray.getString(i).equals("java.lang.String"))addString = "\""+addString+"\"";
                     try {
+//                        args[i] = JSON.parseObject(addString, pts[i]);
                         args[i] = JSON.parseObject(addString, pts[i]);
                     } catch (Exception e) {
                         if (log.isWarnEnabled()) {
