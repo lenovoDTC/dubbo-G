@@ -5,4 +5,6 @@ package com.alibaba.dubbo.demo;
  */
 public interface DemoServiceOne {
     public String get(String str);
+
+    String sayHello(String name);
 }
