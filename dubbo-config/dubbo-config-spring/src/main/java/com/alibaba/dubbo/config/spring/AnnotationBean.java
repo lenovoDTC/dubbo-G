@@ -231,8 +231,10 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                     methodList = interfaceMethodMaps.get(key);
                 } else {
                     methodList = new ArrayList<Method>();
+                    interfaceMethodMaps.put(key, methodList);
                 }
                 methodList.add(method);
+
             }
         }
         Method[] methods = classType.getMethods();
@@ -429,12 +431,15 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
         private String name;
         private Class<?>[] parameterTypes;
 
-        public MethodKey () {}
-        public MethodKey (String name, Class<?>[] parameterTypes) {
+        public MethodKey() {
+        }
+
+        public MethodKey(String name, Class<?>[] parameterTypes) {
             this.name = name;
             this.parameterTypes = parameterTypes;
         }
-        public MethodKey (Method method) {
+
+        public MethodKey(Method method) {
             this(method.getName(), method.getParameterTypes());
         }
 
@@ -456,13 +461,27 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
         @Override
         public boolean equals(Object obj) {
-            if (obj != null && obj instanceof Method) {
-                MethodKey other = (MethodKey)obj;
+            if (obj != null && obj instanceof MethodKey) {
+                MethodKey other = (MethodKey) obj;
                 if (getName().equals(other.getName())) {
                     return equalParamTypes(parameterTypes, other.parameterTypes);
                 }
             }
             return false;
+        }
+
+        @Override
+        public int hashCode() {
+            if (parameterTypes.length == 0) return getName().hashCode();
+            int hash = 7;
+            hash = hash * 31 + getName().hashCode();
+            hash = hash * 31 + parameterTypes.length;
+            for (int i = 0; i < parameterTypes.length; i++) {
+                hash = hash * 31 + parameterTypes[0].hashCode();
+            }
+            return hash;
+
+
         }
 
         boolean equalParamTypes(Class<?>[] params1, Class<?>[] params2) {
