@@ -209,13 +209,30 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
             return bean;
         }
 
-        Map<String, String> interfaceMap = new HashMap<String, String>();
+        Map<MethodKey, String> interfaceMap = new HashMap<MethodKey, String>();
+        Map<MethodKey, List<Method>> interfaceMethodMaps = new HashMap<MethodKey, List<Method>>();
         Class<?> classType = bean.getClass();
         Class<?>[] interfaces = classType.getInterfaces();
         for (Class<?> interfaceType : interfaces) {
             Method[] methods = interfaceType.getDeclaredMethods();
             for (Method method : methods) {
-                interfaceMap.put(method.getName(), interfaceType.getName());
+                MethodKey key = new MethodKey(method);
+                String interfaceName = null;
+                if (interfaceMap.containsKey(key)) {
+                    interfaceName = interfaceMap.get(key);
+                    interfaceName += ", " + interfaceType.getName();
+                } else {
+                    interfaceName = interfaceType.getName();
+                }
+                interfaceMap.put(key, interfaceName);
+
+                List<Method> methodList = null;
+                if (interfaceMethodMaps.containsKey(key)) {
+                    methodList = interfaceMethodMaps.get(key);
+                } else {
+                    methodList = new ArrayList<Method>();
+                }
+                methodList.add(method);
             }
         }
         Method[] methods = classType.getMethods();
@@ -241,7 +258,12 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
             Request request = method.getAnnotation(Request.class);
 
-            if (interfaceMap.containsKey(method.getName())) {
+            MethodKey key = new MethodKey(method);
+            if (interfaceMap.containsKey(key)) {
+                List<Method> methodList = interfaceMethodMaps.get(key);
+                for (Method m : methodList) {
+                    Mapping.push(m, method);
+                }
                 if (request != null) {
                     String[] args = new String[method.getTypeParameters().length];
                     String[] values = request.value();
@@ -401,6 +423,58 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
             }
         }
         return false;
+    }
+
+    public class MethodKey {
+        private String name;
+        private Class<?>[] parameterTypes;
+
+        public MethodKey () {}
+        public MethodKey (String name, Class<?>[] parameterTypes) {
+            this.name = name;
+            this.parameterTypes = parameterTypes;
+        }
+        public MethodKey (Method method) {
+            this(method.getName(), method.getParameterTypes());
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Class<?>[] getParameterTypes() {
+            return parameterTypes;
+        }
+
+        public void setParameterTypes(Class<?>[] parameterTypes) {
+            this.parameterTypes = parameterTypes;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj != null && obj instanceof Method) {
+                MethodKey other = (MethodKey)obj;
+                if (getName().equals(other.getName())) {
+                    return equalParamTypes(parameterTypes, other.parameterTypes);
+                }
+            }
+            return false;
+        }
+
+        boolean equalParamTypes(Class<?>[] params1, Class<?>[] params2) {
+            if (params1.length == params2.length) {
+                for (int i = 0; i < params1.length; i++) {
+                    if (params1[i] != params2[i])
+                        return false;
+                }
+                return true;
+            }
+            return false;
+        }
     }
 
 }

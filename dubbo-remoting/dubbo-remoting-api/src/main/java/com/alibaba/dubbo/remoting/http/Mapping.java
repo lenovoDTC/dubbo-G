@@ -3,18 +3,13 @@ package com.alibaba.dubbo.remoting.http;
 import com.alibaba.fastjson.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.omg.Dynamic.Parameter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Created by haoning1 on 2017/4/6.
@@ -24,7 +19,7 @@ public class Mapping {
     public static Map<Method, Schema> cache = new LinkedHashMap<Method, Schema>();
     public static Map<String, Method> mapping = new LinkedHashMap<String, Method>();
     public static Map<String, RequestMeta> metas = new LinkedHashMap<String, RequestMeta>();
-//    public static LinkedHashMap<Method, ParameterMeta[]> params;
+    public static Map<Method, Method> methods = new LinkedHashMap<Method, Method>();
 
     public static void push(Method method) {
         String[] parameterNames = discoverer.getParameterNames(method);
@@ -42,7 +37,6 @@ public class Mapping {
             parameter.setParameterType(parameterType);
             parameter.setType(getType(parameterType));
             parameter.setIndex(i);
-            //parameter.setGenericType(types[i].toString());
             parameterMeta.put(parameterName, parameter);
 
         }
@@ -68,8 +62,6 @@ public class Mapping {
         if (parameterType.equals("java.lang.String")) return "String";
         if (parameterType.startsWith("[L") || parameterType.endsWith("List") || parameterType.endsWith("Set")) return "JSONArray";
         return "JSONString";
-
-
     }
 
     public static void push(Method method, Schema schema) {
@@ -81,9 +73,13 @@ public class Mapping {
         metas.put(uri, requestMeta);
     }
 
+    public static void push (Method interfaceMethod, Method implMethod) {methods.put(interfaceMethod, implMethod);}
+
     public static boolean isMapping(String uri) {
         return mapping.containsKey(uri);
     }
+
+    public static boolean isMapping(Method method) {return methods.containsKey(method);}
 
     public static boolean isGet(String uri) throws Exception {
         return isMethod(uri, "GET");
@@ -108,6 +104,11 @@ public class Mapping {
         }
 
         return false;
+    }
+
+    public static Schema getSchema (Method method) {
+        Method m = methods.get(method);
+        return cache.get(m);
     }
 
     public static String decode(String uri, Map<String, Object> parameters) throws Exception{
