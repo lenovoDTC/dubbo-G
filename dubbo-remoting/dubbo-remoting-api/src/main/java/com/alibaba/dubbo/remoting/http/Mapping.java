@@ -68,8 +68,6 @@ public class Mapping {
         if (parameterType.equals("java.lang.String")) return "String";
         if (parameterType.startsWith("[L") || parameterType.endsWith("List") || parameterType.endsWith("Set")) return "JSONArray";
         return "JSONString";
-
-
     }
 
     public static void push(Method method, Schema schema) {
@@ -84,6 +82,8 @@ public class Mapping {
     public static boolean isMapping(String uri) {
         return mapping.containsKey(uri);
     }
+
+    public static boolean isMapping(Method method) {return cache.containsKey(method);}
 
     public static boolean isGet(String uri) throws Exception {
         return isMethod(uri, "GET");
@@ -108,6 +108,10 @@ public class Mapping {
         }
 
         return false;
+    }
+
+    public static Schema getSchema (Method method) {
+        return cache.get(method);
     }
 
     public static String decode(String uri, Map<String, Object> parameters) throws Exception{
