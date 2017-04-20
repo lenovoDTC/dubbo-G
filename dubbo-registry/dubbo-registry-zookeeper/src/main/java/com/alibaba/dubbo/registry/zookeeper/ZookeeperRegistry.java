@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.alibaba.dubbo.remoting.http.Mapping;
 import org.json.JSONObject;
 
 import com.alibaba.dubbo.common.utils.*;
@@ -114,32 +115,44 @@ public class ZookeeperRegistry extends FailbackRegistry {
 					Method[] methods = interfaceClass.getMethods();
 					for (Method method : methods) {
 						String total = "";
+                        String[] name = Mapping.getParameters(method);
 						Class<?>[] types = method.getParameterTypes();
 						Type[] type = method.getGenericParameterTypes();
 						for (int i = 0; i < types.length; i++) {
 							if (total.equals("")) {
 								if ("boolean".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+ 									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("byte".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("char".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("double".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("float".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("int".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("long".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if ("short".equals(type[i].toString()))
-									total = type[i].toString() + "()";
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
 								else if (type[i].toString()
-										.indexOf("java.lang") != -1)
-									total = type[i].toString() + "()";
+										.equals("java.lang.String"))
+									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
+                                else if (type[i].toString()
+                                        .equals("java.lang.String"))
+                                    total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
+                                    else if (type[i].toString()
+                                        .equals("java.lang.String"))
+                                        total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
+                                        else if (type[i].toString()
+                                        .equals("java.lang.String"))
+                                            total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
+                                            else if (type[i].toString()
+                                        .equals("java.lang.String"))
 								else if (type[i].toString()
 										.indexOf("java.util") != -1)
-									total = type[i].toString() + "()";
+									total = type[i].toString();
 								else {
 									total = type[i].toString()
 											+ "("
@@ -151,35 +164,35 @@ public class ZookeeperRegistry extends FailbackRegistry {
 							} else {
 								if ("boolean".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("byte".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("char".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("double".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("float".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("int".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("long".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if ("short".equals(type[i].toString()))
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if (type[i].toString()
 										.indexOf("java.lang") != -1)
 									total = total + "," + type[i].toString()
-											+ "()";
+											;
 								else if (type[i].toString()
 										.indexOf("java.util") != -1)
-									total = type[i].toString() + "()";
+									total = type[i].toString();
 								else {
 									total = total
 											+ ","

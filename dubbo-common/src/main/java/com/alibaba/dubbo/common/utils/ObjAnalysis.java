@@ -18,6 +18,7 @@ public class ObjAnalysis {
             for(int i=0;i<fields.length;i++){
                 try {
                     Field f = obj.getClass().getDeclaredField(fields[i].getName());
+
                     f.setAccessible(true);
                     Object o = null;
 //                    System.out.println(fields[i].getType().getName());
