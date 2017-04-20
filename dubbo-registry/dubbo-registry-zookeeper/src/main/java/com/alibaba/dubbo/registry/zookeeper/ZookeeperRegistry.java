@@ -42,419 +42,461 @@ import com.alibaba.dubbo.rpc.RpcException;
 
 /**
  * ZookeeperRegistry
- * 
+ *
  * @author william.liangf
  */
 public class ZookeeperRegistry extends FailbackRegistry {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ZookeeperRegistry.class);
+    private final static Logger logger = LoggerFactory
+            .getLogger(ZookeeperRegistry.class);
 
-	private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
+    private final static int DEFAULT_ZOOKEEPER_PORT = 2181;
 
-	private final static String DEFAULT_ROOT = "dubbo";
+    private final static String DEFAULT_ROOT = "dubbo";
 
-	private final String root;
+    private final String root;
 
-	private final Set<String> anyServices = new ConcurrentHashSet<String>();
+    private final Set<String> anyServices = new ConcurrentHashSet<String>();
 
-	private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<URL, ConcurrentMap<NotifyListener, ChildListener>>();
+    private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<URL, ConcurrentMap<NotifyListener, ChildListener>>();
 
-	private final ZookeeperClient zkClient;
+    private final ZookeeperClient zkClient;
 
-	public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
-		super(url);
-		if (url.isAnyHost()) {
-			throw new IllegalStateException("registry address == null");
-		}
-		String group = url.getParameter(Constants.GROUP_KEY, DEFAULT_ROOT);
-		if (!group.startsWith(Constants.PATH_SEPARATOR)) {
-			group = Constants.PATH_SEPARATOR + group;
-		}
-		this.root = group;
-		zkClient = zookeeperTransporter.connect(url);
-		zkClient.addStateListener(new StateListener() {
-			public void stateChanged(int state) {
-				if (state == RECONNECTED) {
-					try {
-						recover();
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-			}
-		});
-	}
+    public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
+        super(url);
+        if (url.isAnyHost()) {
+            throw new IllegalStateException("registry address == null");
+        }
+        String group = url.getParameter(Constants.GROUP_KEY, DEFAULT_ROOT);
+        if (!group.startsWith(Constants.PATH_SEPARATOR)) {
+            group = Constants.PATH_SEPARATOR + group;
+        }
+        this.root = group;
+        zkClient = zookeeperTransporter.connect(url);
+        zkClient.addStateListener(new StateListener() {
+            public void stateChanged(int state) {
+                if (state == RECONNECTED) {
+                    try {
+                        recover();
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                }
+            }
+        });
+    }
 
-	public boolean isAvailable() {
-		return zkClient.isConnected();
-	}
+    public boolean isAvailable() {
+        return zkClient.isConnected();
+    }
 
-	public void destroy() {
-		super.destroy();
-		try {
-			zkClient.close();
-		} catch (Exception e) {
-			logger.warn("Failed to close zookeeper client " + getUrl()
-					+ ", cause: " + e.getMessage(), e);
-		}
-	}
+    public void destroy() {
+        super.destroy();
+        try {
+            zkClient.close();
+        } catch (Exception e) {
+            logger.warn("Failed to close zookeeper client " + getUrl()
+                    + ", cause: " + e.getMessage(), e);
+        }
+    }
 
-	protected void doRegister(URL url) {
-		try {
-			zkClient.create(toUrlPath(url),
-					url.getParameter(Constants.DYNAMIC_KEY, true));
-			if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
-				String[] a = toUrlPath(url).split("/");
-				if (a[2].equals(url.getServiceInterface())) {
-					zkClient.create("/http" + toUrlPath(url), true);
-					JSONObject jsonObject = new JSONObject();
-					Class<?> interfaceClass = Class.forName(url.getPath(),
-							true, Thread.currentThread()
-									.getContextClassLoader());
-					Method[] methods = interfaceClass.getMethods();
-					for (Method method : methods) {
-						String total = "";
+    protected void doRegister(URL url) {
+        try {
+            zkClient.create(toUrlPath(url),
+                    url.getParameter(Constants.DYNAMIC_KEY, true));
+            if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
+                String[] a = toUrlPath(url).split("/");
+                if (a[2].equals(url.getServiceInterface())) {
+                    zkClient.create("/http" + toUrlPath(url), true);
+                    JSONObject jsonObject = new JSONObject();
+                    Class<?> interfaceClass = Class.forName(url.getPath(),
+                            true, Thread.currentThread()
+                                    .getContextClassLoader());
+                    Method[] methods = interfaceClass.getMethods();
+                    for (Method method : methods) {
+                        String total = "";
                         String[] name = Mapping.getParameters(method);
-						Class<?>[] types = method.getParameterTypes();
-						Type[] type = method.getGenericParameterTypes();
-						for (int i = 0; i < types.length; i++) {
-							if (total.equals("")) {
-								if ("boolean".equals(type[i].toString()))
- 									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("byte".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("char".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("double".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("float".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("int".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("long".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if ("short".equals(type[i].toString()))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-								else if (type[i].toString()
-										.equals("java.lang.String"))
-									total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-                                else if (type[i].toString()
+
+                        Class<?>[] types = method.getParameterTypes();
+                        Type[] type = method.getGenericParameterTypes();
+                        for (int i = 0; i < types.length; i++) {
+                            String parameterType = type[i].toString().replace("class ","");
+                            String lastName = name[i];
+                            String desc = "";
+                            if (Mapping.isMapping(method)){
+                                parameterType =  Mapping.getSchema(method).getParameterMeta().get(name[i]).getParameterType();
+                                lastName = Mapping.getSchema(method).getParameterMeta().get(name[i]).getName();
+                                desc = Mapping.getSchema(method).getParameterMeta().get(name[i]).getDesc();
+                            }
+                            if (total.equals("")) {
+                                if ("boolean".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("byte".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("char".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("double".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("float".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("int".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("long".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("short".equals(type[i].toString()))
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Boolean"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Boolean,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Byte"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Byte,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Char"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Char,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Double"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Double,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Float"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Float,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Integer"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Integer,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Long"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Long,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Short"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Short,Required=0,desc="+desc+"}";
+                                else if (parameterType
                                         .equals("java.lang.String"))
-                                    total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-                                    else if (type[i].toString()
+                                    total = "{ParameterName="+lastName+",ParameterType=String,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .indexOf("[Ljava") != -1)
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .indexOf("java.util") != -1)
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else {
+                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType
+                                            + "("
+                                            + ObjAnalysis
+                                            .ConvertObjToList(types[i]
+                                                    .newInstance())
+                                            + ")"+",Required=0,desc="+desc+"}";
+                                }
+                            } else {
+                                if ("boolean".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("byte".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("char".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("double".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("float".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("int".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("long".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if ("short".equals(type[i].toString()))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Boolean"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Boolean,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Byte"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Byte,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Char"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Char,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Double"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Double,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Float"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Float,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Integer"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Integer,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Long"))
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Long,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .equals("java.lang.Short"))
+                                    total = "{ParameterName="+lastName+",ParameterType=Short,Required=0,desc="+desc+"}";
+                                else if (parameterType
                                         .equals("java.lang.String"))
-                                        total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-                                        else if (type[i].toString()
-                                        .equals("java.lang.String"))
-                                            total = "{ParameterName="+name[i]+",ParameterType="+type[i].toString()+",Required=0";
-                                            else if (type[i].toString()
-                                        .equals("java.lang.String"))
-								else if (type[i].toString()
-										.indexOf("java.util") != -1)
-									total = type[i].toString();
-								else {
-									total = type[i].toString()
-											+ "("
-											+ ObjAnalysis
-													.ConvertObjToMap(types[i]
-															.newInstance())
-											+ ")";
-								}
-							} else {
-								if ("boolean".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("byte".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("char".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("double".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("float".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("int".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("long".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if ("short".equals(type[i].toString()))
-									total = total + "," + type[i].toString()
-											;
-								else if (type[i].toString()
-										.indexOf("java.lang") != -1)
-									total = total + "," + type[i].toString()
-											;
-								else if (type[i].toString()
-										.indexOf("java.util") != -1)
-									total = type[i].toString();
-								else {
-									total = total
-											+ ","
-											+ type[i].toString()
-											+ "("
-											+ ObjAnalysis
-													.ConvertObjToMap(types[i]
-															.newInstance())
-											+ ")";
-								}
-							}
-						}
-						jsonObject.put(method.getName(),
-								total.replace("\"", ""));
-					}
-					System.out.println(jsonObject.toString());
-					zkClient.setData("/http/" + a[1] + "/" + a[2]
-							+ "/providers", jsonObject.toString());
-					for (String key : jsonObject.keySet()) {
-						zkClient.create("/http/" + a[1] + "/" + a[2]
-								+ "/loadbalance/" + key, false);
-					}
-				}else {
-					throw new RpcException("Failed to register dubbo group format error!");
-				}
-			}
-		} catch (Throwable e) {
-			throw new RpcException("Failed to register " + url
-					+ " to zookeeper " + getUrl() + ", cause: "
-					+ e.getMessage(), e);
-		}
-	}
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=String,Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .indexOf("[Ljava") != -1)
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else if (parameterType
+                                        .indexOf("java.util") != -1)
+                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
+                                else {
+                                    total = total
+                                            + ","+"{ParameterName="+lastName+",ParameterType="+ parameterType
+                                            + "("
+                                            + ObjAnalysis
+                                            .ConvertObjToList(types[i]
+                                                    .newInstance())
+                                            + ")"+",Required=0,desc="+desc+"}";
+                                }
+                            }
+                        }
+                        jsonObject.put(method.getName(),
+                                total.replace("\"", ""));
+                    }
+                    System.out.println(jsonObject.toString());
+                    zkClient.setData("/http/" + a[1] + "/" + a[2]
+                            + "/providers", jsonObject.toString());
+                    for (String key : jsonObject.keySet()) {
+                        zkClient.create("/http/" + a[1] + "/" + a[2]
+                                + "/loadbalance/" + key, false);
+                    }
+                }else {
+                    throw new RpcException("Failed to register dubbo group format error!");
+                }
+            }
+        } catch (Throwable e) {
+            throw new RpcException("Failed to register " + url
+                    + " to zookeeper " + getUrl() + ", cause: "
+                    + e.getMessage(), e);
+        }
+    }
 
-	protected void doUnregister(URL url) {
-		try {
-			zkClient.delete(toUrlPath(url));
-			if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
-				zkClient.delete("/http" + toUrlPath(url));
-			}
-		} catch (Throwable e) {
-			throw new RpcException("Failed to unregister " + url
-					+ " to zookeeper " + getUrl() + ", cause: "
-					+ e.getMessage(), e);
-		}
-	}
+    protected void doUnregister(URL url) {
+        try {
+            zkClient.delete(toUrlPath(url));
+            if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
+                zkClient.delete("/http" + toUrlPath(url));
+            }
+        } catch (Throwable e) {
+            throw new RpcException("Failed to unregister " + url
+                    + " to zookeeper " + getUrl() + ", cause: "
+                    + e.getMessage(), e);
+        }
+    }
 
-	protected void doSubscribe(final URL url, final NotifyListener listener) {
-		try {
-			if (Constants.ANY_VALUE.equals(url.getServiceInterface())) {
-				String root = toRootPath();
-				ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
-						.get(url);
-				if (listeners == null) {
-					zkListeners
-							.putIfAbsent(
-									url,
-									new ConcurrentHashMap<NotifyListener, ChildListener>());
-					listeners = zkListeners.get(url);
-				}
-				ChildListener zkListener = listeners.get(listener);
-				if (zkListener == null) {
-					listeners.putIfAbsent(listener, new ChildListener() {
-						public void childChanged(String parentPath,
-								List<String> currentChilds) {
-							for (String child : currentChilds) {
-								if (!anyServices.contains(child)) {
-									anyServices.add(child);
-									subscribe(
-											url.setPath(child).addParameters(
-													Constants.INTERFACE_KEY,
-													child, Constants.CHECK_KEY,
-													String.valueOf(false)),
-											listener);
-								}
-							}
-						}
-					});
-					zkListener = listeners.get(listener);
-				}
-				zkClient.create(root, false);
-				List<String> services = zkClient.addChildListener(root,
-						zkListener);
-				if (services != null && services.size() > 0) {
-					anyServices.addAll(services);
-					for (String service : services) {
-						subscribe(
-								url.setPath(service).addParameters(
-										Constants.INTERFACE_KEY, service,
-										Constants.CHECK_KEY,
-										String.valueOf(false)), listener);
-					}
-				}
-			} else {
-				List<URL> urls = new ArrayList<URL>();
-				for (String path : toCategoriesPath(url)) {
-					ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
-							.get(url);
-					if (listeners == null) {
-						zkListeners
-								.putIfAbsent(
-										url,
-										new ConcurrentHashMap<NotifyListener, ChildListener>());
-						listeners = zkListeners.get(url);
-					}
-					ChildListener zkListener = listeners.get(listener);
-					if (zkListener == null) {
-						listeners.putIfAbsent(listener, new ChildListener() {
-							public void childChanged(String parentPath,
-									List<String> currentChilds) {
-								ZookeeperRegistry.this.notify(
-										url,
-										listener,
-										toUrlsWithEmpty(url, parentPath,
-												currentChilds));
-							}
-						});
-						zkListener = listeners.get(listener);
-					}
-					zkClient.create(path, false);
-					List<String> children = zkClient.addChildListener(path,
-							zkListener);
-					if (children != null) {
-						urls.addAll(toUrlsWithEmpty(url, path, children));
-					}
-				}
-				notify(url, listener, urls);
-			}
-		} catch (Throwable e) {
-			throw new RpcException("Failed to subscribe " + url
-					+ " to zookeeper " + getUrl() + ", cause: "
-					+ e.getMessage(), e);
-		}
-	}
+    protected void doSubscribe(final URL url, final NotifyListener listener) {
+        try {
+            if (Constants.ANY_VALUE.equals(url.getServiceInterface())) {
+                String root = toRootPath();
+                ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
+                        .get(url);
+                if (listeners == null) {
+                    zkListeners
+                            .putIfAbsent(
+                                    url,
+                                    new ConcurrentHashMap<NotifyListener, ChildListener>());
+                    listeners = zkListeners.get(url);
+                }
+                ChildListener zkListener = listeners.get(listener);
+                if (zkListener == null) {
+                    listeners.putIfAbsent(listener, new ChildListener() {
+                        public void childChanged(String parentPath,
+                                                 List<String> currentChilds) {
+                            for (String child : currentChilds) {
+                                if (!anyServices.contains(child)) {
+                                    anyServices.add(child);
+                                    subscribe(
+                                            url.setPath(child).addParameters(
+                                                    Constants.INTERFACE_KEY,
+                                                    child, Constants.CHECK_KEY,
+                                                    String.valueOf(false)),
+                                            listener);
+                                }
+                            }
+                        }
+                    });
+                    zkListener = listeners.get(listener);
+                }
+                zkClient.create(root, false);
+                List<String> services = zkClient.addChildListener(root,
+                        zkListener);
+                if (services != null && services.size() > 0) {
+                    anyServices.addAll(services);
+                    for (String service : services) {
+                        subscribe(
+                                url.setPath(service).addParameters(
+                                        Constants.INTERFACE_KEY, service,
+                                        Constants.CHECK_KEY,
+                                        String.valueOf(false)), listener);
+                    }
+                }
+            } else {
+                List<URL> urls = new ArrayList<URL>();
+                for (String path : toCategoriesPath(url)) {
+                    ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
+                            .get(url);
+                    if (listeners == null) {
+                        zkListeners
+                                .putIfAbsent(
+                                        url,
+                                        new ConcurrentHashMap<NotifyListener, ChildListener>());
+                        listeners = zkListeners.get(url);
+                    }
+                    ChildListener zkListener = listeners.get(listener);
+                    if (zkListener == null) {
+                        listeners.putIfAbsent(listener, new ChildListener() {
+                            public void childChanged(String parentPath,
+                                                     List<String> currentChilds) {
+                                ZookeeperRegistry.this.notify(
+                                        url,
+                                        listener,
+                                        toUrlsWithEmpty(url, parentPath,
+                                                currentChilds));
+                            }
+                        });
+                        zkListener = listeners.get(listener);
+                    }
+                    zkClient.create(path, false);
+                    List<String> children = zkClient.addChildListener(path,
+                            zkListener);
+                    if (children != null) {
+                        urls.addAll(toUrlsWithEmpty(url, path, children));
+                    }
+                }
+                notify(url, listener, urls);
+            }
+        } catch (Throwable e) {
+            throw new RpcException("Failed to subscribe " + url
+                    + " to zookeeper " + getUrl() + ", cause: "
+                    + e.getMessage(), e);
+        }
+    }
 
-	protected void doUnsubscribe(URL url, NotifyListener listener) {
-		ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
-				.get(url);
-		if (listeners != null) {
-			ChildListener zkListener = listeners.get(listener);
-			if (zkListener != null) {
-				zkClient.removeChildListener(toUrlPath(url), zkListener);
-				if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
-					zkClient.removeChildListener("/http" + toUrlPath(url),
-							zkListener);
-				}
-			}
-		}
-	}
+    protected void doUnsubscribe(URL url, NotifyListener listener) {
+        ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners
+                .get(url);
+        if (listeners != null) {
+            ChildListener zkListener = listeners.get(listener);
+            if (zkListener != null) {
+                zkClient.removeChildListener(toUrlPath(url), zkListener);
+                if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
+                    zkClient.removeChildListener("/http" + toUrlPath(url),
+                            zkListener);
+                }
+            }
+        }
+    }
 
-	public List<URL> lookup(URL url) {
-		if (url == null) {
-			throw new IllegalArgumentException("lookup url == null");
-		}
-		try {
-			List<String> providers = new ArrayList<String>();
-			for (String path : toCategoriesPath(url)) {
-				try {
-					List<String> children = zkClient.getChildren(path);
-					if (children != null) {
-						providers.addAll(children);
-					}
-				} catch (ZkNoNodeException e) {
-					// ignore
-				}
-			}
-			return toUrlsWithoutEmpty(url, providers);
-		} catch (Throwable e) {
-			throw new RpcException("Failed to lookup " + url
-					+ " from zookeeper " + getUrl() + ", cause: "
-					+ e.getMessage(), e);
-		}
-	}
+    public List<URL> lookup(URL url) {
+        if (url == null) {
+            throw new IllegalArgumentException("lookup url == null");
+        }
+        try {
+            List<String> providers = new ArrayList<String>();
+            for (String path : toCategoriesPath(url)) {
+                try {
+                    List<String> children = zkClient.getChildren(path);
+                    if (children != null) {
+                        providers.addAll(children);
+                    }
+                } catch (ZkNoNodeException e) {
+                    // ignore
+                }
+            }
+            return toUrlsWithoutEmpty(url, providers);
+        } catch (Throwable e) {
+            throw new RpcException("Failed to lookup " + url
+                    + " from zookeeper " + getUrl() + ", cause: "
+                    + e.getMessage(), e);
+        }
+    }
 
-	private String toRootDir() {
-		if (root.equals(Constants.PATH_SEPARATOR)) {
-			return root;
-		}
-		return root + Constants.PATH_SEPARATOR;
-	}
+    private String toRootDir() {
+        if (root.equals(Constants.PATH_SEPARATOR)) {
+            return root;
+        }
+        return root + Constants.PATH_SEPARATOR;
+    }
 
-	private String toRootPath() {
-		return root;
-	}
+    private String toRootPath() {
+        return root;
+    }
 
-	private String toServicePath(URL url) {
-		String name = url.getServiceInterface();
-		if (Constants.ANY_VALUE.equals(name)) {
-			return toRootPath();
-		}
-		return toRootDir() + URL.encode(name);
-	}
+    private String toServicePath(URL url) {
+        String name = url.getServiceInterface();
+        if (Constants.ANY_VALUE.equals(name)) {
+            return toRootPath();
+        }
+        return toRootDir() + URL.encode(name);
+    }
 
-	private String[] toCategoriesPath(URL url) {
-		String[] categroies;
-		if (Constants.ANY_VALUE
-				.equals(url.getParameter(Constants.CATEGORY_KEY))) {
-			categroies = new String[] { Constants.PROVIDERS_CATEGORY,
-					Constants.CONSUMERS_CATEGORY, Constants.ROUTERS_CATEGORY,
-					Constants.CONFIGURATORS_CATEGORY };
-		} else {
-			categroies = url.getParameter(Constants.CATEGORY_KEY,
-					new String[] { Constants.DEFAULT_CATEGORY });
-		}
-		String[] paths = new String[categroies.length];
-		for (int i = 0; i < categroies.length; i++) {
-			paths[i] = toServicePath(url) + Constants.PATH_SEPARATOR
-					+ categroies[i];
-		}
-		return paths;
-	}
+    private String[] toCategoriesPath(URL url) {
+        String[] categroies;
+        if (Constants.ANY_VALUE
+                .equals(url.getParameter(Constants.CATEGORY_KEY))) {
+            categroies = new String[] { Constants.PROVIDERS_CATEGORY,
+                    Constants.CONSUMERS_CATEGORY, Constants.ROUTERS_CATEGORY,
+                    Constants.CONFIGURATORS_CATEGORY };
+        } else {
+            categroies = url.getParameter(Constants.CATEGORY_KEY,
+                    new String[] { Constants.DEFAULT_CATEGORY });
+        }
+        String[] paths = new String[categroies.length];
+        for (int i = 0; i < categroies.length; i++) {
+            paths[i] = toServicePath(url) + Constants.PATH_SEPARATOR
+                    + categroies[i];
+        }
+        return paths;
+    }
 
-	private String toCategoryPath(URL url) {
-		return toServicePath(url)
-				+ Constants.PATH_SEPARATOR
-				+ url.getParameter(Constants.CATEGORY_KEY,
-						Constants.DEFAULT_CATEGORY);
-	}
+    private String toCategoryPath(URL url) {
+        return toServicePath(url)
+                + Constants.PATH_SEPARATOR
+                + url.getParameter(Constants.CATEGORY_KEY,
+                Constants.DEFAULT_CATEGORY);
+    }
 
-	private String toUrlPath(URL url) {
-		return toCategoryPath(url) + Constants.PATH_SEPARATOR
-				+ URL.encode(url.toFullString());
-	}
+    private String toUrlPath(URL url) {
+        return toCategoryPath(url) + Constants.PATH_SEPARATOR
+                + URL.encode(url.toFullString());
+    }
 
-	private List<URL> toUrlsWithoutEmpty(URL consumer, List<String> providers) {
-		List<URL> urls = new ArrayList<URL>();
-		if (providers != null && providers.size() > 0) {
-			for (String provider : providers) {
-				provider = URL.decode(provider);
-				if (provider.contains("://")) {
-					URL url = URL.valueOf(provider);
-					if (UrlUtils.isMatch(consumer, url)) {
-						urls.add(url);
-					}
-				}
-			}
-		}
-		return urls;
-	}
+    private List<URL> toUrlsWithoutEmpty(URL consumer, List<String> providers) {
+        List<URL> urls = new ArrayList<URL>();
+        if (providers != null && providers.size() > 0) {
+            for (String provider : providers) {
+                provider = URL.decode(provider);
+                if (provider.contains("://")) {
+                    URL url = URL.valueOf(provider);
+                    if (UrlUtils.isMatch(consumer, url)) {
+                        urls.add(url);
+                    }
+                }
+            }
+        }
+        return urls;
+    }
 
-	private List<URL> toUrlsWithEmpty(URL consumer, String path,
-			List<String> providers) {
-		List<URL> urls = toUrlsWithoutEmpty(consumer, providers);
-		if (urls == null || urls.isEmpty()) {
-			int i = path.lastIndexOf('/');
-			String category = i < 0 ? path : path.substring(i + 1);
-			URL empty = consumer.setProtocol(Constants.EMPTY_PROTOCOL)
-					.addParameter(Constants.CATEGORY_KEY, category);
-			urls.add(empty);
-		}
-		return urls;
-	}
+    private List<URL> toUrlsWithEmpty(URL consumer, String path,
+                                      List<String> providers) {
+        List<URL> urls = toUrlsWithoutEmpty(consumer, providers);
+        if (urls == null || urls.isEmpty()) {
+            int i = path.lastIndexOf('/');
+            String category = i < 0 ? path : path.substring(i + 1);
+            URL empty = consumer.setProtocol(Constants.EMPTY_PROTOCOL)
+                    .addParameter(Constants.CATEGORY_KEY, category);
+            urls.add(empty);
+        }
+        return urls;
+    }
 
-	static String appendDefaultPort(String address) {
-		if (address != null && address.length() > 0) {
-			int i = address.indexOf(':');
-			if (i < 0) {
-				return address + ":" + DEFAULT_ZOOKEEPER_PORT;
-			} else if (Integer.parseInt(address.substring(i + 1)) == 0) {
-				return address.substring(0, i + 1) + DEFAULT_ZOOKEEPER_PORT;
-			}
-		}
-		return address;
-	}
+    static String appendDefaultPort(String address) {
+        if (address != null && address.length() > 0) {
+            int i = address.indexOf(':');
+            if (i < 0) {
+                return address + ":" + DEFAULT_ZOOKEEPER_PORT;
+            } else if (Integer.parseInt(address.substring(i + 1)) == 0) {
+                return address.substring(0, i + 1) + DEFAULT_ZOOKEEPER_PORT;
+            }
+        }
+        return address;
+    }
 
 }

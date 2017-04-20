@@ -465,6 +465,11 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
             return false;
         }
 
+        @Override
+        public int hashCode() {
+            return getName().hashCode() ^ getParameterTypes().hashCode();
+        }
+
         boolean equalParamTypes(Class<?>[] params1, Class<?>[] params2) {
             if (params1.length == params2.length) {
                 for (int i = 0; i < params1.length; i++) {
