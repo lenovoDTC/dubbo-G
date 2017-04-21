@@ -3,6 +3,8 @@ package com.alibaba.dubbo.common.utils;
 /**
  * Created by lzg on 2017/3/22.
  */
+import com.sun.tools.javac.code.Attribute;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,16 +17,28 @@ public class ObjAnalysis {
     public static List<String> ConvertObjToList(Object obj){
 //        Map<String,Object> reMap = new HashMap<String,Object>();
         List<String> reList = new ArrayList<String>();
+        if(obj.getClass().getName().contains("java.lang")
+                ||obj.getClass().getName().equals("boolean")
+                ||obj.getClass().getName().equals("byte")
+                ||obj.getClass().getName().equals("char")
+                ||obj.getClass().getName().equals("double")
+                ||obj.getClass().getName().equals("float")
+                ||obj.getClass().getName().equals("int")
+                ||obj.getClass().getName().equals("long")
+                ||obj.getClass().getName().equals("short")){
+            reList.add(obj.getClass().getSimpleName());
+            return reList;
+        }
         if (obj == null)
             return null;
         Field[] fields = obj.getClass().getDeclaredFields();
         try {
             for(int i=0;i<fields.length;i++){
                 try {
-                    Field f = obj.getClass().getDeclaredField(fields[i].getName());
+//                    Field f = obj.getClass().getDeclaredField(fields[i].getName());
 
-                    f.setAccessible(true);
-                    Object o = null;
+//                    f.setAccessible(true);
+//                    Object o = null;
 //                    System.out.println(fields[i].getType().getName());
 //                    if ("boolean".equals(fields[i].getType().getName()))  o = f.get(obj);
 //                    else if ("byte".equals(fields[i].getType().getName())) o = f.get(obj);
@@ -86,6 +100,7 @@ public class ObjAnalysis {
 //                    }
 //                    reMap.put("("+fields[i].getGenericType().toString().replace("class ","")+")"+fields[i].getName().toString(), o);
                     String p = fields[i].getGenericType().toString().replace("class ","");
+
                     if (p.equals("java.lang.Boolean"))p = "Boolean";
                     else if (p.equals("java.lang.Byte"))p = "Byte";
                     else if (p.equals("java.lang.Char"))p = "Char";
@@ -95,10 +110,35 @@ public class ObjAnalysis {
                     else if (p.equals("java.lang.Long"))p = "Long";
                     else if (p.equals("java.lang.Short"))p = "Short";
                     else if (p.equals("java.lang.String"))p = "String";
+                    else if (p.contains("[L")){
+                        if(p.contains("[Ljava"))p = fields[i].getType().getSimpleName();
+                        else {
+                            try {
+                            try {
+                                p = fields[i].getType().getSimpleName() + "("+ObjAnalysis.ConvertObjToList(Class.forName(p.substring(2,p.length()-1),
+                                        true, Thread.currentThread()
+                                                .getContextClassLoader()).newInstance())+")";
+                            } catch (InstantiationException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        }
+                    }
+                    else if (p.contains("java.util"));
+                    else {
+                        try {
+                            p = p + "("+ObjAnalysis.ConvertObjToList(fields[i].getType().newInstance())+")";
+                        } catch (InstantiationException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     reList.add("{ParameterName="+fields[i].getName().toString()+",ParameterType="+p+",Required=0,desc=}");
-                } catch (NoSuchFieldException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 } catch (IllegalArgumentException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

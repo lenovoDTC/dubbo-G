@@ -116,7 +116,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     for (Method method : methods) {
                         String total = "";
                         String[] name = Mapping.getParameters(method);
-
                         Class<?>[] types = method.getParameterTypes();
                         Type[] type = method.getGenericParameterTypes();
                         for (int i = 0; i < types.length; i++) {
