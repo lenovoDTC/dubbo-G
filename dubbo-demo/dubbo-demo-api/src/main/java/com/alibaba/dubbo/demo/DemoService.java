@@ -22,6 +22,6 @@ public interface DemoService {
     String sayHello(String name);
     String sayHello1( String name);
 
-    byte[] sayHello2(String name);
+    byte[] sayHello2(List<String> name);
 
 }

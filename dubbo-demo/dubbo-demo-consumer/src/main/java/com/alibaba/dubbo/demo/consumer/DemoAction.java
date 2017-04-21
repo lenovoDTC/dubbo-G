@@ -16,7 +16,6 @@
 package com.alibaba.dubbo.demo.consumer;
 
 import com.alibaba.dubbo.demo.DemoService;
-import com.alibaba.dubbo.demo.DemoService1;
 import com.alibaba.dubbo.demo.DemoServiceOne;
 
 import java.text.SimpleDateFormat;

@@ -6,7 +6,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -24,6 +26,7 @@ public class Mapping {
     public static void push(Method method) {
         String[] parameterNames = discoverer.getParameterNames(method);
         Type[] types = method.getGenericParameterTypes();
+
         Class<?>[] parameterTypes = method.getParameterTypes();
         Map<String, ParameterMeta> parameterMeta = new HashMap<String, ParameterMeta>();
 
@@ -37,6 +40,13 @@ public class Mapping {
             parameter.setParameterType(parameterType);
             parameter.setType(getType(parameterType));
             parameter.setIndex(i);
+            parameter.setParameterClass(classType);
+            if (types[i] instanceof ParameterizedType) {
+                ParameterizedType type = (ParameterizedType) types[i];
+                Type[] argTypes = type.getActualTypeArguments();
+                parameter.setGenericClass((Class<?>[]) argTypes);
+            }
+
             parameterMeta.put(parameterName, parameter);
 
         }

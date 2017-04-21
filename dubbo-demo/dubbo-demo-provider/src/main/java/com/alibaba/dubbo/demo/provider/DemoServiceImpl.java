@@ -36,9 +36,9 @@ public class DemoServiceImpl implements DemoService {
         return "Hello sayHello1, response form provider: " + RpcContext.getContext().getLocalAddress();
     }
 
-    @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
-    @Response(headers = {""})
-    public byte[] sayHello2(@Parameter(value = "name", required = false) String name) {
+//    @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
+//    @Response(headers = {""})
+    public byte[] sayHello2(/*@Parameter(value = "name", required = false)*/ List<String> name) {
         return new byte[]{1,2,3,4};
     }
 

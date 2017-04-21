@@ -16,10 +16,7 @@
 package com.alibaba.dubbo.config.spring;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -216,6 +213,7 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
         for (Class<?> interfaceType : interfaces) {
             Method[] methods = interfaceType.getDeclaredMethods();
             for (Method method : methods) {
+                String[] parameterTypes = Mapping.getParameters(method);
                 MethodKey key = new MethodKey(method);
                 String interfaceName = null;
                 if (interfaceMap.containsKey(key)) {
@@ -315,6 +313,12 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
                             parameterMeta.setRealname(parameterName);
                             parameterMeta.setParameterType(parameterType);
+                            parameterMeta.setParameterClass(parameterTypes[i]);
+                            if (types[i] instanceof ParameterizedType) {
+                                ParameterizedType type = (ParameterizedType) types[i];
+                                Type[] argTypes = type.getActualTypeArguments();
+                                parameterMeta.setGenericClass((Class<?>[]) argTypes);
+                            }
                             parameterMeta.setIndex(i);
                             parameterMetas[i++] = parameterMeta;
                             parameterMetaMap.put(parameterMeta.getName(), parameterMeta);

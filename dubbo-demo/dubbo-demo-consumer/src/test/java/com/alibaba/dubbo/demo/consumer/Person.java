@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.demo.consumer;
 
+import com.alibaba.dubbo.demo.DemoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,16 +10,20 @@ import javafx.beans.binding.ObjectExpression;
 import javassist.bytecode.ByteArray;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.*;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by haoning1 on 2017/3/16.
  */
-public class Person {
+public class Person<T, D> {
     private String name;
     private String age;
+    private T desc;
+    private D desc1;
 
     private static String a = "0";
 
@@ -40,6 +45,14 @@ public class Person {
 
     public void setAge(String age) {
         this.age = age;
+    }
+
+    public T getDesc() {
+        return desc;
+    }
+
+    public void setDesc(T desc) {
+        this.desc = desc;
     }
 
     {
@@ -74,11 +87,37 @@ public class Person {
 
 //        System.out.println(b.length);
 
-        String a = "true";
+//        Method[] method = DemoService.class.getMethods();
+//
+//        String a = "true";
+//        try {
+//            Number number = NumberFormat.getInstance().parse(a);
+//            System.out.println(number instanceof Double);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+
+        Person<String, Integer> p = new Person<String, Integer>();
         try {
-            Number number = NumberFormat.getInstance().parse(a);
-            System.out.println(number instanceof Double);
-        } catch (ParseException e) {
+            TypeVariable<?>[] types = p.getClass().getTypeParameters();
+            for (TypeVariable<?> type : types) {
+                System.out.println(type);
+            }
+            Field field = p.getClass().getDeclaredField("desc");
+            Map<String, Integer> map = new HashMap<String, Integer>();
+            for (Method method : map.getClass().getMethods()) {
+                if (method.getName().equals("get")) {
+                    Type returnType = method.getGenericReturnType();
+                    if(returnType instanceof ParameterizedType){
+                        Type [] genericTypes2 =((ParameterizedType)returnType).getActualTypeArguments();
+                        for(Type genericType2:genericTypes2){
+                            System.out.println("返回值，泛型类型"+genericType2);
+                        }
+                    }
+                }
+            }
+//            System.out.print(((TypeVariable)field.getGenericType()).get);
+        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
     }

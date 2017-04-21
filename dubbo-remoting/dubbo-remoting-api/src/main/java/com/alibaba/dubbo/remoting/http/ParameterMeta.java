@@ -11,7 +11,9 @@ public class ParameterMeta {
     private String parameterType;
     private String type;
     private int index;
-    private String genericType;
+    private String[] genericType;
+    private Class<?> parameterClass;
+    private Class<?>[] genericClass;
 
     public String getName() {
         return name;
@@ -69,11 +71,27 @@ public class ParameterMeta {
         this.index = index;
     }
 
-    public String getGenericType() {
+    public String[] getGenericType() {
         return genericType;
     }
 
-    public void setGenericType(String genericType) {
+    public void setGenericType(String[] genericType) {
         this.genericType = genericType;
+    }
+
+    public Class<?> getParameterClass() {
+        return parameterClass;
+    }
+
+    public void setParameterClass(Class<?> parameterClass) {
+        this.parameterClass = parameterClass;
+    }
+
+    public Class<?>[] getGenericClass() {
+        return genericClass;
+    }
+
+    public void setGenericClass(Class<?>[] genericClass) {
+        this.genericClass = genericClass;
     }
 }
