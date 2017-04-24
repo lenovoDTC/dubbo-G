@@ -15,6 +15,7 @@
  */
 package com.alibaba.dubbo.registry.zookeeper;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -22,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.dubbo.remoting.http.Mapping;
+import com.alibaba.dubbo.remoting.http.ParameterMeta;
+import com.alibaba.dubbo.remoting.http.Schema;
 import org.json.JSONObject;
 
 import com.alibaba.dubbo.common.utils.*;
@@ -115,136 +118,18 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     Method[] methods = interfaceClass.getMethods();
                     for (Method method : methods) {
                         String total = "";
-                        String[] name = Mapping.getParameters(method);
-                        Class<?>[] types = method.getParameterTypes();
-                        Type[] type = method.getGenericParameterTypes();
-                        for (int i = 0; i < types.length; i++) {
-                            String parameterType = type[i].toString().replace("class ","");
-                            String lastName = name[i];
+                        Map<String, ParameterMeta> names = Mapping.getSchema(method).getParameterMeta();
+//                        Class<?>[] types = method.getParameterTypes();
+//                        Type[] type = method.getGenericParameterTypes();
+                        for (String name : names.keySet()) {
+                            String parameterType = names.get(name).getParameterType();
                             String desc = "";
+                            int index = names.get(name).getIndex();
                             if (Mapping.isMapping(method)){
-                                parameterType =  Mapping.getSchema(method).getParameterMeta().get(name[i]).getParameterType();
-                                lastName = Mapping.getSchema(method).getParameterMeta().get(name[i]).getName();
-                                desc = Mapping.getSchema(method).getParameterMeta().get(name[i]).getDesc();
+                                desc = names.get(name).getDesc();
                             }
-                            if (total.equals("")) {
-                                if ("boolean".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("byte".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("char".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("double".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("float".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("int".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("long".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("short".equals(type[i].toString()))
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Boolean"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Boolean,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Byte"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Byte,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Char"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Char,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Double"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Double,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Float"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Float,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Integer"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Integer,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Long"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Long,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Short"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Short,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.String"))
-                                    total = "{ParameterName="+lastName+",ParameterType=String,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .indexOf("[Ljava") != -1)
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .indexOf("java.util") != -1)
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else {
-                                    total = "{ParameterName="+lastName+",ParameterType="+parameterType
-                                            + "("
-                                            + ObjAnalysis
-                                            .ConvertObjToList(types[i]
-                                                    .newInstance())
-                                            + ")"+",Required=0,desc="+desc+"}";
-                                }
-                            } else {
-                                if ("boolean".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("byte".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("char".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("double".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("float".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("int".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("long".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if ("short".equals(type[i].toString()))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Boolean"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Boolean,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Byte"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Byte,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Char"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Char,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Double"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Double,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Float"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Float,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Integer"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Integer,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Long"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=Long,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.Short"))
-                                    total = "{ParameterName="+lastName+",ParameterType=Short,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .equals("java.lang.String"))
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType=String,Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .indexOf("[Ljava") != -1)
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else if (parameterType
-                                        .indexOf("java.util") != -1)
-                                    total = total + "," + "{ParameterName="+lastName+",ParameterType="+parameterType+",Required=0,desc="+desc+"}";
-                                else {
-                                    total = total
-                                            + ","+"{ParameterName="+lastName+",ParameterType="+ parameterType
-                                            + "("
-                                            + ObjAnalysis
-                                            .ConvertObjToList(types[i]
-                                                    .newInstance())
-                                            + ")"+",Required=0,desc="+desc+"}";
-                                }
-                            }
+                            if (total.equals(""))total="{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterType)+",Required=0,desc="+index+"}";
+                            else total = total+",{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterType)+",Required=0,desc="+index+"}";
                         }
                         jsonObject.put(method.getName(),
                                 total.replace("\"", ""));
