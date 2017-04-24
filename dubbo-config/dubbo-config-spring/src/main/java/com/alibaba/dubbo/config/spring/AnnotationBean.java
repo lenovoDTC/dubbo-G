@@ -484,8 +484,6 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                 hash = hash * 31 + parameterTypes[0].hashCode();
             }
             return hash;
-
-
         }
 
         boolean equalParamTypes(Class<?>[] params1, Class<?>[] params2) {

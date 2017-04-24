@@ -29,6 +29,7 @@ import com.alibaba.dubbo.rpc.RpcInvocation;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 import com.alibaba.fastjson.JSON;
@@ -74,10 +75,18 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         String param = "";
         Map<String,Object> parameter = new HashMap<String, Object>();
         if(message instanceof DefaultHttpRequest){
+            String uri ;
             DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
+            if (!httpRequst.getUri().contains("?"))uri = httpRequst.getUri();
+             else uri = httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?"));
             if (httpRequst.getMethod().getName().equals("GET")){
-                if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
-                    String[] parameters = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1).split("&");
+                if(Mapping.isMapping(uri)){
+                    String[] parameters = new String[0];
+                    try {
+                        parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1),"UTF-8").split("&");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                     for(String p : parameters){
                         String[] ps = p.split("=");
                         if(parameter.containsKey(ps[0])){
@@ -97,9 +106,9 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 param = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
             }else if(httpRequst.getMethod().getName().equals("POST")){
 //                                        parem = new String(httpRequst.getContent().array(),"utf-8" );
-                if(Mapping.isMapping(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")))){
-                    String uri = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1) + "&" +new String(httpRequst.getContent().array());
-                    String[] parameters = uri.split("&");
+                if(Mapping.isMapping(uri)){
+                    String parameterize = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1) + "&" +new String(httpRequst.getContent().array());
+                    String[] parameters = parameterize.split("&");
                     for(String p : parameters){
                         String[] ps = p.split("=");
                         if(parameter.containsKey(ps[0])){
@@ -164,9 +173,12 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 args = new Object[pts.length];
                 for (int i = 0; i < args.length; i++) {
                    String addString =  jsonArrayargs.get(i).toString();
-                    if (jsonArray.getString(i).equals("java.lang.String"))addString = "\""+addString+"\"";
+
                     try {
-                        args[i] = JSON.parseObject(addString, pts[i]);
+//                        args[i] = JSON.parseObject(addString, pts[i]);
+                        if (jsonArray.getString(i).equals("java.lang.String"))args[i] = addString;
+                        else
+                            args[i] = JSON.parseObject(addString, pts[i]);
                     } catch (Exception e) {
                         if (log.isWarnEnabled()) {
                             log.warn("Decode argument failed: " + e.getMessage(), e);
