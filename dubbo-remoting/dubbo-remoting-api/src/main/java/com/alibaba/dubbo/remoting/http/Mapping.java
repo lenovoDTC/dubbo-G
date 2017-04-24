@@ -46,11 +46,8 @@ public class Mapping {
                 Type[] argTypes = type.getActualTypeArguments();
                 parameter.setGenericClass((Class<?>[]) argTypes);
             }
-
             parameterMeta.put(parameterName, parameter);
-
         }
-
         Schema schema = new Schema();
         schema.setMethodName(method.getName());
         schema.setParameterMeta(parameterMeta);
