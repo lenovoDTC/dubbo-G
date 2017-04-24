@@ -44,7 +44,11 @@ public class Mapping {
             if (types[i] instanceof ParameterizedType) {
                 ParameterizedType type = (ParameterizedType) types[i];
                 Type[] argTypes = type.getActualTypeArguments();
-                parameter.setGenericClass((Class<?>[]) argTypes);
+                Class<?>[] classTypes = new Class<?>[argTypes.length];
+                for (int k = 0; k < argTypes.length; k++) {
+                    classTypes[k] = (Class<?>)argTypes[i];
+                }
+                parameter.setGenericClass(classTypes);
             }
             parameterMeta.put(parameterName, parameter);
         }
