@@ -8,8 +8,6 @@ import java.util.Map;
 public class Schema {
     private String methodName;
     private String interfaceName;
-//    private ParameterMeta[] parameterMeta;
-//    private String[] parameterName;
 
     private Map<String, ParameterMeta> parameterMeta;
 
@@ -37,11 +35,5 @@ public class Schema {
         this.interfaceName = interfaceName;
     }
 
-    //    public String[] getParameterName() {
-//        return parameterName;
-//    }
-//
-//    public void setParameterName(String[] parameterName) {
-//        this.parameterName = parameterName;
-//    }
+
 }
