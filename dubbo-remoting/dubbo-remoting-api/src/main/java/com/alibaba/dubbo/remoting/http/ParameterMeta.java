@@ -1,5 +1,7 @@
 package com.alibaba.dubbo.remoting.http;
 
+import java.lang.reflect.Type;
+
 /**
  * Created by haoning1 on 2017/4/6.
  */
@@ -11,10 +13,10 @@ public class ParameterMeta {
     private String parameterType;
     private String type;
     private int index;
-    private String[] genericType;
-    private Class<?> parameterClass;
-    private Class<?>[] genericClass;
-
+//    private String[] genericType;
+//    private Class<?> parameterClass;
+//    private Class<?>[] genericClass;
+    private Type parameterTypePlus;
     public String getName() {
         return name;
     }
@@ -71,27 +73,36 @@ public class ParameterMeta {
         this.index = index;
     }
 
-    public String[] getGenericType() {
-        return genericType;
+//    public String[] getGenericType() {
+//        return genericType;
+//    }
+//
+//    public void setGenericType(String[] genericType) {
+//        this.genericType = genericType;
+//    }
+
+//    public Class<?> getParameterClass() {
+//        return parameterClass;
+//    }
+//
+//    public void setParameterClass(Class<?> parameterClass) {
+//        this.parameterClass = parameterClass;
+//    }
+//
+//    public Class<?>[] getGenericClass() {
+//        return genericClass;
+//    }
+//
+//    public void setGenericClass(Class<?>[] genericClass) {
+//        this.genericClass = genericClass;
+//    }
+
+
+    public Type getParameterTypePlus() {
+        return parameterTypePlus;
     }
 
-    public void setGenericType(String[] genericType) {
-        this.genericType = genericType;
-    }
-
-    public Class<?> getParameterClass() {
-        return parameterClass;
-    }
-
-    public void setParameterClass(Class<?> parameterClass) {
-        this.parameterClass = parameterClass;
-    }
-
-    public Class<?>[] getGenericClass() {
-        return genericClass;
-    }
-
-    public void setGenericClass(Class<?>[] genericClass) {
-        this.genericClass = genericClass;
+    public void setParameterTypePlus(Type parameterTypePlus) {
+        this.parameterTypePlus = parameterTypePlus;
     }
 }

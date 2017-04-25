@@ -16,6 +16,7 @@
 package com.alibaba.dubbo.demo;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DemoService {
 
@@ -23,5 +24,7 @@ public interface DemoService {
     String sayHello1( String name);
 
     byte[] sayHello2(List<String> name);
+
+    String sayHello3 (Map<String, List<String>> name);
 
 }

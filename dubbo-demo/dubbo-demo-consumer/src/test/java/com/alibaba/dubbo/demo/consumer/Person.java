@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by haoning1 on 2017/3/16.
  */
-public class Person<T, D> {
+public class Person<T, D, F> {
     private String name;
     private String age;
     private T desc;
@@ -97,7 +97,7 @@ public class Person<T, D> {
 //            e.printStackTrace();
 //        }
 
-        Person<String, Integer> p = new Person<String, Integer>();
+        Person<String, Integer, String> p = new Person<String, Integer, String>();
         try {
             TypeVariable<?>[] types = p.getClass().getTypeParameters();
             for (TypeVariable<?> type : types) {

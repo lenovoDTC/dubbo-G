@@ -40,16 +40,18 @@ public class Mapping {
             parameter.setParameterType(parameterType);
             parameter.setType(getType(parameterType));
             parameter.setIndex(i);
-            parameter.setParameterClass(classType);
-            if (types[i] instanceof ParameterizedType) {
-                ParameterizedType type = (ParameterizedType) types[i];
-                Type[] argTypes = type.getActualTypeArguments();
-                Class<?>[] classTypes = new Class<?>[argTypes.length];
-                for (int k = 0; k < argTypes.length; k++) {
-                    classTypes[k] = (Class<?>)argTypes[i];
-                }
-                parameter.setGenericClass(classTypes);
-            }
+            parameter.setParameterTypePlus(types[i]);
+//            parameter.setParameterClass(classType);
+//            if (types[i] instanceof ParameterizedType) {
+//                ParameterizedType type = (ParameterizedType) types[i];
+//                Type[] argTypes = type.getActualTypeArguments();
+//                Class<?>[] classTypes = new Class<?>[argTypes.length];
+//                for (int k = 0; k < argTypes.length; k++) {
+//                    classTypes[k] = (Class<?>)argTypes[k];
+////                    classTypes[k].getGenericSuperclass().
+//                }
+//                parameter.setGenericClass(classTypes);
+//            }
 
             parameterMeta.put(parameterName, parameter);
 

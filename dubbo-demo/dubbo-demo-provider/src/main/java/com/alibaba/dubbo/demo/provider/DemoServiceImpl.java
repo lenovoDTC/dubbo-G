@@ -18,6 +18,7 @@ package com.alibaba.dubbo.demo.provider;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.dubbo.config.annotation.Parameter;
 import com.alibaba.dubbo.config.annotation.Request;
@@ -42,4 +43,8 @@ public class DemoServiceImpl implements DemoService {
         return new byte[]{1,2,3,4};
     }
 
+    @Override
+    public String sayHello3(Map<String, List<String>> name) {
+        return "hello";
+    }
 }
