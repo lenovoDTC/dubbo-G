@@ -118,23 +118,29 @@ public class ZookeeperRegistry extends FailbackRegistry {
                                     .getContextClassLoader());
                     Method[] methods = interfaceClass.getMethods();
                     for (Method method : methods) {
-                        String total = "";
+                        JSONObject total = new JSONObject();
                         Map<String, ParameterMeta> names = Mapping.getSchema(method).getParameterMeta();
                         for (String name : names.keySet()) {
+                            JSONObject namejson = new JSONObject();
 //                            String parameterType = names.get(name).getParameterType();
-                            Class<?> parameterClass = names.get(name).getParameterClass();
-                            String parameterType = parameterClass.getName();
-                            TypeVariable<? extends Class<?>>[] parameterType1 = parameterClass.getTypeParameters();
+                            Type parameterClass = names.get(name).getParameterTypePlus();
+//                            TypeVariable<? extends Class<?>>[] parameterType1 = parameterClass.getTypeParameters();
                             String desc = "";
                             int index = names.get(name).getIndex();
                             if (Mapping.isMapping(method)){
                                 desc = names.get(name).getDesc();
                             }
-                            if (total.equals(""))total="{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterType)+",Required=0,desc="+index+"}";
-                            else total = total+",{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterType)+",Required=0,desc="+index+"}";
+//                            if (total.equals("")) {
+                            namejson.put("ParameterName",name);
+                            namejson.put("ParameterType",ObjAnalysis.ConvertObjToList(parameterClass));
+                            namejson.put("Required",0);
+                            namejson.put("desc",desc);
+                            total.put(name,namejson);
+//                            }
+//                            total="{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
+//                            else total = total+",{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
                         }
-                        jsonObject.put(method.getName(),
-                                total.replace("\"", ""));
+                        jsonObject.put(method.getName(), total);
                     }
                     System.out.println(jsonObject.toString());
                     zkClient.setData("/http/" + a[1] + "/" + a[2]

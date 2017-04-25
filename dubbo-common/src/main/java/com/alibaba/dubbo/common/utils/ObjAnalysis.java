@@ -4,14 +4,19 @@ package com.alibaba.dubbo.common.utils;
  * Created by yuanbo on 2017/4/21.
  */
 
+import org.json.JSONObject;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ObjAnalysis {
-    public static String ConvertObjToList(String param) throws ClassNotFoundException {
+    public static JSONObject ConvertObjToList(Type type) throws ClassNotFoundException {
+        JSONObject jsonObject = new JSONObject();
+        String param = type.toString().replace("class ","");
         if(!param.contains("<")
                 &&(param.contains("java.util")
                 ||param.contains("java.lang")
@@ -24,29 +29,72 @@ public class ObjAnalysis {
                 ||param.equals("long")
                 ||param.equals("short")))
         {
-            return param.replace("[L","").replace(";","[]").replace("java.lang.","").replace("java.util.","");
+            jsonObject.put("parent",param.replace("[L","").replace(";","[]").replace("java.lang.","").replace("java.util.",""));
+//            param = param.replace("[L","").replace(";","[]").replace("java.lang.","").replace("java.util.","");
         }
         else if (param.contains("[L")){
-            param = param.substring(2,param.length()-1)+"[]"+pojo(param.substring(2,param.length()-1));
+            JSONObject children = new JSONObject();
+            children.put(param.substring(2,param.length()-1),pojo(param.substring(2,param.length()-1),new Type[0]));
+            jsonObject.put("parent",param.substring(2,param.length()-1)+"[]");
+            jsonObject.put("children",children);
+//            param = param.substring(2,param.length()-1)+"[]"+pojo(param.substring(2,param.length()-1),new Type[0]);
         }
         else if (param.contains("<")){
-            if (param.substring(param.indexOf("<")).contains("java.util")) param = param.replace("java.lang.","").replace("java.util.","");
+            JSONObject children = new JSONObject();
+            Type[] types =((ParameterizedType)type).getActualTypeArguments();
+            for(Type type1:types){
+                JSONObject zz = ConvertObjToList(type1);
+                if (!zz.isNull("children")){
+                    children.put(type1.toString().replace("class ","").replace("java.lang.","").replace("java.util.",""),zz);
+                }
+            }
+            if (param.substring(0,param.indexOf("<")).contains("java.util")) {
+                jsonObject.put("parent",param.replace("java.lang.","").replace("java.util.",""));
+                if (children.length()!=0) jsonObject.put("children",children);
+                //            param = param.replace("java.lang.","").replace("java.util.","");
+            }
             else {
-                param = param.replace("java.lang.","").replace("java.util.","")+pojo(param.substring(0,param.indexOf("<")));
+                children.put(param,pojo(param.substring(0,param.indexOf("<")),types));
+                jsonObject.put("parent",param.replace("java.lang.","").replace("java.util.",""));
+                jsonObject.put("children",children);
+//                param = param.replace("java.lang.","").replace("java.util.","")+pojo(param.substring(0,param.indexOf("<")),types);
             }
         }else {
-            if (param.length() == 1);
-            else param = param+ObjAnalysis.pojo(param);
+            if (param.contains(".")) {
+                JSONObject children = new JSONObject();
+                children.put(param,pojo(param,new Type[0]));
+                jsonObject.put("parent", param);
+                jsonObject.put("children",children);
+            }else jsonObject.put("parent", param);
+//                param = param+ObjAnalysis.pojo(param,new Type[0]);
         }
-    return param;
+    return jsonObject;
     }
-    private static List<String> pojo(String name) throws ClassNotFoundException {
-        List<String> reList = new ArrayList<String>();
+    private static JSONObject pojo(String name, Type[] types) throws ClassNotFoundException {
+//        List<String> reList = new ArrayList<String>();
+        JSONObject jsonObject = new JSONObject();
+        Map<String,Type> map = new HashMap<String,Type>();
         Field[] fields = Class.forName(name, true, Thread.currentThread().getContextClassLoader()).getDeclaredFields();
-        for(int i=0;i<fields.length;i++) {
-                String file = fields[i].getGenericType().toString().replace("class ","");
-                reList.add("{ParameterName="+fields[i].getName().toString()+",ParameterType="+ConvertObjToList(file)+",Required=0,desc=}");
+        if (types.length!=0){
+            TypeVariable<?>[] files = Class.forName(name, true, Thread.currentThread().getContextClassLoader()).getTypeParameters();
+            for (int i=0;i<files.length;i++){
+                map.put(files[i].getName(),types[i]);
             }
-        return reList;
+        }
+        for(int i=0;i<fields.length;i++) {
+            JSONObject smalljson = new JSONObject();
+//                String file = fields[i].getGenericType().toString().replace("class ","");
+            Type file = fields[i].getGenericType();
+            if (map.containsKey(file.toString().replace("class ",""))){
+                file = map.get(file.toString().replace("class ",""));
+            }
+            smalljson.put("ParameterName",fields[i].getName().toString());
+            smalljson.put("ParameterType",ConvertObjToList(file));
+            smalljson.put("Required",0);
+            smalljson.put("desc","");
+            jsonObject.put(fields[i].getName().toString(),smalljson);
+//            reList.add("{ParameterName="+fields[i].getName().toString()+",ParameterType="+ConvertObjToList(file)+",Required=0,desc=}");
+            }
+        return jsonObject;
     }
 }
