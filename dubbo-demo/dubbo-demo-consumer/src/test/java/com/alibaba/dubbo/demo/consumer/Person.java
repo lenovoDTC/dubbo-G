@@ -69,14 +69,14 @@ public class Person<T, D> {
 //        jsonObject.put("body", sb);
 //        System.out.println(JSON.toJSONString(jsonObject));
 
-        JSONObject json = new JSONObject();
-        System.out.println(JSON.parseObject("{\"a\":1}", Map.class).getClass());
-        JSONArray array = new JSONArray();
-        array.add("hahha");
-        array.add("hahha1");
-        json.put("a", array.toJSONString());
+//        JSONObject json = new JSONObject();
+//        System.out.println(JSON.parseObject("{\"a\":1}", Map.class).getClass());
+//        JSONArray array = new JSONArray();
+//        array.add("hahha");
+//        array.add("hahha1");
+//        json.put("a", array.toJSONString());
 //        json.put("b", new byte[]{1,2,3,4});
-        System.out.println(json.toJSONString());
+//        System.out.println(json.toJSONString());
 
 //        System.out.println(new String(new byte[]{1,2,3,4}));
 
@@ -98,28 +98,25 @@ public class Person<T, D> {
 //        }
 
         Person<String, Integer> p = new Person<String, Integer>();
-        try {
-            TypeVariable<?>[] types = p.getClass().getTypeParameters();
-            for (TypeVariable<?> type : types) {
-                System.out.println(type);
-            }
-            Field field = p.getClass().getDeclaredField("desc");
-            Map<String, Integer> map = new HashMap<String, Integer>();
-            for (Method method : map.getClass().getMethods()) {
-                if (method.getName().equals("get")) {
-                    Type returnType = method.getGenericReturnType();
-                    if(returnType instanceof ParameterizedType){
-                        Type [] genericTypes2 =((ParameterizedType)returnType).getActualTypeArguments();
-                        for(Type genericType2:genericTypes2){
-                            System.out.println("返回值，泛型类型"+genericType2);
-                        }
-                    }
-                }
-            }
-//            System.out.print(((TypeVariable)field.getGenericType()).get);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
+        TypeVariable<?>[] types = p.getClass().getTypeParameters();
 
+        System.out.println(p.getClass().getGenericSuperclass().toString());
+        for (TypeVariable<?> type : types) {
+            System.out.println(type);
+        }
+//            Field field = p.getClass().getDeclaredField("desc");
+//            Map<String, Integer> map = new HashMap<String, Integer>();
+//            for (Method method : map.getClass().getMethods()) {
+//                if (method.getName().equals("get")) {
+//                    Type returnType = method.getGenericReturnType();
+//                    if(returnType instanceof ParameterizedType){
+//                        Type [] genericTypes2 =((ParameterizedType)returnType).getActualTypeArguments();
+//                        for(Type genericType2:genericTypes2){
+//                            System.out.println("返回值，泛型类型"+genericType2);
+//                        }
+//                    }
+//                }
+//            }
+//            System.out.print(((TypeVariable)field.getGenericType()).get);
+    }
 }

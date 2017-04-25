@@ -18,6 +18,7 @@ package com.alibaba.dubbo.registry.zookeeper;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -119,10 +120,11 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     for (Method method : methods) {
                         String total = "";
                         Map<String, ParameterMeta> names = Mapping.getSchema(method).getParameterMeta();
-//                        Class<?>[] types = method.getParameterTypes();
-//                        Type[] type = method.getGenericParameterTypes();
                         for (String name : names.keySet()) {
-                            String parameterType = names.get(name).getParameterType();
+//                            String parameterType = names.get(name).getParameterType();
+                            Class<?> parameterClass = names.get(name).getParameterClass();
+                            String parameterType = parameterClass.getName();
+                            TypeVariable<? extends Class<?>>[] parameterType1 = parameterClass.getTypeParameters();
                             String desc = "";
                             int index = names.get(name).getIndex();
                             if (Mapping.isMapping(method)){
