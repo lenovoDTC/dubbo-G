@@ -313,12 +313,13 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
                             parameterMeta.setRealname(parameterName);
                             parameterMeta.setParameterType(parameterType);
-                            parameterMeta.setParameterClass(parameterTypes[i]);
-                            if (types[i] instanceof ParameterizedType) {
-                                ParameterizedType type = (ParameterizedType) types[i];
-                                Type[] argTypes = type.getActualTypeArguments();
-                                parameterMeta.setGenericClass((Class<?>[]) argTypes);
-                            }
+                            parameterMeta.setParameterTypePlus(types[i]);
+//                            parameterMeta.setParameterClass(parameterTypes[i]);
+//                            if (types[i] instanceof ParameterizedType) {
+//                                ParameterizedType type = (ParameterizedType) types[i];
+//                                Type[] argTypes = type.getActualTypeArguments();
+//                                parameterMeta.setGenericClass((Class<?>[]) argTypes);
+//                            }
                             parameterMeta.setIndex(i);
                             parameterMetas[i++] = parameterMeta;
                             parameterMetaMap.put(parameterMeta.getName(), parameterMeta);
