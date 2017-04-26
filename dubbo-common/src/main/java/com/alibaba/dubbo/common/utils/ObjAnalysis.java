@@ -54,7 +54,7 @@ public class ObjAnalysis {
                 //            param = param.replace("java.lang.","").replace("java.util.","");
             }
             else {
-                children.put(param,pojo(param.substring(0,param.indexOf("<")),types));
+                children.put(param.substring(0,param.indexOf("<")),pojo(param.substring(0,param.indexOf("<")),types));
                 jsonObject.put("parent",param.replace("java.lang.","").replace("java.util.",""));
                 jsonObject.put("children",children);
 //                param = param.replace("java.lang.","").replace("java.util.","")+pojo(param.substring(0,param.indexOf("<")),types);
