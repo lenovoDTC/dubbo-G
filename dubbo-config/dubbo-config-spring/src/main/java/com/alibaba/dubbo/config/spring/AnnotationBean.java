@@ -276,12 +276,14 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                     requestMeta.setHeaders(request.headers());
                     requestMeta.setMethod(requestMethods);
                     for (String uri : values) {
+                        if (Mapping.isMapping(uri))
+                            throw new RuntimeException("Request Mapping Uri " + uri + " can't be repeated");
                         Mapping.push(method, uri, requestMeta);
                     }
 
                     Annotation[][] annotations = method.getParameterAnnotations();
                     if (annotations.length == 0) {
-                        Mapping.push(method);
+                        Mapping.push(method, requestMeta);
                     } else {
                         String[] parameterNames = Mapping.getParameters(method);
                         ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
@@ -314,12 +316,6 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                             parameterMeta.setRealname(parameterName);
                             parameterMeta.setParameterType(parameterType);
                             parameterMeta.setParameterTypePlus(types[i]);
-//                            parameterMeta.setParameterClass(parameterTypes[i]);
-//                            if (types[i] instanceof ParameterizedType) {
-//                                ParameterizedType type = (ParameterizedType) types[i];
-//                                Type[] argTypes = type.getActualTypeArguments();
-//                                parameterMeta.setGenericClass((Class<?>[]) argTypes);
-//                            }
                             parameterMeta.setIndex(i);
                             parameterMetas[i++] = parameterMeta;
                             parameterMetaMap.put(parameterMeta.getName(), parameterMeta);
@@ -334,7 +330,8 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
                     }
                 } else {
-                    Mapping.push(method);
+                    String[] interfaceArray = interfaceMap.get(key).split(",");
+                    Mapping.push(method, interfaceArray);
                 }
             }
         }

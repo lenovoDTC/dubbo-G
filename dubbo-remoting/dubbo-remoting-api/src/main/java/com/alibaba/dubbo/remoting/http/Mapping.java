@@ -1,5 +1,6 @@
 package com.alibaba.dubbo.remoting.http;
 
+import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.fastjson.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,15 +21,18 @@ public class Mapping {
     private static LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
     public static Map<Method, Schema> cache = new LinkedHashMap<Method, Schema>();
     public static Map<String, Method> mapping = new LinkedHashMap<String, Method>();
+    public static Map<String, List<Method>> defaultMapping = new LinkedHashMap<String, List<Method>>();
     public static Map<String, RequestMeta> metas = new LinkedHashMap<String, RequestMeta>();
+    public static Map<String, List<RequestMeta>> defaultMetas = new LinkedHashMap<String, List<RequestMeta>>();
     public static Map<Method, Method> methods = new LinkedHashMap<Method, Method>();
 
-    public static void push(Method method) {
+    public static void push(Method method, RequestMeta requestMeta) {
         String[] parameterNames = discoverer.getParameterNames(method);
         Type[] types = method.getGenericParameterTypes();
 
         Class<?>[] parameterTypes = method.getParameterTypes();
         Map<String, ParameterMeta> parameterMeta = new HashMap<String, ParameterMeta>();
+        ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
 
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> classType = parameterTypes[i];
@@ -41,21 +45,12 @@ public class Mapping {
             parameter.setType(getType(parameterType));
             parameter.setIndex(i);
             parameter.setParameterTypePlus(types[i]);
-//            parameter.setParameterClass(classType);
-//            if (types[i] instanceof ParameterizedType) {
-//                ParameterizedType type = (ParameterizedType) types[i];
-//                Type[] argTypes = type.getActualTypeArguments();
-//                Class<?>[] classTypes = new Class<?>[argTypes.length];
-//                for (int k = 0; k < argTypes.length; k++) {
-//                    classTypes[k] = (Class<?>)argTypes[k];
-////                    classTypes[k].getGenericSuperclass().
-//                }
-//                parameter.setGenericClass(classTypes);
-//            }
 
             parameterMeta.put(parameterName, parameter);
-
+            parameterMetas[i] = parameter;
         }
+
+        requestMeta.setParameterMetas(parameterMetas);
 
         Schema schema = new Schema();
         schema.setMethodName(method.getName());
@@ -89,10 +84,27 @@ public class Mapping {
         metas.put(uri, requestMeta);
     }
 
+    public static void push (Method method, String[] interfaces) {
+        for (String interfaceName : interfaces) {
+            String uri = "/" + interfaceName + "/" + method.getName();
+            List<Method> methods = null;
+            List<RequestMeta> requestMetas = null;
+            if (!mapping.containsKey(uri)) {
+                methods = new ArrayList<Method>();
+                requestMetas = new ArrayList<RequestMeta>();
+                defaultMapping.put(uri, methods);
+                defaultMetas.put(uri, requestMetas);
+            }
+            RequestMeta requestMeta = new RequestMeta();
+            requestMetas.add(requestMeta);
+            push(method, requestMeta);
+        }
+    }
+
     public static void push (Method interfaceMethod, Method implMethod) {methods.put(interfaceMethod, implMethod);}
 
     public static boolean isMapping(String uri) {
-        return mapping.containsKey(uri);
+        return mapping.containsKey(uri) || defaultMapping.containsKey(uri);
     }
 
     public static boolean isMapping(Method method) {return methods.containsKey(method);}
@@ -127,15 +139,50 @@ public class Mapping {
         return cache.get(m);
     }
 
-    public static String decode(String uri, Map<String, Object> parameters) throws Exception{
+    public static String decode(String uri, Map<String, Object> parameters, String[] schemas) throws Exception{
         if (!isMapping(uri))
             return null;
+        String json = null;
+        if (schemas == null) {
+            Method method = mapping.get(uri);
+            Schema schema = cache.get(method);
+            json = pojo(parameters, schema);
+        } else if (schemas.length == 0) {
+            List<Method> methods = defaultMapping.get(uri);
+            if (methods.size() > 1)
+                throw new RpcException("the method " + uri + " isn't just one implemented, please enter method parameter schema!!");
+            Method method = methods.get(0);
+            Schema schema = cache.get(method);
+            json = pojo (parameters, schema);
+        } else {
+            List<Method> methods = defaultMapping.get(uri);
+            List<RequestMeta> requestMetas = defaultMetas.get(uri);
+            int count = 0;
+            outer : for (int i = 0; i < methods.size(); i++) {
+                Method method = methods.get(i);
+                RequestMeta requestMeta = requestMetas.get(i);
+                ParameterMeta[] parameterMetas = requestMeta.getParameterMetas();
+                if (parameterMetas.length == schemas.length) {
+                    inner : for (int j = 0 ; j < parameterMetas.length; j++) {
+                        ParameterMeta parameterMeta = parameterMetas[j];
+                        String schema = schemas[j];
+                        if (!parameterMeta.getParameterType().equals(schema)) count++; break outer;
+                    }
+                    Schema schema = cache.get(method);
+                    json = pojo(parameters, schema);
+                    return json;
+                }
+            }
 
-        Method method = mapping.get(uri);
-        Schema schema = cache.get(method);
+            throw new RpcException("the method " + uri + " is not implemented");
 
-        String json = pojo(parameters, schema);
+        }
+
         return json;
+    }
+
+    public static String decode(String uri, Map<String, Object> parameters) throws Exception{
+        return decode(uri, parameters, null);
     }
 
     private static String pojo(Map<String, Object> parameters, Schema schema) throws Exception{
@@ -166,7 +213,7 @@ public class Mapping {
                     else if (meta.getType().equals("String"))
                         args.add(v);
                     else
-                        throw new Exception(String.format("%s is valid", key));
+                        throw new RpcException(String.format("%s is valid", key));
                 }
                 else if (v.startsWith("{")) {
                     if (meta.getType().equals("JSONString"))
@@ -174,7 +221,7 @@ public class Mapping {
                     else if (meta.getType().equals("String"))
                         args.add(v);
                     else
-                        throw new Exception(String.format("%s is valid", key));
+                        throw new RpcException(String.format("%s is valid", key));
                 }
 
                 else if (v.isEmpty()) args.add("");
@@ -188,9 +235,8 @@ public class Mapping {
 
             if (value instanceof List) {
                 if (!meta.getType().equals("JSONArray"))
-                    throw new Exception("parameter is valid");
+                    throw new RpcException("parameter is valid");
 
-                //String json = JSON.toJSONString(value);
                 args.add(pojo((List<String>)value));
             }
         }
