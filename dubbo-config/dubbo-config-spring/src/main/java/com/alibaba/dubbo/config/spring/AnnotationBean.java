@@ -283,7 +283,8 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
 
                     Annotation[][] annotations = method.getParameterAnnotations();
                     if (annotations.length == 0) {
-                        Mapping.push(method, requestMeta);
+//                        Mapping.push(method, requestMeta);
+                        Mapping.push(method, requestMeta,interfaceMap.get(key));
                     } else {
                         String[] parameterNames = Mapping.getParameters(method);
                         ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
@@ -320,14 +321,12 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                             parameterMetas[i++] = parameterMeta;
                             parameterMetaMap.put(parameterMeta.getName(), parameterMeta);
                         }
-
                         requestMeta.setParameterMetas(parameterMetas);
                         Schema schema = new Schema();
                         schema.setMethodName(method.getName());
                         schema.setParameterMeta(parameterMetaMap);
-                        schema.setInterfaceName(interfaceMap.get(method.getName()));
+                        schema.setInterfaceName(interfaceMap.get(key));
                         Mapping.push(method, schema);
-
                     }
                 } else {
                     String[] interfaceArray = interfaceMap.get(key).split(",");

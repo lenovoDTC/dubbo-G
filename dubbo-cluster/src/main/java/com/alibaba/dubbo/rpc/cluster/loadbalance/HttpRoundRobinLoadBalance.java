@@ -37,7 +37,7 @@ public class HttpRoundRobinLoadBalance extends HttpAbstractLoadBalance {
         }
     }
 
-    protected String httpDoSelect(Map<String, List<AtomicInteger>> map, float errorrate, Map<String, Integer> providers, String rinterface, String method, String schema, String args)
+    protected String httpDoSelect(Map<String, List<AtomicInteger>> map, float errorrate, Map<String, Integer> providers, String rinterface, String method, Map<String,String> args)
     {
         Set<String> keys = providers.keySet();
         List<String> list = new ArrayList<String>(keys);
@@ -80,6 +80,6 @@ public class HttpRoundRobinLoadBalance extends HttpAbstractLoadBalance {
             }
         }
         // 取模轮循
-        return HttpClient.httpClient(map,errorrate,list.get(currentSequence % length),rinterface,method,schema,args);
+        return HttpClient.httpClient(map,errorrate,list.get(currentSequence % length),rinterface,method,args);
     }
 }

@@ -97,31 +97,41 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             }
             if (parameters.length==1&&parameters[0].equals(uri)){
             }else {
-            for(String p : parameters){
-                String[] ps = p.split("=");
-                if(parameter.containsKey(ps[0])){
-                    parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
-                }else parameter.put(ps[0],ps[1]);
-            }
-            for(String p : parameters){
-                String[] ps = p.split("=");
-                if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
-            }
+                for(String p : parameters){
+                    if (!p.equals(uri)){
+                        String[] ps = p.split("=");
+                        if(parameter.containsKey(ps[0])){
+                            parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
+                        }else parameter.put(ps[0],ps[1]);
+                    }
+                }
+                for(String p : parameters){
+                    if(!p.equals(uri)){
+                        String[] ps = p.split("=");
+                        if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
+                    }
+                }
             }
             if(Mapping.isMapping(uri)){
-                try {
-                    param = Mapping.decode(uri,parameter);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }else{
-                String[] strings = new String[0];
-                if (uri.contains("(")&&uri.contains(")")){
-                    strings = uri.substring(uri.indexOf("(")+1,uri.indexOf(")")).split(",");
-                    uri = uri.substring(0,uri.indexOf("("));
+                if (!uri.contains(".")){
+                    try {
+                        param = Mapping.decode(uri,parameter);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    String[] strings = new String[0];
+                    if (uri.contains("(")&&uri.contains(")")){
+                        strings = uri.substring(uri.indexOf("(")+1,uri.indexOf(")")).split(",");
+                        uri = uri.substring(0,uri.indexOf("("));
+                    }
+                    try {
+                        param = Mapping.decode(uri,parameter,strings);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-
         }
         else if(message instanceof DefaultHttpChunk){
             DefaultHttpChunk httpChunk = (DefaultHttpChunk)message;

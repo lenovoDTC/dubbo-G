@@ -2,16 +2,21 @@ package com.alibaba.dubbo.common.utils;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +27,7 @@ public class HttpClient {
 	private static Map<String, AtomicInteger> maptotal = new HashMap<String, AtomicInteger>();
 
 	public static String httpClient(Map<String, List<AtomicInteger>> map,
-									float errorrate, String uri, String rinterface, String method, String schema,
-									String args) {
+									float errorrate, String uri, String rinterface, String method,Map<String,String> args) {
 		if (System.currentTimeMillis() - start > 1000) {
 			start = System.currentTimeMillis();
 			maptotal = new HashMap<String, AtomicInteger>();
@@ -61,20 +65,16 @@ public class HttpClient {
 		// 读取超时
 		httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT,
 				6000);
-		HttpPost httpPost = new HttpPost(uri);
-		StringEntity entity = null;
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("interface",rinterface);
-		jsonObject.put("method", method);
-		jsonObject.put("schema", schema);
-		jsonObject.put("args", args);
+		HttpPost httpPost = new HttpPost(uri+"/"+rinterface+"/"+method);
+		List <NameValuePair> params = new ArrayList<NameValuePair>();
+		for(String arg : args.keySet()){
+			params.add(new BasicNameValuePair(arg, args.get(arg)));
+		}
 		try {
-			entity = new StringEntity(jsonObject.toString());
+			httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			return response + uri;
 		}
-		httpPost.setEntity(entity);
 		try {
 			HttpResponse httpResponse = httpClient.execute(httpPost);
 			if (httpResponse.getStatusLine().getStatusCode() == 200) {
