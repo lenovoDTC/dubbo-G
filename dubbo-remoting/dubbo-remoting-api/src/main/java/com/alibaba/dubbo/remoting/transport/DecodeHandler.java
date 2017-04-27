@@ -100,9 +100,15 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 for(String p : parameters){
                     if (!p.equals(uri)){
                         String[] ps = p.split("=");
+                        if(ps.length<2){
+                            if(parameter.containsKey(ps[0])){
+                                parameter.put(ps[0],parameter.get(ps[0]).toString()+"&");
+                            }else parameter.put(ps[0],"");
+                        }else {
                         if(parameter.containsKey(ps[0])){
                             parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
                         }else parameter.put(ps[0],ps[1]);
+                    }
                     }
                 }
                 for(String p : parameters){
