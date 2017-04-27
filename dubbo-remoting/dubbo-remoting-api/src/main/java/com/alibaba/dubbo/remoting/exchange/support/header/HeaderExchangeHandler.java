@@ -187,6 +187,8 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         // Decide whether to close the connection or not.
                         if(request.getVersion().equals("http1.0.0")){
                             Object result = ((Response)response).getResult();
+                            if (result==null){
+                            result = ((Response)response).getErrorMessage();}
                             HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1,HttpResponseStatus.OK);
                             httpResponse.setContent(ChannelBuffers.copiedBuffer(JSON.toJSONString(result), CharsetUtil.UTF_8));
                             System.out.println(JSON.toJSONString(result));

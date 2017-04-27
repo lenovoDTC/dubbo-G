@@ -20,13 +20,13 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo-config-api</artifactId>
-            <version>2.5.3-Galpha</version>
+            <version>2.5.3-G-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <parent>
         <groupId>com.alibaba</groupId>
         <artifactId>dubbo-demo</artifactId>
-        <version>2.5.3-Galpha</version>
+        <version>2.5.3-G-SNAPSHOT</version>
     </parent>
     <artifactId>dubbo-demo-api</artifactId>
     <packaging>jar</packaging>
