@@ -24,4 +24,6 @@ public interface DemoService {
 
     byte[] sayHello2(List<String> name);
 
+    String sayHello3(Person<String> z);
+
 }

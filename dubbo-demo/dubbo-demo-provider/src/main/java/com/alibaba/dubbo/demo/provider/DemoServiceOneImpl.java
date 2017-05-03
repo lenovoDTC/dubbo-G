@@ -2,6 +2,7 @@ package com.alibaba.dubbo.demo.provider;
 
 import com.alibaba.dubbo.demo.DemoService;
 import com.alibaba.dubbo.demo.DemoServiceOne;
+import com.alibaba.dubbo.demo.Person;
 
 import java.util.List;
 
@@ -28,5 +29,10 @@ public class DemoServiceOneImpl implements DemoServiceOne, DemoService{
     @Override
     public byte[] sayHello2(List<String> name) {
         return new byte[0];
+    }
+
+    @Override
+    public String sayHello3(Person<String> z) {
+        return null;
     }
 }

@@ -23,6 +23,7 @@ import com.alibaba.dubbo.config.annotation.Parameter;
 import com.alibaba.dubbo.config.annotation.Request;
 import com.alibaba.dubbo.config.annotation.Response;
 import com.alibaba.dubbo.demo.DemoService;
+import com.alibaba.dubbo.demo.Person;
 import com.alibaba.dubbo.rpc.RpcContext;
 
 public class DemoServiceImpl implements DemoService {
@@ -36,10 +37,15 @@ public class DemoServiceImpl implements DemoService {
         return "Hello sayHello1, response form provider: " + RpcContext.getContext().getLocalAddress();
     }
 
-//    @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
-//    @Response(headers = {""})
-    public byte[] sayHello2(/*@Parameter(value = "name", required = false)*/ List<String> name) {
+    @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
+    @Response(headers = {""})
+    public byte[] sayHello2(@Parameter(value = "name", required = false) List<String> name) {
         return new byte[]{1,2,3,4};
+    }
+
+    @Override
+    public String sayHello3(Person z) {
+        return null;
     }
 
 }
