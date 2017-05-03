@@ -273,6 +273,7 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                         requestMethods[i] = requestAnnotationMethods[i].name();
                     }
                     RequestMeta requestMeta = new RequestMeta();
+                    requestMeta.setUri(values);
                     requestMeta.setHeaders(request.headers());
                     requestMeta.setMethod(requestMethods);
                     for (String uri : values) {
@@ -326,6 +327,7 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                         schema.setMethodName(method.getName());
                         schema.setParameterMeta(parameterMetaMap);
                         schema.setInterfaceName(interfaceMap.get(method.getName()));
+                        schema.setRequestMeta(requestMeta);
                         Mapping.push(method, schema);
 
                     }
