@@ -56,11 +56,9 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         if (message instanceof Decodeable) {
             decode(message);
         }
-
         if (message instanceof Request) {
             decode(((Request) message).getData());
         }
-
         if (message instanceof Response) {
             decode(((Response) message).getResult());
         }
@@ -68,63 +66,77 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             Object req = decodeRequest(channel,message);
             message = req;
         }
-
         handler.received(channel, message);
     }
     private Object decodeRequest(Channel channel,Object message) {
-        String param = "";
-        Map<String,Object> parameter = new HashMap<String, Object>();
+        String param = "uri is error";
+        Map<String,Object> parameter = new LinkedHashMap<String, Object>();
         if(message instanceof DefaultHttpRequest){
-            String uri ;
             DefaultHttpRequest httpRequst = (DefaultHttpRequest)message;
-            if (!httpRequst.getUri().contains("?"))uri = httpRequst.getUri();
-             else uri = httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?"));
+            String uri = null;
+            try {
+                uri = URLDecoder.decode(httpRequst.getUri(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            if(uri.contains("?")) uri = uri.substring(0,httpRequst.getUri().indexOf("?"));
+            String[] parameters = new String[0];
             if (httpRequst.getMethod().getName().equals("GET")){
-                if(Mapping.isMapping(uri)){
-                    String[] parameters = new String[0];
-                    try {
-                        parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1),"UTF-8").split("&");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    for(String p : parameters){
-                        String[] ps = p.split("=");
-                        if(parameter.containsKey(ps[0])){
-                            parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
-                        }else parameter.put(ps[0],ps[1]);
-                    }
-                    for(String p : parameters){
-                        String[] ps = p.split("=");
-                        if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
-                    }
                 try {
-                    param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
-                } catch (Exception e) {
+                    parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1),"UTF-8").split("&");
+                } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                }else
-                param = httpRequst.getUri().substring(1).replace("%7B", "{").replace("%22", "\"").replace("%7D", "}").replace("/", "\\");
-            }else if(httpRequst.getMethod().getName().equals("POST")){
-//                                        parem = new String(httpRequst.getContent().array(),"utf-8" );
-                if(Mapping.isMapping(uri)){
-                    String parameterize = httpRequst.getUri().substring(httpRequst.getUri().indexOf("?")+1) + "&" +new String(httpRequst.getContent().array());
-                    String[] parameters = parameterize.split("&");
-                    for(String p : parameters){
+            }
+            else if(httpRequst.getMethod().getName().equals("POST")) {
+                try {
+                    parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?") + 1) + "&" + new String(httpRequst.getContent().array()), "UTF-8").split("&");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (parameters.length==1&&parameters[0].equals(uri)){
+            }else {
+                for(String p : parameters){
+                    if (!p.equals(uri)){
                         String[] ps = p.split("=");
+                        if(ps.length<2){
+                            if(parameter.containsKey(ps[0])){
+                                parameter.put(ps[0],parameter.get(ps[0]).toString()+"&");
+                            }else parameter.put(ps[0],"");
+                        }else {
                         if(parameter.containsKey(ps[0])){
                             parameter.put(ps[0],parameter.get(ps[0]).toString()+"&"+ps[1]);
                         }else parameter.put(ps[0],ps[1]);
                     }
-                    for(String p : parameters){
+                    }
+                }
+                for(String p : parameters){
+                    if(!p.equals(uri)){
                         String[] ps = p.split("=");
                         if (parameter.get(ps[0]).toString().contains("&"))parameter.put(ps[0],parameter.get(ps[0]).toString().split("&"));
                     }
+                }
+            }
+            if(Mapping.isMapping(uri)){
+                if (!uri.contains(".")){
                     try {
-                        param = Mapping.decode(httpRequst.getUri().substring(0,httpRequst.getUri().indexOf("?")),parameter);
+                        param = Mapping.decode(uri,parameter);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }else param = new String(httpRequst.getContent().array());
+                }else{
+                    String[] strings = new String[0];
+                    if (uri.contains("(")&&uri.contains(")")){
+                        strings = uri.substring(uri.indexOf("(")+1,uri.indexOf(")")).split(",");
+                        uri = uri.substring(0,uri.indexOf("("));
+                    }
+                    try {
+                        param = Mapping.decode(uri,parameter,strings);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
         else if(message instanceof DefaultHttpChunk){
@@ -135,17 +147,16 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 e.printStackTrace();
             }
         }
-        if(param.indexOf("{")==-1||param.indexOf("}")==-1){
-            return null;
+        Request req = new Request();
+        req.setVersion("http1.0.0");
+        if(!param.contains("{")&&!param.contains("}")) {
+            req.setData(param);
+            return req;
         }
-        System.out.println(param);
         //        localhost:20880/{"interface":"com.alibaba.dubbo.demo.DemoService","method":"sayHello","schema":"[java.lang.String,int]","args":"[\"world\",1]"}
         JSONObject jsonObject = new JSONObject(param);
         RpcInvocation rpcInvocation = new RpcInvocation();
-        Request req = new Request();
-        req.setVersion("http1.0.0");
         rpcInvocation.setAttachment(Constants.DUBBO_VERSION_KEY, "2.0.0");
-//        rpcInvocation.setAttachment(Constants.PATH_KEY, channel.getUrl().getPath());
         rpcInvocation.setAttachment(Constants.PATH_KEY, jsonObject.getString("interface"));
         rpcInvocation.setAttachment(Constants.VERSION_KEY, "0.0.0");
 
@@ -154,7 +165,6 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             Object[] args;
             List<Class<?>> ptsl = new ArrayList<Class<?>>();
             Class<?>[] pts ;
-//            String[] desc = jsonObject.getString("schema").split(",");
             JSONArray jsonArray = new JSONArray(jsonObject.getString("schema"));
             JSONArray jsonArrayargs = new JSONArray(jsonObject.getString("args"));
             if (jsonArray.length() < 1) {
@@ -172,10 +182,9 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 ptsl.toArray(pts);
                 args = new Object[pts.length];
                 for (int i = 0; i < args.length; i++) {
-                   String addString =  jsonArrayargs.get(i).toString();
+                    String addString =  jsonArrayargs.get(i).toString();
 
                     try {
-//                        args[i] = JSON.parseObject(addString, pts[i]);
                         if (jsonArray.getString(i).equals("java.lang.String"))args[i] = addString;
                         else
                             args[i] = JSON.parseObject(addString, pts[i]);

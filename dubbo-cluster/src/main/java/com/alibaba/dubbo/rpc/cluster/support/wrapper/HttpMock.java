@@ -18,7 +18,7 @@ public class HttpMock implements HttpMockinterface{
     private Integer number = 0;
     private long start = System.currentTimeMillis();
     private Map<String,List<AtomicInteger>> map = new HashMap<String, List<AtomicInteger>>();
-    public String httpMockCluster(float errorrate, String methodloadBalance, Map<String, Integer> providers, String rinterface, String method, String schema, String args) {
+    public String httpMockCluster(float errorrate, String methodloadBalance, Map<String, Integer> providers, String rinterface, String method,Map<String,String> args) {
         if (System.currentTimeMillis()-start>10000){
             map = new HashMap<String, List<AtomicInteger>>();
             start = System.currentTimeMillis();
@@ -27,13 +27,13 @@ public class HttpMock implements HttpMockinterface{
         if(methodloadBalance.equals("roundrobin")){
             HttpLoadBalance dothis = new HttpRoundRobinLoadBalance();
             long timeBefore = System.currentTimeMillis();
-            result = dothis.httpSelect(map,errorrate,providers,rinterface,method,schema,args);
+            result = dothis.httpSelect(map,errorrate,providers,rinterface,method,args);
             long time = System.currentTimeMillis()-timeBefore;
             count(result,time);
         }else{
             HttpLoadBalance dothis = new HttpRandomLoadBalance();
             long timeBefore = System.currentTimeMillis();
-            result = dothis.httpSelect(map,errorrate,providers, rinterface, method,schema,args);
+            result = dothis.httpSelect(map,errorrate,providers, rinterface, method,args);
             long time = System.currentTimeMillis()-timeBefore;
             count(result,time);
         }

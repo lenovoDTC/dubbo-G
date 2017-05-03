@@ -26,7 +26,7 @@ public class Mapping {
     public static Map<String, List<RequestMeta>> defaultMetas = new LinkedHashMap<String, List<RequestMeta>>();
     public static Map<Method, Method> methods = new LinkedHashMap<Method, Method>();
 
-    public static void push(Method method, RequestMeta requestMeta) {
+    public static void push(Method method, RequestMeta requestMeta,String interfaceName) {
         String[] parameterNames = discoverer.getParameterNames(method);
         Type[] types = method.getGenericParameterTypes();
 
@@ -53,6 +53,7 @@ public class Mapping {
         requestMeta.setParameterMetas(parameterMetas);
 
         Schema schema = new Schema();
+        schema.setInterfaceName(interfaceName);
         schema.setMethodName(method.getName());
         schema.setParameterMeta(parameterMeta);
         push(method, schema);
@@ -95,9 +96,11 @@ public class Mapping {
                 defaultMapping.put(uri, methods);
                 defaultMetas.put(uri, requestMetas);
             }
+            methods.add(method);
             RequestMeta requestMeta = new RequestMeta();
             requestMetas.add(requestMeta);
-            push(method, requestMeta);
+//            push(method, requestMeta);
+            push(method, requestMeta,interfaceName);
         }
     }
 

@@ -139,13 +139,22 @@ public class HttpZookeeperRegistry implements HttpClient{
             System.out.println(dataPath);
         }
     }
-    public String doStart(String group, String rinterface, String method, String schema, String args){
+    public String doStart(String group, String rinterface, String method,Map<String,String> args){
     	Map<String,Integer> providers = new HashMap<String, Integer>();
+        if (!map.containsKey(group)){
+            return "group does not exist";
+        }
+        if(!map.get(group).containsKey(rinterface)){
+            return "interface does not exist";
+        }
+        if(!loadBalanceMap.get(group).get(rinterface).containsKey(method)){
+            return "method does not exist";
+        }
         for(String provider : map.get(group).get(rinterface).keySet()){
         	providers.put(provider, Integer.parseInt(map.get(group).get(rinterface).get(provider).get(0).toString()));
         }
         String methodloadBalance = loadBalanceMap.get(group).get(rinterface).get(method);
-        return httpMockinterface.httpMockCluster(errorrate,methodloadBalance,providers,rinterface,method,schema,args);
+        return httpMockinterface.httpMockCluster(errorrate,methodloadBalance,providers,rinterface,method,args);
     }
     public Map<String,Map<String,Map<String,List<Object>>>> getMap(){
         return map;
