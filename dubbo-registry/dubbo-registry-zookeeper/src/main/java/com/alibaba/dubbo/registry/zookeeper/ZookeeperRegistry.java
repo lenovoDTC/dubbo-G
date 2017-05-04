@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.dubbo.remoting.http.Mapping;
 import com.alibaba.dubbo.remoting.http.ParameterMeta;
+import com.alibaba.dubbo.remoting.http.RequestMeta;
 import com.alibaba.dubbo.remoting.http.Schema;
 import org.json.JSONObject;
 
@@ -120,13 +121,14 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     for (Method method : methods) {
                         JSONObject total = new JSONObject();
                         Map<String, ParameterMeta> names = Mapping.getSchema(method).getParameterMeta();
+                        RequestMeta requestMeta = Mapping.getSchema(method).getRequestMeta();
                         for (String name : names.keySet()) {
                             JSONObject namejson = new JSONObject();
 //                            String parameterType = names.get(name).getParameterType();
                             Type parameterClass = names.get(name).getParameterTypePlus();
 //                            TypeVariable<? extends Class<?>>[] parameterType1 = parameterClass.getTypeParameters();
                             String desc = "";
-                            int index = names.get(name).getIndex();
+
                             if (Mapping.isMapping(method)){
                                 desc = names.get(name).getDesc();
                             }
@@ -135,12 +137,21 @@ public class ZookeeperRegistry extends FailbackRegistry {
                             namejson.put("ParameterType",ObjAnalysis.ConvertObjToList(parameterClass));
                             namejson.put("Required",0);
                             namejson.put("desc",desc);
+                            if (requestMeta==null)namejson.put("uri","/"+a[2]+"/"+method.getName());
+                            else namejson.put("uri",requestMeta.getUri());
                             total.put(name,namejson);
 //                            }
 //                            total="{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
 //                            else total = total+",{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
                         }
-                        jsonObject.put(method.getName(), total);
+                        for(int i= 0 ;i<Integer.MAX_VALUE;i++)
+                        if (jsonObject.isNull(method.getName())&&i==0) {
+                            jsonObject.put(method.getName(), total);
+                            break;
+                        }else if(jsonObject.isNull(method.getName()+"("+i+")")){
+                            jsonObject.put(method.getName()+"("+i+")",total);
+                            break;
+                        }
                     }
                     System.out.println(jsonObject.toString());
                     zkClient.setData("/http/" + a[1] + "/" + a[2]

@@ -9,6 +9,8 @@ public class Schema {
     private String methodName;
     private String interfaceName;
 
+    private RequestMeta requestMeta;
+
     private Map<String, ParameterMeta> parameterMeta;
 
     public String getMethodName() {
@@ -35,5 +37,11 @@ public class Schema {
         this.interfaceName = interfaceName;
     }
 
+    public RequestMeta getRequestMeta() {
+        return requestMeta;
+    }
 
+    public void setRequestMeta(RequestMeta requestMeta) {
+        this.requestMeta = requestMeta;
+    }
 }

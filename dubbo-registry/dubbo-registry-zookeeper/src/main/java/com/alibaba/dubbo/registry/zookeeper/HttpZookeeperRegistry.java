@@ -41,6 +41,7 @@ public class HttpZookeeperRegistry implements HttpClient{
     	new ZKLoadBalanceDataListener();
     	new ZKProviderDataListener();
     	new ZKProviderChildListener();
+        new ZKProviderChildDataListener();
         this.errorrate = errorrate;
         httpMockinterface = new HttpMock();
         zkClient = new ZkClient(host);
@@ -57,8 +58,9 @@ public class HttpZookeeperRegistry implements HttpClient{
                 String method =zkClient.readData("/http/"+group+"/"+rinterface+"/providers");
                 JSONObject jsonObject = new JSONObject(method);
                 zkClient.subscribeChildChanges("/http/"+group+"/"+rinterface+"/providers", new ZKProviderChildListener());//增加提供者节点监听
+                zkClient.subscribeDataChanges("/http/"+group+"/"+rinterface+"/providers", new ZKProviderDataListener());//增加提供者节点监听
                 for(String provider:providers){
-                    zkClient.subscribeDataChanges("/http/"+group+"/"+rinterface+"/providers/"+provider,new ZKProviderDataListener());
+                    zkClient.subscribeDataChanges("/http/"+group+"/"+rinterface+"/providers/"+provider,new ZKProviderChildDataListener());
                     String weight = zkClient.readData("/http/"+group+"/"+rinterface+"/providers/"+provider);
                     if(weight==null)weight=weightDefault;
                     List<Object> info  = new ArrayList<Object>();
@@ -95,13 +97,33 @@ public class HttpZookeeperRegistry implements HttpClient{
                 list.add(weightDefault);
                 list.add(method);
                 b.put(Child,list);
-                zkClient.subscribeDataChanges(parentPath+ "/" + Child,new ZKProviderDataListener());
+                zkClient.subscribeDataChanges(parentPath+ "/" + Child,new ZKProviderChildDataListener());
             }
             map.get(path[2]).put(path[3],b);
             logger.info("Map providers update");
         }
     }
     private class ZKProviderDataListener implements IZkDataListener {
+        /**
+         * dataPath 触发事件目录 data 修改数据
+         */
+        public void handleDataChange(String dataPath, Object data)
+                throws Exception {
+            String[] path = dataPath.split("/");
+            List<Object> list = new ArrayList<Object>();
+            list.add(weightDefault);
+            list.add(data.toString());
+            map.get(path[2]).get(path[3]).put(path[5],list);
+            logger.info("Map update");
+        }
+        /**
+         * dataPath 触发事件目录
+         */
+        public void handleDataDeleted(String dataPath) throws Exception {
+            System.out.println(dataPath);
+        }
+    }
+    private class ZKProviderChildDataListener implements IZkDataListener {
         /**
          * dataPath 触发事件目录 data 修改数据
          */

@@ -53,6 +53,7 @@ public class Mapping {
         requestMeta.setParameterMetas(parameterMetas);
 
         Schema schema = new Schema();
+        schema.setRequestMeta(requestMeta);
         schema.setInterfaceName(interfaceName);
         schema.setMethodName(method.getName());
         schema.setParameterMeta(parameterMeta);
