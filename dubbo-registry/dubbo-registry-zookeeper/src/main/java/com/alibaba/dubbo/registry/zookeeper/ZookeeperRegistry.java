@@ -23,11 +23,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.alibaba.dubbo.common.json.JSONArray;
 import com.alibaba.dubbo.remoting.http.Mapping;
 import com.alibaba.dubbo.remoting.http.ParameterMeta;
 import com.alibaba.dubbo.remoting.http.RequestMeta;
 import com.alibaba.dubbo.remoting.http.Schema;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.alibaba.dubbo.common.utils.*;
@@ -121,15 +121,13 @@ public class ZookeeperRegistry extends FailbackRegistry {
                                     .getContextClassLoader());
                     Method[] methods = interfaceClass.getMethods();
                     for (Method method : methods) {
-//                        JSONArray total = new JSONArray();
-                        JSONObject total = new JSONObject();
+                        JSONArray total = new JSONArray();
                         Map<String, ParameterMeta> names = Mapping.getSchema(method).getParameterMeta();
                         RequestMeta requestMeta = Mapping.getSchema(method).getRequestMeta();
-                        if (requestMeta==null)total.put("uri","/"+a[2]+"/"+method.getName());
-//                        total.
+                        if (requestMeta==null)total.put("/"+a[2]+"/"+method.getName());
                         else {
-                            if (requestMeta.getUri()==null)total.put("uri","/"+a[2]+"/"+method.getName());
-                                else total.put("uri",requestMeta.getUri());}
+                            if (requestMeta.getUri()==null)total.put("/"+a[2]+"/"+method.getName());
+                                else total.put(requestMeta.getUri());}
                         for (String name : names.keySet()) {
                             JSONObject namejson = new JSONObject();
 //                            String parameterType = names.get(name).getParameterType();
@@ -145,7 +143,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                             namejson.put("ParameterType",ObjAnalysis.ConvertObjToList(parameterClass));
                             namejson.put("Required",0);
                             namejson.put("desc",desc);
-                            total.put(name,namejson);
+                            total.put(namejson);
 //                            }
 //                            total="{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
 //                            else total = total+",{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
