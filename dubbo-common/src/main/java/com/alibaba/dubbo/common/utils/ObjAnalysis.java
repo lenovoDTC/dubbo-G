@@ -4,6 +4,7 @@ package com.alibaba.dubbo.common.utils;
  * Created by yuanbo on 2017/4/21.
  */
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
@@ -70,9 +71,9 @@ public class ObjAnalysis {
         }
     return jsonObject;
     }
-    private static JSONObject pojo(String name, Type[] types) throws ClassNotFoundException {
+    private static JSONArray pojo(String name, Type[] types) throws ClassNotFoundException {
 //        List<String> reList = new ArrayList<String>();
-        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonObject = new JSONArray();
         Map<String,Type> map = new HashMap<String,Type>();
         Field[] fields = Class.forName(name, true, Thread.currentThread().getContextClassLoader()).getDeclaredFields();
         if (types.length!=0){
@@ -92,7 +93,7 @@ public class ObjAnalysis {
             smalljson.put("ParameterType",ConvertObjToList(file));
             smalljson.put("Required",0);
             smalljson.put("desc","");
-            jsonObject.put(fields[i].getName().toString(),smalljson);
+            jsonObject.put(smalljson);
 //            reList.add("{ParameterName="+fields[i].getName().toString()+",ParameterType="+ConvertObjToList(file)+",Required=0,desc=}");
             }
         return jsonObject;
