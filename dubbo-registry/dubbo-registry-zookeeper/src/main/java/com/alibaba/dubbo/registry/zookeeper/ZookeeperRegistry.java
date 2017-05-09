@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.alibaba.dubbo.common.json.JSONArray;
 import com.alibaba.dubbo.remoting.http.Mapping;
 import com.alibaba.dubbo.remoting.http.ParameterMeta;
 import com.alibaba.dubbo.remoting.http.RequestMeta;
@@ -109,6 +110,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
             zkClient.create(toUrlPath(url),
                     url.getParameter(Constants.DYNAMIC_KEY, true));
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+url.getParameter(Constants.HTTPPORT_KEY, true));
             if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
                 String[] a = toUrlPath(url).split("/");
                 if (a[2].equals(url.getServiceInterface())) {
@@ -119,9 +121,15 @@ public class ZookeeperRegistry extends FailbackRegistry {
                                     .getContextClassLoader());
                     Method[] methods = interfaceClass.getMethods();
                     for (Method method : methods) {
+//                        JSONArray total = new JSONArray();
                         JSONObject total = new JSONObject();
                         Map<String, ParameterMeta> names = Mapping.getSchema(method).getParameterMeta();
                         RequestMeta requestMeta = Mapping.getSchema(method).getRequestMeta();
+                        if (requestMeta==null)total.put("uri","/"+a[2]+"/"+method.getName());
+//                        total.
+                        else {
+                            if (requestMeta.getUri()==null)total.put("uri","/"+a[2]+"/"+method.getName());
+                                else total.put("uri",requestMeta.getUri());}
                         for (String name : names.keySet()) {
                             JSONObject namejson = new JSONObject();
 //                            String parameterType = names.get(name).getParameterType();
@@ -137,8 +145,6 @@ public class ZookeeperRegistry extends FailbackRegistry {
                             namejson.put("ParameterType",ObjAnalysis.ConvertObjToList(parameterClass));
                             namejson.put("Required",0);
                             namejson.put("desc",desc);
-                            if (requestMeta==null)namejson.put("uri","/"+a[2]+"/"+method.getName());
-                            else namejson.put("uri",requestMeta.getUri());
                             total.put(name,namejson);
 //                            }
 //                            total="{ParameterName="+name+",ParameterType="+ObjAnalysis.ConvertObjToList(parameterClass)+",Required=0,desc="+index+"}";
