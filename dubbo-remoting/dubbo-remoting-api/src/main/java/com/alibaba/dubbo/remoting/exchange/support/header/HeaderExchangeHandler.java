@@ -183,17 +183,18 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                 } else {
                     if (request.isTwoWay()) {
                         Object response;
-                        response =handleRequest(exchangeChannel, request);
+                        response = handleRequest(exchangeChannel, request);
                         // Decide whether to close the connection or not.
-                        if(request.getVersion().equals("http1.0.0")){
-                            Object result = ((Response)response).getResult();
-                            if (result==null){
-                            result = ((Response)response).getErrorMessage();}
-                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1,HttpResponseStatus.OK);
+                        if (request.getVersion().equals("http1.0.0")) {
+                            Object result = ((Response) response).getResult();
+                            if (result == null) {
+                                result = ((Response) response).getErrorMessage();
+                            }
+                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
                             httpResponse.setContent(ChannelBuffers.copiedBuffer(JSON.toJSONString(result), CharsetUtil.UTF_8));
                             System.out.println(JSON.toJSONString(result));
                             httpResponse.headers().set("Content-Type", "text/html; charset=UTF-8");
-                            
+
                             // Add 'Content-Length' header only for a keep-alive connection.
                             if (true) {
                                 // Add 'Content-Length' header only for a keep-alive connection.
@@ -203,8 +204,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                                 httpResponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
                             }
                             channel.send(httpResponse);
-                        }
-                        else {
+                        } else {
                             channel.send(response);
                         }
                     } else {

@@ -26,12 +26,12 @@ public class Mapping {
     public static Map<String, List<RequestMeta>> defaultMetas = new LinkedHashMap<String, List<RequestMeta>>();
     public static Map<Method, Method> methods = new LinkedHashMap<Method, Method>();
 
-    public static void push(Method method, RequestMeta requestMeta,String interfaceName) {
+    public static void push(Method method, RequestMeta requestMeta, String interfaceName) {
         String[] parameterNames = discoverer.getParameterNames(method);
         Type[] types = method.getGenericParameterTypes();
 
         Class<?>[] parameterTypes = method.getParameterTypes();
-        Map<String, ParameterMeta> parameterMeta = new HashMap<String, ParameterMeta>();
+        Map<String, ParameterMeta> parameterMeta = new LinkedHashMap<String, ParameterMeta>();
         ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
 
         for (int i = 0; i < parameterTypes.length; i++) {
@@ -61,7 +61,7 @@ public class Mapping {
 
     }
 
-    public static String getType (String parameterType) {
+    public static String getType(String parameterType) {
         String type = "";
         if (parameterType.matches("(byte|short|int|long|float|double|boolean|char)")) return parameterType;
         if (parameterType.equals("java.lang.Byte")) return "int";
@@ -73,7 +73,8 @@ public class Mapping {
         if (parameterType.equals("java.lang.Boolean")) return "boolean";
         if (parameterType.equals("java.lang.Character")) return "char";
         if (parameterType.equals("java.lang.String")) return "String";
-        if (parameterType.startsWith("[L") || parameterType.endsWith("List") || parameterType.endsWith("Set")) return "JSONArray";
+        if (parameterType.startsWith("[L") || parameterType.endsWith("List") || parameterType.endsWith("Set"))
+            return "JSONArray";
         return "JSONString";
     }
 
@@ -86,7 +87,7 @@ public class Mapping {
         metas.put(uri, requestMeta);
     }
 
-    public static void push (Method method, String[] interfaces) {
+    public static void push(Method method, String[] interfaces) {
         for (String interfaceName : interfaces) {
             String uri = "/" + interfaceName + "/" + method.getName();
             List<Method> methods = null;
@@ -101,17 +102,21 @@ public class Mapping {
             RequestMeta requestMeta = new RequestMeta();
             requestMetas.add(requestMeta);
 //            push(method, requestMeta);
-            push(method, requestMeta,interfaceName);
+            push(method, requestMeta, interfaceName);
         }
     }
 
-    public static void push (Method interfaceMethod, Method implMethod) {methods.put(interfaceMethod, implMethod);}
+    public static void push(Method interfaceMethod, Method implMethod) {
+        methods.put(interfaceMethod, implMethod);
+    }
 
     public static boolean isMapping(String uri) {
         return mapping.containsKey(uri) || defaultMapping.containsKey(uri);
     }
 
-    public static boolean isMapping(Method method) {return methods.containsKey(method);}
+    public static boolean isMapping(Method method) {
+        return methods.containsKey(method);
+    }
 
     public static boolean isGet(String uri) throws Exception {
         return isMethod(uri, "GET");
@@ -138,12 +143,12 @@ public class Mapping {
         return false;
     }
 
-    public static Schema getSchema (Method method) {
+    public static Schema getSchema(Method method) {
         Method m = methods.get(method);
         return cache.get(m);
     }
 
-    public static String decode(String uri, Map<String, Object> parameters, String[] schemas) throws Exception{
+    public static String decode(String uri, Map<String, Object> parameters, String[] schemas) throws Exception {
         if (!isMapping(uri))
             return null;
         String json = null;
@@ -157,20 +162,23 @@ public class Mapping {
                 throw new RpcException("the method " + uri + " isn't just one implemented, please enter method parameter schema!!");
             Method method = methods.get(0);
             Schema schema = cache.get(method);
-            json = pojo (parameters, schema);
+            json = pojo(parameters, schema);
         } else {
             List<Method> methods = defaultMapping.get(uri);
             List<RequestMeta> requestMetas = defaultMetas.get(uri);
             int count = 0;
-            outer : for (int i = 0; i < methods.size(); i++) {
+            outer:
+            for (int i = 0; i < methods.size(); i++) {
                 Method method = methods.get(i);
                 RequestMeta requestMeta = requestMetas.get(i);
                 ParameterMeta[] parameterMetas = requestMeta.getParameterMetas();
                 if (parameterMetas.length == schemas.length) {
-                    inner : for (int j = 0 ; j < parameterMetas.length; j++) {
+                    inner:
+                    for (int j = 0; j < parameterMetas.length; j++) {
                         ParameterMeta parameterMeta = parameterMetas[j];
                         String schema = schemas[j];
-                        if (!parameterMeta.getParameterType().equals(schema)) count++; break outer;
+                        if (!parameterMeta.getParameterType().equals(schema)) count++;
+                        break outer;
                     }
                     Schema schema = cache.get(method);
                     json = pojo(parameters, schema);
@@ -185,11 +193,11 @@ public class Mapping {
         return json;
     }
 
-    public static String decode(String uri, Map<String, Object> parameters) throws Exception{
+    public static String decode(String uri, Map<String, Object> parameters) throws Exception {
         return decode(uri, parameters, null);
     }
 
-    private static String pojo(Map<String, Object> parameters, Schema schema) throws Exception{
+    private static String pojo(Map<String, Object> parameters, Schema schema) throws Exception {
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         Map<String, ParameterMeta> parameterMetas = schema.getParameterMeta();
         String[] parameterTypes = new String[parameterMetas.size()];
@@ -218,17 +226,14 @@ public class Mapping {
                         args.add(v);
                     else
                         throw new RpcException(String.format("%s is valid", key));
-                }
-                else if (v.startsWith("{")) {
+                } else if (v.startsWith("{")) {
                     if (meta.getType().equals("JSONString"))
                         args.add(JSON.parseObject(v));
                     else if (meta.getType().equals("String"))
                         args.add(v);
                     else
                         throw new RpcException(String.format("%s is valid", key));
-                }
-
-                else if (v.isEmpty()) args.add("");
+                } else if (v.isEmpty()) args.add("");
                 else if (v.matches("([0-9]+(.[0-9]+)*)"))
                     args.add(NumberFormat.getInstance().parse(v));
                 else if (v.matches("(true|false)"))
@@ -241,7 +246,7 @@ public class Mapping {
                 if (!meta.getType().equals("JSONArray"))
                     throw new RpcException("parameter is valid");
 
-                args.add(pojo((List<String>)value));
+                args.add(pojo((List<String>) value));
             }
         }
 
@@ -255,10 +260,10 @@ public class Mapping {
         return result.toJSONString();
     }
 
-    private static List<Object> pojo (List<String> list) throws ParseException {
+    private static List<Object> pojo(List<String> list) throws ParseException {
         List<Object> result = new ArrayList<Object>();
         for (String v : list) {
-            if (v.startsWith("[") )
+            if (v.startsWith("["))
                 result.add(JSONArray.parse(v));
             else if (v.startsWith("{"))
                 result.add(JSONObject.parse(v));
@@ -272,7 +277,7 @@ public class Mapping {
         return result;
     }
 
-    private static boolean isValid (String key) {
+    private static boolean isValid(String key) {
         return key.matches("^([a-zA-Z]|_)(\\w|_*)+");
     }
 

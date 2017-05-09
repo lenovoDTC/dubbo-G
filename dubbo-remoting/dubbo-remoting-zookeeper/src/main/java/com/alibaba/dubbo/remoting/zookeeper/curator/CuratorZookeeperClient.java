@@ -80,14 +80,15 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
-    public void setData(String path,String data){
+    public void setData(String path, String data) {
         byte[] data1 = data.getBytes();
         try {
-            client.setData().forPath(path,data1);
+            client.setData().forPath(path, data1);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public List<String> getChildren(String path) {
         try {
             return client.getChildren().forPath(path);
