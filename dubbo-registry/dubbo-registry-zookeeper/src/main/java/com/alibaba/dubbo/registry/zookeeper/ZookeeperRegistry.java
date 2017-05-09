@@ -111,7 +111,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             zkClient.create(toUrlPath(url),
                     url.getParameter(Constants.DYNAMIC_KEY, true));
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+url.getParameter(Constants.HTTPPORT_KEY, true));
-            if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
+            if (url.getParameter(Constants.HTTPPORT_KEY, false)) {
                 String[] a = toUrlPath(url).split("/");
                 if (a[2].equals(url.getServiceInterface())) {
                     zkClient.create("/http" + toUrlPath(url), true);
