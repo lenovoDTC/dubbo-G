@@ -13,10 +13,11 @@ public class ParameterMeta {
     private String parameterType;
     private String type;
     private int index;
-//    private String[] genericType;
+    //    private String[] genericType;
 //    private Class<?> parameterClass;
 //    private Class<?>[] genericClass;
     private Type parameterTypePlus;
+
     public String getName() {
         return name;
     }

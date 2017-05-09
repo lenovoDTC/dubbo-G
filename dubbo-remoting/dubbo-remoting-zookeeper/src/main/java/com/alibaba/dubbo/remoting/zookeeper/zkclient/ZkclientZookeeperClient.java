@@ -54,8 +54,8 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
     }
 
 
-    public void setData(String path,String data){
-        client.writeData(path,data);
+    public void setData(String path, String data) {
+        client.writeData(path, data);
     }
 
     public void delete(String path) {

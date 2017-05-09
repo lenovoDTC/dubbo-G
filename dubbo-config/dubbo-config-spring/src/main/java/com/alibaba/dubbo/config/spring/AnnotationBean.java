@@ -291,7 +291,7 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                         ParameterMeta[] parameterMetas = new ParameterMeta[parameterNames.length];
                         Type[] types = method.getGenericParameterTypes();
                         Class<?>[] parameterTypes = method.getParameterTypes();
-                        Map<String, ParameterMeta> parameterMetaMap = new HashMap<String, ParameterMeta>();
+                        Map<String, ParameterMeta> parameterMetaMap = new LinkedHashMap<String, ParameterMeta>();
                         for (int i = 0; i < parameterNames.length; i++) {
                             Annotation[] parameterAnnotations = annotations[i];
                             boolean hasAnnotation = false;
