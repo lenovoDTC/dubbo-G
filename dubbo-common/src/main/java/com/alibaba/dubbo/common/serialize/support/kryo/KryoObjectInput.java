@@ -3,15 +3,16 @@ package com.alibaba.dubbo.common.serialize.support.kryo;
 import com.alibaba.dubbo.common.serialize.ObjectInput;
 import com.alibaba.dubbo.common.utils.Assert;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.serializers.JavaSerializer;
-import com.esotericsoftware.kryo.serializers.MapSerializer;
+import com.esotericsoftware.kryo.serializers.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Created by haoning1 on 2017/3/20.
@@ -26,6 +27,40 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
     public KryoObjectInput(Input input) {
         Assert.notNull(input, "is NULL");
         kryo = new Kryo();
+//        kryo.setReferences(false);
+//        kryo.setRegistrationRequired(true);
+//        kryo.register(byte[].class, new DefaultArraySerializers.ByteArraySerializer());
+//        kryo.register(char[].class, new DefaultArraySerializers.CharArraySerializer());
+//        kryo.register(short[].class, new DefaultArraySerializers.ShortArraySerializer());
+//        kryo.register(int[].class, new DefaultArraySerializers.IntArraySerializer());
+//        kryo.register(long[].class, new DefaultArraySerializers.LongArraySerializer());
+//        kryo.register(float[].class, new DefaultArraySerializers.FloatArraySerializer());
+//        kryo.register(double[].class, new DefaultArraySerializers.DoubleArraySerializer());
+//        kryo.register(String[].class, new DefaultArraySerializers.StringArraySerializer());
+//        kryo.register(Object[].class, new DefaultArraySerializers.ObjectArraySerializer(kryo, Object[].class));
+//        kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
+//        kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
+//        kryo.register(Class.class, new DefaultSerializers.ClassSerializer());
+//
+//        kryo.register(Date.class, new DefaultSerializers.DateSerializer());
+//        kryo.register(EnumSet.class, new DefaultSerializers.EnumSetSerializer());
+//        kryo.register(Currency.class, new DefaultSerializers.CurrencySerializer());
+//        kryo.register(StringBuffer.class, new DefaultSerializers.StringBufferSerializer());
+//        kryo.register(StringBuilder.class, new DefaultSerializers.StringBuilderSerializer());
+//        kryo.register(Collections.EMPTY_LIST.getClass(), new DefaultSerializers.CollectionsEmptyListSerializer());
+//        kryo.register(Collections.EMPTY_MAP.getClass(), new DefaultSerializers.CollectionsEmptyMapSerializer());
+//        kryo.register(Collections.EMPTY_SET.getClass(), new DefaultSerializers.CollectionsEmptySetSerializer());
+//        kryo.register(Collections.singletonList(null).getClass(), new DefaultSerializers.CollectionsSingletonListSerializer());
+//        kryo.register(Collections.singletonMap(null, null).getClass(), new DefaultSerializers.CollectionsSingletonMapSerializer());
+//        kryo.register(Collections.singleton(null).getClass(), new DefaultSerializers.CollectionsSingletonSetSerializer());
+//        kryo.register(TreeSet.class, new DefaultSerializers.TreeSetSerializer());
+//        kryo.register(Collection.class, new CollectionSerializer());
+//        kryo.register(TreeMap.class, new DefaultSerializers.TreeMapSerializer());
+//        kryo.register(Map.class, new MapSerializer());
+//        kryo.register(TimeZone.class, new DefaultSerializers.TimeZoneSerializer());
+//        kryo.register(Calendar.class, new DefaultSerializers.CalendarSerializer());
+//        kryo.register(Locale.class, new DefaultSerializers.LocaleSerializer());
+
         this.input = input;
     }
 

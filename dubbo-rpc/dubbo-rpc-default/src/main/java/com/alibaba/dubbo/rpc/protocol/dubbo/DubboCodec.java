@@ -98,7 +98,9 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
                                 Constants.DEFAULT_DECODE_IN_IO_THREAD)) {
                             result = new DecodeableRpcResult(channel, res, is,
                                     (Invocation) getRequestData(id), proto);
+                            long start = System.nanoTime();
                             result.decode();
+                            System.out.println("response : " + (System.nanoTime() - start));
                         } else {
                             result = new DecodeableRpcResult(channel, res,
                                     new UnsafeByteArrayInputStream(readMessageData(is)),
@@ -138,7 +140,9 @@ public class DubboCodec extends ExchangeCodec implements Codec2 {
                             Constants.DECODE_IN_IO_THREAD_KEY,
                             Constants.DEFAULT_DECODE_IN_IO_THREAD)) {
                         inv = new DecodeableRpcInvocation(channel, req, is, proto);
+                        long start = System.nanoTime();
                         inv.decode();
+                        System.out.println("request : " + (System.nanoTime() - start));
                     } else {
                         inv = new DecodeableRpcInvocation(channel, req,
                                 new UnsafeByteArrayInputStream(readMessageData(is)), proto);

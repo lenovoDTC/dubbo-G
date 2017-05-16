@@ -22,7 +22,7 @@
         </property>
     </bean>
 
-    <dubbo:registry address="N/A"/>
+    <dubbo:registry address="zookeeper://10.120.120.72:2181"/>
 
     <!-- 服务应用配置 -->
     <dubbo:application name="dubbo_provider"/>
