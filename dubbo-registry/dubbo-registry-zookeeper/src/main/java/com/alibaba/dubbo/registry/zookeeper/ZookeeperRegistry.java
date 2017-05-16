@@ -161,7 +161,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     zkClient.setData("/http/" + a[1] + "/" + a[2]
                             + "/providers", jsonObject.toString());
 //                    zkClient.create("/http/" + a[1] + "/" + a[2] + "/loadbalance",false);
-                    zkClient.delete("/http/" + a[1] + "/" + a[2] + "/loadbalance");
+                    zkClient.deleteRecursive("/http/" + a[1] + "/" + a[2] + "/loadbalance");
                     for (String key : jsonObject.keySet()) {
                         zkClient.create("/http/" + a[1] + "/" + a[2]
                                 + "/loadbalance/" + key, false);

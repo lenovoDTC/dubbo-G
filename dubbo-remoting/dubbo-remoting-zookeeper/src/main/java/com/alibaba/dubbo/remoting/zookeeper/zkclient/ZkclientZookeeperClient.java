@@ -64,6 +64,12 @@ public class ZkclientZookeeperClient extends AbstractZookeeperClient<IZkChildLis
         } catch (ZkNoNodeException e) {
         }
     }
+    public void deleteRecursive(String path) {
+        try {
+            client.deleteRecursive(path);
+        } catch (ZkNoNodeException e) {
+        }
+    }
 
     public List<String> getChildren(String path) {
         try {
