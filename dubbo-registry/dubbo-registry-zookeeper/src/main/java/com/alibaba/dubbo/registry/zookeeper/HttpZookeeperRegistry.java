@@ -151,7 +151,7 @@ public class HttpZookeeperRegistry implements HttpClient{
         public void handleDataChange(String dataPath, Object data)
                 throws Exception {
             String[] path = dataPath.split("/");
-            loadBalanceMap.get(path).get(path[3]).put(path[5],data.toString());
+            loadBalanceMap.get(path[2]).get(path[3]).put(path[5],data.toString());
             logger.info("LoadBalanceMap update");
         }
         /**
