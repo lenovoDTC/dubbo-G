@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by lzg on 2017/4/26.
  */
-public class Person<T> {
+public class Person1<T> {
     private String name;
     private Map<String,List<Integer>> map;
 }
