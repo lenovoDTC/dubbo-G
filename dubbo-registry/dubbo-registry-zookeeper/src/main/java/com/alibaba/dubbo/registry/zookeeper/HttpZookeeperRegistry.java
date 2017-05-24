@@ -45,6 +45,8 @@ public class HttpZookeeperRegistry implements HttpClient{
         this.errorrate = errorrate;
         httpMockinterface = new HttpMock();
         zkClient = new ZkClient(host);
+        zkClient.subscribeChildChanges("/http", new ZKChildListener());
+        if (zkClient.exists("/http")){
         List<String> groups = zkClient.getChildren("/http");
         for(String group:groups){
             Map<String,Map<String,List<Object>>> interfacemap = new HashMap<String, Map<String,List<Object>>>();
@@ -80,7 +82,56 @@ public class HttpZookeeperRegistry implements HttpClient{
             map.put(group,interfacemap);
             loadBalanceMap.put(group,Rinterfacemap);
         }
-        logger.info("Map success");
+            logger.info("Map success");
+        }
+        else {
+            logger.info("No http protocol provider in this zookeeper");
+        }
+    }
+    private class ZKChildListener implements IZkChildListener {
+        /**
+         * handleChildChange： 用来处理服务器端发送过来的通知 parentPath：对应的父节点的路径
+         * currentChilds：子节点的相对路径
+         */
+        public void handleChildChange(String parentPath,
+                                      List<String> currentChilds) throws Exception {
+            List<String> groups = zkClient.getChildren("/http");
+            for(String group:groups){
+                Map<String,Map<String,List<Object>>> interfacemap = new HashMap<String, Map<String,List<Object>>>();
+                Map<String,Map<String,String>> Rinterfacemap = new HashMap<String, Map<String, String>>();
+                List<String> interfaces = zkClient.getChildren("/http/"+group);
+                for(String rinterface:interfaces){
+                    Map<String,List<Object>> providermap = new HashMap<String,List<Object>>();
+                    Map<String,String> methodmap = new HashMap<String, String>();
+                    List<String> providers = zkClient.getChildren("/http/"+group+"/"+rinterface+"/providers");
+                    List<String> methods = zkClient.getChildren("/http/"+group+"/"+rinterface+"/loadbalance");
+                    String method =zkClient.readData("/http/"+group+"/"+rinterface+"/providers");
+                    JSONObject jsonObject = new JSONObject(method);
+                    zkClient.subscribeChildChanges("/http/"+group+"/"+rinterface+"/providers", new ZKProviderChildListener());//增加提供者节点监听
+                    zkClient.subscribeDataChanges("/http/"+group+"/"+rinterface+"/providers", new ZKProviderDataListener());//增加提供者节点监听
+                    for(String provider:providers){
+                        zkClient.subscribeDataChanges("/http/"+group+"/"+rinterface+"/providers/"+provider,new ZKProviderChildDataListener());
+                        String weight = zkClient.readData("/http/"+group+"/"+rinterface+"/providers/"+provider);
+                        if(weight==null)weight=weightDefault;
+                        List<Object> info  = new ArrayList<Object>();
+                        info.add(weight);
+                        info.add(jsonObject);
+                        providermap.put(provider,info);
+                    }
+                    interfacemap.put(rinterface,providermap);
+                    for (String method1:methods){
+                        zkClient.subscribeDataChanges("/http/"+group+"/"+rinterface+"/loadbalance/"+method1,new ZKLoadBalanceDataListener());
+                        String loadBalance = zkClient.readData("/http/"+group+"/"+rinterface+"/loadbalance/"+method1);
+                        if(loadBalance==null||loadBalance.equals(""))loadBalance=loadBalanceDefault;
+                        methodmap.put(method1,loadBalance);
+                    }
+                    Rinterfacemap.put(rinterface,methodmap);
+                }
+                map.put(group,interfacemap);
+                loadBalanceMap.put(group,Rinterfacemap);
+            }
+            logger.info("Map success");
+        }
     }
     private class ZKProviderChildListener implements IZkChildListener {
         /**
