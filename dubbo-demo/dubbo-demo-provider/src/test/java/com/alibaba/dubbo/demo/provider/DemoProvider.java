@@ -22,11 +22,11 @@ import java.io.IOException;
 public class DemoProvider {
 
     public static void main(String[] args) throws IOException {
-//        com.alibaba.dubbo.container.Main.main(args);
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"classpath*:META-INF/spring/dubbo-demo-provider.xml"});
-        context.start();
-
-        System.in.read(); // 按任意键退出
+        com.alibaba.dubbo.container.Main.main(args);
+//        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"classpath*:META-INF/spring/dubbo-demo-provider.xml"});
+//        context.start();
+//
+//        System.in.read(); // 按任意键退出
     }
 
 }

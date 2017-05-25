@@ -110,7 +110,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
         try {
             zkClient.create(toUrlPath(url),
                     url.getParameter(Constants.DYNAMIC_KEY, true));
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+url.getParameter(Constants.HTTPPORT_KEY, true));
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+url.getParameter(Constants.HTTPPORT_KEY, false));
             if (url.getParameter(Constants.HTTPPORT_KEY, false)) {
                 String[] a = toUrlPath(url).split("/");
                 if (a[2].equals(url.getServiceInterface())) {
@@ -180,7 +180,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
     protected void doUnregister(URL url) {
         try {
             zkClient.delete(toUrlPath(url));
-            if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
+            if (url.getParameter(Constants.HTTPPORT_KEY, false)) {
                 zkClient.delete("/http" + toUrlPath(url));
             }
         } catch (Throwable e) {
@@ -285,7 +285,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
             ChildListener zkListener = listeners.get(listener);
             if (zkListener != null) {
                 zkClient.removeChildListener(toUrlPath(url), zkListener);
-                if (url.getParameter(Constants.HTTPPORT_KEY, true)) {
+                if (url.getParameter(Constants.HTTPPORT_KEY, false)) {
                     zkClient.removeChildListener("/http" + toUrlPath(url),
                             zkListener);
                 }

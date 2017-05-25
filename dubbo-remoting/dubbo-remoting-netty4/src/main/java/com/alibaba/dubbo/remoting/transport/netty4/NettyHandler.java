@@ -95,11 +95,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
-            if (msg instanceof Response) {
-                handler.sent(channel, msg);
-            } else {
-                handler.received(channel, msg);
-            }
+            handler.received(channel, msg);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
