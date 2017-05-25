@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.dubbo.remoting.transport.netty;
+package com.alibaba.dubbo.remoting.transport.netty4;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.remoting.Codec2;
-import com.alibaba.dubbo.remoting.buffer.ChannelBuffer;
+import com.alibaba.dubbo.remoting.buffer.ChannelBuffers;
 import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -81,7 +81,10 @@ final class NettyCodecAdapter {
                 } finally {
                     NettyChannel.removeChannelIfDisconnected(ctx.channel());
                 }
-//                return ChannelBuffers.wrappedBuffer(buffer.toByteBuffer());
+
+                out.writeBytes(buffer.toByteBuffer());
+
+//                ChannelBuffers.wrappedBuffer(buffer.toByteBuffer());
             }
         }
     }
@@ -99,16 +102,17 @@ final class NettyCodecAdapter {
                 return;
             }
 
-            ByteBuf input = (ByteBuf) msg;
-
-            if (new String(input.array(), "UTF-8").indexOf("HTTP/1.1\r\n") != -1) {
+            ByteBuf input = (ByteBuf) o;
+            int readable = input.readableBytes();
+            if (readable <= 0)
+                return;
+            byte[] array = new byte[readable];
+            input.getBytes(input.readerIndex(), array);
+            if (new String(array, "UTF-8").indexOf("HTTP/1.1\r\n") != -1) {
                 ctx.pipeline().addAfter("decoder", "httpdecoder", new HttpRequestDecoder());
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(msg);
             } else {
-                int readable = input.readableBytes();
-                if (readable <= 0)
-                    return;
                 com.alibaba.dubbo.remoting.buffer.ChannelBuffer message;
                 if (buffer.readable()) {
                     if (buffer instanceof DynamicChannelBuffer) {

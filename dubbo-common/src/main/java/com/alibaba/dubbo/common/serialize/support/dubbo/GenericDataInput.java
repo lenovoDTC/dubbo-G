@@ -205,6 +205,11 @@ public class GenericDataInput implements DataInput, GenericDataFlags {
         }
     }
 
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
+
     public int readUInt() throws IOException {
         byte tmp = read0();
         if (tmp < 0)

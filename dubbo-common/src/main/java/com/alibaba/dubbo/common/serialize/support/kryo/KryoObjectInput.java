@@ -3,6 +3,7 @@ package com.alibaba.dubbo.common.serialize.support.kryo;
 import com.alibaba.dubbo.common.serialize.ObjectInput;
 import com.alibaba.dubbo.common.utils.Assert;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.serializers.*;
@@ -26,41 +27,7 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
 
     public KryoObjectInput(Input input) {
         Assert.notNull(input, "is NULL");
-        kryo = new Kryo();
-//        kryo.setReferences(false);
-//        kryo.setRegistrationRequired(true);
-//        kryo.register(byte[].class, new DefaultArraySerializers.ByteArraySerializer());
-//        kryo.register(char[].class, new DefaultArraySerializers.CharArraySerializer());
-//        kryo.register(short[].class, new DefaultArraySerializers.ShortArraySerializer());
-//        kryo.register(int[].class, new DefaultArraySerializers.IntArraySerializer());
-//        kryo.register(long[].class, new DefaultArraySerializers.LongArraySerializer());
-//        kryo.register(float[].class, new DefaultArraySerializers.FloatArraySerializer());
-//        kryo.register(double[].class, new DefaultArraySerializers.DoubleArraySerializer());
-//        kryo.register(String[].class, new DefaultArraySerializers.StringArraySerializer());
-//        kryo.register(Object[].class, new DefaultArraySerializers.ObjectArraySerializer(kryo, Object[].class));
-//        kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
-//        kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
-//        kryo.register(Class.class, new DefaultSerializers.ClassSerializer());
-//
-//        kryo.register(Date.class, new DefaultSerializers.DateSerializer());
-//        kryo.register(EnumSet.class, new DefaultSerializers.EnumSetSerializer());
-//        kryo.register(Currency.class, new DefaultSerializers.CurrencySerializer());
-//        kryo.register(StringBuffer.class, new DefaultSerializers.StringBufferSerializer());
-//        kryo.register(StringBuilder.class, new DefaultSerializers.StringBuilderSerializer());
-//        kryo.register(Collections.EMPTY_LIST.getClass(), new DefaultSerializers.CollectionsEmptyListSerializer());
-//        kryo.register(Collections.EMPTY_MAP.getClass(), new DefaultSerializers.CollectionsEmptyMapSerializer());
-//        kryo.register(Collections.EMPTY_SET.getClass(), new DefaultSerializers.CollectionsEmptySetSerializer());
-//        kryo.register(Collections.singletonList(null).getClass(), new DefaultSerializers.CollectionsSingletonListSerializer());
-//        kryo.register(Collections.singletonMap(null, null).getClass(), new DefaultSerializers.CollectionsSingletonMapSerializer());
-//        kryo.register(Collections.singleton(null).getClass(), new DefaultSerializers.CollectionsSingletonSetSerializer());
-//        kryo.register(TreeSet.class, new DefaultSerializers.TreeSetSerializer());
-//        kryo.register(Collection.class, new CollectionSerializer());
-//        kryo.register(TreeMap.class, new DefaultSerializers.TreeMapSerializer());
-//        kryo.register(Map.class, new MapSerializer());
-//        kryo.register(TimeZone.class, new DefaultSerializers.TimeZoneSerializer());
-//        kryo.register(Calendar.class, new DefaultSerializers.CalendarSerializer());
-//        kryo.register(Locale.class, new DefaultSerializers.LocaleSerializer());
-
+        kryo = KryoFactory.getInstance().get();
         this.input = input;
     }
 
@@ -69,36 +36,76 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
     }
 
     public boolean readBool() throws IOException {
-        return kryo.readObject(input, boolean.class);
+//        return kryo.readObject(input, boolean.class);
+        try {
+            return input.readBoolean();
+        } catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public byte readByte() throws IOException {
 //        return kryo.readObject(input, byte.class);
-        return kryo.readObjectOrNull(input, byte.class);
+//        return kryo.readObjectOrNull(input, byte.class, new DefaultSerializers.ByteSerializer());
+        try {
+            return input.readByte();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public short readShort() throws IOException {
-        return kryo.readObjectOrNull(input, short.class);
+//        return kryo.readObjectOrNull(input, short.class, new DefaultSerializers.ShortSerializer());
+        try {
+            return input.readShort();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public int readInt() throws IOException {
-        return kryo.readObjectOrNull(input, int.class);
+//        return kryo.readObjectOrNull(input, int.class, new DefaultSerializers.IntSerializer());
+        try {
+            return input.readInt();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public long readLong() throws IOException {
-        return kryo.readObjectOrNull(input, long.class);
+//        return kryo.readObjectOrNull(input, long.class, new DefaultSerializers.LongSerializer());
+        try {
+            return input.readLong();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public float readFloat() throws IOException {
-        return kryo.readObjectOrNull(input, float.class);
+//        return kryo.readObjectOrNull(input, float.class, new DefaultSerializers.FloatSerializer());
+        try {
+            return input.readFloat();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public double readDouble() throws IOException {
-        return kryo.readObjectOrNull(input, double.class);
+//        return kryo.readObjectOrNull(input, double.class, new DefaultSerializers.DoubleSerializer());
+        try {
+            return input.readDouble();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public String readUTF() throws IOException {
-        return (String) kryo.readClassAndObject(input);
+//        return kryo.readObjectOrNull(input, String.class, new DefaultSerializers.StringSerializer());
+        try {
+            return input.readString();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public byte[] readBytes() throws IOException {
@@ -121,10 +128,18 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
     }
 
     public <T> T readObject(Class<T> cls) throws IOException, ClassNotFoundException {
+        if (cls.equals(String.class))
+            return (T) readObject();
         return (T) kryo.readClassAndObject(input);
     }
 
     public <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException {
-        return (T) kryo.readClassAndObject(input);
+        if (cls.equals(String.class))
+            return (T) readObject();
+        return (T) readObject(cls);
+    }
+
+    public void flushBuffer () throws IOException {
+        KryoFactory.getInstance().close(kryo);
     }
 }

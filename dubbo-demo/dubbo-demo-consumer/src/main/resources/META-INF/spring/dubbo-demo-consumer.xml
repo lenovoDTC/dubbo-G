@@ -23,8 +23,7 @@
 	<dubbo:reference id="demoService"
 		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
 	<dubbo:reference id="demoServiceOne"
-					 interface="com.alibaba.dubbo.demo.DemoServiceOne"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
-
+					 interface="com.alibaba.dubbo.demo.DemoServiceOne"  mock="return null" errorrate="35" loadbalance="roundrobin" client="netty4" async="true"/>
 		<!--retries="0" />-->
 
 </beans>

@@ -80,6 +80,11 @@ public class CuratorZookeeperClient extends AbstractZookeeperClient<CuratorWatch
         }
     }
 
+    @Override
+    public void deleteRecursive(String path) {
+
+    }
+
     public void setData(String path, String data) {
         byte[] data1 = data.getBytes();
         try {

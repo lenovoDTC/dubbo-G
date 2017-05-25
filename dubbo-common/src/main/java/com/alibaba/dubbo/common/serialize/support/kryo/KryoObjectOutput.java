@@ -25,40 +25,7 @@ public class KryoObjectOutput implements ObjectOutput, KryoDataFlag {
 
     public KryoObjectOutput(Output output) {
         Assert.notNull(output, " is NULL");
-        kryo = new Kryo();
-//        kryo.setReferences(false);
-//        kryo.setRegistrationRequired(true);
-//        kryo.register(byte[].class, new DefaultArraySerializers.ByteArraySerializer());
-//        kryo.register(char[].class, new DefaultArraySerializers.CharArraySerializer());
-//        kryo.register(short[].class, new DefaultArraySerializers.ShortArraySerializer());
-//        kryo.register(int[].class, new DefaultArraySerializers.IntArraySerializer());
-//        kryo.register(long[].class, new DefaultArraySerializers.LongArraySerializer());
-//        kryo.register(float[].class, new DefaultArraySerializers.FloatArraySerializer());
-//        kryo.register(double[].class, new DefaultArraySerializers.DoubleArraySerializer());
-//        kryo.register(String[].class, new DefaultArraySerializers.StringArraySerializer());
-//        kryo.register(Object[].class, new DefaultArraySerializers.ObjectArraySerializer(kryo, Object[].class));
-//        kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
-//        kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
-//        kryo.register(Class.class, new DefaultSerializers.ClassSerializer());
-//
-//        kryo.register(Date.class, new DefaultSerializers.DateSerializer());
-//        kryo.register(EnumSet.class, new DefaultSerializers.EnumSetSerializer());
-//        kryo.register(Currency.class, new DefaultSerializers.CurrencySerializer());
-//        kryo.register(StringBuffer.class, new DefaultSerializers.StringBufferSerializer());
-//        kryo.register(StringBuilder.class, new DefaultSerializers.StringBuilderSerializer());
-//        kryo.register(Collections.EMPTY_LIST.getClass(), new DefaultSerializers.CollectionsEmptyListSerializer());
-//        kryo.register(Collections.EMPTY_MAP.getClass(), new DefaultSerializers.CollectionsEmptyMapSerializer());
-//        kryo.register(Collections.EMPTY_SET.getClass(), new DefaultSerializers.CollectionsEmptySetSerializer());
-//        kryo.register(Collections.singletonList(null).getClass(), new DefaultSerializers.CollectionsSingletonListSerializer());
-//        kryo.register(Collections.singletonMap(null, null).getClass(), new DefaultSerializers.CollectionsSingletonMapSerializer());
-//        kryo.register(Collections.singleton(null).getClass(), new DefaultSerializers.CollectionsSingletonSetSerializer());
-//        kryo.register(TreeSet.class, new DefaultSerializers.TreeSetSerializer());
-//        kryo.register(Collection.class, new CollectionSerializer());
-//        kryo.register(TreeMap.class, new DefaultSerializers.TreeMapSerializer());
-//        kryo.register(Map.class, new MapSerializer());
-//        kryo.register(TimeZone.class, new DefaultSerializers.TimeZoneSerializer());
-//        kryo.register(Calendar.class, new DefaultSerializers.CalendarSerializer());
-//        kryo.register(Locale.class, new DefaultSerializers.LocaleSerializer());
+        kryo = KryoFactory.getInstance().get();
         this.output = output;
     }
 
@@ -67,39 +34,51 @@ public class KryoObjectOutput implements ObjectOutput, KryoDataFlag {
     }
 
     public void writeObject(Object obj) throws IOException {
-        kryo.writeClassAndObject(output, obj);
+        if (obj instanceof String)
+            writeUTF((String) obj);
+        else
+            kryo.writeClassAndObject(output, obj);
     }
 
     public void writeBool(boolean v) throws IOException {
-        kryo.writeObjectOrNull(output, v, boolean.class);
+//        kryo.writeObjectOrNull(output, v, boolean.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.BooleanSerializer());
+        output.writeBoolean(v);
     }
 
     public void writeByte(byte v) throws IOException {
-        kryo.writeObjectOrNull(output, v, byte.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.ByteSerializer());
+        output.writeByte(v);
     }
 
     public void writeShort(short v) throws IOException {
-        kryo.writeObjectOrNull(output, v, short.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.ShortSerializer());
+        output.writeShort(v);
     }
 
     public void writeInt(int v) throws IOException {
-        kryo.writeObjectOrNull(output, v, int.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.IntSerializer());
+        output.writeInt(v);
     }
 
     public void writeLong(long v) throws IOException {
-        kryo.writeObjectOrNull(output, v, long.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.LongSerializer());
+        output.writeLong(v);
     }
 
     public void writeFloat(float v) throws IOException {
-        kryo.writeObjectOrNull(output, v, float.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.FloatSerializer());
+        output.writeFloat(v);
     }
 
     public void writeDouble(double v) throws IOException {
-        kryo.writeObjectOrNull(output, v, double.class);
+//        kryo.writeObjectOrNull(output, v, new DefaultSerializers.DoubleSerializer());
+        output.writeDouble(v);
     }
 
     public void writeUTF(String v) throws IOException {
-        kryo.writeClassAndObject(output, v);
+//        kryo.writeObject(output, v, new DefaultSerializers.StringSerializer());
+        output.writeString(v);
     }
 
     public void writeBytes(byte[] v) throws IOException {
@@ -130,6 +109,7 @@ public class KryoObjectOutput implements ObjectOutput, KryoDataFlag {
 
     public void flushBuffer() throws IOException {
         //output.flush();
+        KryoFactory.getInstance().close(kryo);
         output.close();
     }
 }

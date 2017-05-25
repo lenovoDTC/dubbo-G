@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.dubbo.remoting.transport.netty;
+package com.alibaba.dubbo.remoting.transport.netty4;
 
-import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
@@ -78,7 +77,7 @@ public class NettyServer extends AbstractServer implements Server {
         if (logger.isDebugEnabled()) {
             logger.debug("-Dio.netty.eventLoopThreads: " + threads);
         }
-
+        bootstrap = new ServerBootstrap();
         if ("linux".equals(osName)) {
             boss = new EpollEventLoopGroup(threads, new NamedThreadFactory("NettyServerBoss", true));
             worker = new EpollEventLoopGroup(threads, new NamedThreadFactory("NettyServerWorker", true));
@@ -118,7 +117,8 @@ public class NettyServer extends AbstractServer implements Server {
 //            }
 //        });
         // bind
-//        channel = bootstrap.bind(getBindAddress());
+        channel = bootstrap.bind(getBindAddress()).channel();
+//        channel.closeFuture().sync();
     }
 
     @Override

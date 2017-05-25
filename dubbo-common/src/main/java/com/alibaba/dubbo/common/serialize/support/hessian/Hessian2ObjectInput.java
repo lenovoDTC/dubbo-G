@@ -86,4 +86,9 @@ public class Hessian2ObjectInput implements ObjectInput {
         return readObject(cls);
     }
 
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
+
 }

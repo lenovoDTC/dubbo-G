@@ -29,11 +29,11 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements Set<E>, java
 
     private final ConcurrentHashMap<E, Object> map;
 
-    public ConcurrentHashSet() {
+    public ConcurrentHashSet(){
         map = new ConcurrentHashMap<E, Object>();
     }
 
-    public ConcurrentHashSet(int initialCapacity) {
+    public ConcurrentHashSet(int initialCapacity){
         map = new ConcurrentHashMap<E, Object>(initialCapacity);
     }
 
@@ -72,7 +72,8 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements Set<E>, java
      * element <tt>e</tt> such that
      * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>.
      *
-     * @param o element whose presence in this set is to be tested
+     * @param o
+     *            element whose presence in this set is to be tested
      * @return <tt>true</tt> if this set contains the specified element
      */
     public boolean contains(Object o) {
@@ -87,9 +88,10 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements Set<E>, java
      * set already contains the element, the call leaves the set unchanged and
      * returns <tt>false</tt>.
      *
-     * @param e element to be added to this set
+     * @param e
+     *            element to be added to this set
      * @return <tt>true</tt> if this set did not already contain the specified
-     * element
+     *         element
      */
     public boolean add(E e) {
         return map.put(e, PRESENT) == null;
@@ -103,7 +105,8 @@ public class ConcurrentHashSet<E> extends AbstractSet<E> implements Set<E>, java
      * the element (or equivalently, if this set changed as a result of the
      * call). (This set will not contain the element once the call returns.)
      *
-     * @param o object to be removed from this set, if present
+     * @param o
+     *            object to be removed from this set, if present
      * @return <tt>true</tt> if the set contained the specified element
      */
     public boolean remove(Object o) {

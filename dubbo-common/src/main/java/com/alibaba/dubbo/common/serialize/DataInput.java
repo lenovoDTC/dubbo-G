@@ -95,4 +95,10 @@ public interface DataInput {
      * @throws IOException.
      */
     byte[] readBytes() throws IOException;
+
+    /**
+     *
+     * @throws IOException
+     */
+    void flushBuffer () throws IOException;
 }

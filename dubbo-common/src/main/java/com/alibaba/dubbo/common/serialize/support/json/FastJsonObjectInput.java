@@ -134,4 +134,9 @@ public class FastJsonObjectInput implements ObjectInput {
         return line;
     }
 
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
+
 }

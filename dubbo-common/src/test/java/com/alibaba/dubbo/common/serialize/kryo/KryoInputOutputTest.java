@@ -18,15 +18,25 @@ public class KryoInputOutputTest extends TestCase {
     private static final byte[] SMALL_BYTES = SMALL_STRING.getBytes(), BIG_BYTES = BIG_STREAM.getBytes();
 
     public void testMain() throws Exception {
-        // write.
-        UnsafeByteArrayOutputStream os = new UnsafeByteArrayOutputStream();
-        DataOutput cos = new KryoObjectOutput(os);
-        writeTest(cos);
+        for (int i = 0; i < 100; i++) {
+            long start = System.nanoTime();
+            // write.
+            UnsafeByteArrayOutputStream os = new UnsafeByteArrayOutputStream();
+            DataOutput cos = new KryoObjectOutput(os);
+            long start1 = System.nanoTime();
+            writeTest(cos);
+            System.out.println("time enode total : " + (System.nanoTime() - start1));
+            System.out.println("time encode + pojo total : " + (System.nanoTime() - start));
+            // read.
+            byte[] b = os.toByteArray();
+            DataInput cis = new KryoObjectInput(new UnsafeByteArrayInputStream(b));
+            long start2 = System.nanoTime();
+            readTest(cis);
+            System.out.println("time decode total : " + (System.nanoTime() - start2));
+            System.out.println("time total : " + (System.nanoTime() - start));
+            System.out.println("-------------------------------------------------------");
+        }
 
-        // read.
-        byte[] b = os.toByteArray();
-        DataInput cis = new KryoObjectInput(new UnsafeByteArrayInputStream(b));
-        readTest(cis);
     }
 
     private void writeTest(DataOutput out) throws IOException {
@@ -96,6 +106,7 @@ public class KryoInputOutputTest extends TestCase {
         assertSameArray(in.readBytes(), SMALL_BYTES);
         assertEquals(in.readUTF(), SMALL_STRING);
         assertSameArray(in.readBytes(), BIG_BYTES);
+        in.flushBuffer();
     }
 
     private static void assertSameArray(byte[] b1, byte[] b2) {

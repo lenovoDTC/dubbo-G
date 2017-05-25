@@ -154,4 +154,9 @@ public class JsonObjectInput implements ObjectInput {
         if (line == null || line.trim().length() == 0) throw new EOFException();
         return line;
     }
+
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
 }

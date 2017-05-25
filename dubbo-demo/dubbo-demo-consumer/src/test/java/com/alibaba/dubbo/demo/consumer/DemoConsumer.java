@@ -15,11 +15,31 @@
  */
 package com.alibaba.dubbo.demo.consumer;
 
+import com.alibaba.dubbo.demo.DemoService;
+import com.alibaba.dubbo.rpc.RpcContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 public class DemoConsumer {
 
-    public static void main(String[] args) {
-        com.alibaba.dubbo.container.Main.main(args);
+    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException, TimeoutException {
+//        com.alibaba.dubbo.container.Main.main(args);
 //        com.alibaba.dubbo.container.Http.main(args);
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"classpath*:META-INF/spring/dubbo-demo-consumer.xml"});
+        context.start();
+
+        DemoService demoService = (DemoService) context.getBean("demoService");
+
+        demoService.sayHello("hello world");
+        Future<String> future = RpcContext.getContext().getFuture();
+        String result = future.get(3000, TimeUnit.MILLISECONDS);
+        System.out.println("result  " + result);
+        System.in.read(); // 按任意键退出
     }
 
 }

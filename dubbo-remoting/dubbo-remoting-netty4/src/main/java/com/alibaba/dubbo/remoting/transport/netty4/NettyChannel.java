@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.dubbo.remoting.transport.netty;
+package com.alibaba.dubbo.remoting.transport.netty4;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
@@ -48,7 +48,7 @@ final class NettyChannel extends AbstractChannel {
     private NettyChannel(Channel channel, URL url, ChannelHandler handler) {
         super(url, handler);
         if (channel == null) {
-            throw new IllegalArgumentException("netty channel == null;");
+            throw new IllegalArgumentException("netty4 channel == null;");
         }
         this.channel = channel;
     }
@@ -94,7 +94,7 @@ final class NettyChannel extends AbstractChannel {
         boolean success = true;
         int timeout = 0;
         try {
-            ChannelFuture future = channel.write(message);
+            ChannelFuture future = channel.writeAndFlush(message);
             if (sent) {
                 timeout = getUrl().getPositiveParameter(Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
                 success = future.await(timeout);
@@ -131,7 +131,7 @@ final class NettyChannel extends AbstractChannel {
         }
         try {
             if (logger.isInfoEnabled()) {
-                logger.info("Close netty channel " + channel);
+                logger.info("Close netty4 channel " + channel);
             }
             channel.close();
         } catch (Exception e) {
