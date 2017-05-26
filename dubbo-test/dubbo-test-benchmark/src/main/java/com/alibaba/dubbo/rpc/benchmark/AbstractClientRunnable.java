@@ -117,6 +117,7 @@ public abstract class AbstractClientRunnable implements ClientRunnable {
                     errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 LOGGER.error("client.invokeSync error", e);
                 long currentTime = System.nanoTime() / 1000L;
                 if (beginTime <= startTime) {

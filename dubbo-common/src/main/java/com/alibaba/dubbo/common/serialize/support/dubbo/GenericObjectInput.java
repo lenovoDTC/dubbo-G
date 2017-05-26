@@ -96,6 +96,11 @@ public class GenericObjectInput extends GenericDataInput implements ObjectInput 
         return (T) readObject();
     }
 
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
+
     public void addRef(Object obj) {
         mRefs.add(obj);
     }

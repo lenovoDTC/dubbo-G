@@ -17,9 +17,13 @@ package com.alibaba.dubbo.demo.consumer;
 
 import com.alibaba.dubbo.demo.DemoService;
 import com.alibaba.dubbo.demo.DemoServiceOne;
+import com.alibaba.dubbo.demo.Person;
+import com.alibaba.dubbo.rpc.RpcContext;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class DemoAction {
 
@@ -36,7 +40,7 @@ public class DemoAction {
     }
 
     public void start() throws Exception {
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+        for (int i = 0; i < 20/*Integer.MAX_VALUE*/; i++) {
             try {
                 String hello = demoService.sayHello("world" + i);
                 System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + "");
@@ -47,5 +51,16 @@ public class DemoAction {
             }
             Thread.sleep(1000);
         }
+//        for (int i = 0; i < 10; i++) {
+//            Person<String> person = new Person<String>();
+//            person.setName("Hello" + i);
+//            demoService.sayHello3(person);
+//        }
+
+//        demoService.sayHello("hello world");
+//        Future<String> future = RpcContext.getContext().getFuture();
+//        String result = future.get(3000, TimeUnit.MILLISECONDS);
+//        System.out.println("result  " + result);
+
     }
 }

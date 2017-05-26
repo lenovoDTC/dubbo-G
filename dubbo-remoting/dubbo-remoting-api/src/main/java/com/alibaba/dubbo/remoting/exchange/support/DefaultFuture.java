@@ -58,6 +58,8 @@ public class DefaultFuture implements ResponseFuture {
 
     private final int timeout;
 
+    private final int interval = 100;
+
     private final Lock lock = new ReentrantLock();
 
     private final Condition done = lock.newCondition();
@@ -93,7 +95,7 @@ public class DefaultFuture implements ResponseFuture {
             lock.lock();
             try {
                 while (!isDone()) {
-                    done.await(timeout, TimeUnit.MILLISECONDS);
+                    done.await(interval, TimeUnit.MILLISECONDS);
                     if (isDone() || System.currentTimeMillis() - start > timeout) {
                         break;
                     }

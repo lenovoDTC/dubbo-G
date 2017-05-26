@@ -33,6 +33,7 @@ import java.net.URLDecoder;
 import java.util.*;
 
 import com.alibaba.fastjson.JSON;
+import io.netty.handler.codec.http.DefaultHttpContent;
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.json.JSONArray;
@@ -65,6 +66,11 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         if (message instanceof DefaultHttpRequest || message instanceof DefaultHttpChunk) {
             Object req = decodeRequest(channel, message);
             message = req;
+        }
+        if (message instanceof io.netty.handler.codec.http.DefaultHttpRequest || message instanceof io.netty.handler.codec.http.DefaultHttpContent) {
+//            Object req = decodeRequest4(channel, message);
+
+//            message = req;
         }
         handler.received(channel, message);
     }

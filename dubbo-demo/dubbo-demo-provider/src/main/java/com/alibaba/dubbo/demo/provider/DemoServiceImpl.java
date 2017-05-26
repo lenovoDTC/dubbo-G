@@ -44,8 +44,8 @@ public class DemoServiceImpl implements DemoService {
     }
 
     @Override
-    public String sayHello3(Person z) {
-        return null;
+    public String sayHello3(Person<String> z) {
+        return z.getName();
     }
 
 }

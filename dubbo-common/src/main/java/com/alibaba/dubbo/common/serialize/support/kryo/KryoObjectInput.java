@@ -3,15 +3,17 @@ package com.alibaba.dubbo.common.serialize.support.kryo;
 import com.alibaba.dubbo.common.serialize.ObjectInput;
 import com.alibaba.dubbo.common.utils.Assert;
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.serializers.JavaSerializer;
-import com.esotericsoftware.kryo.serializers.MapSerializer;
+import com.esotericsoftware.kryo.serializers.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Created by haoning1 on 2017/3/20.
@@ -25,7 +27,7 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
 
     public KryoObjectInput(Input input) {
         Assert.notNull(input, "is NULL");
-        kryo = new Kryo();
+        kryo = KryoFactory.getInstance().get();
         this.input = input;
     }
 
@@ -34,36 +36,76 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
     }
 
     public boolean readBool() throws IOException {
-        return kryo.readObject(input, boolean.class);
+//        return kryo.readObject(input, boolean.class);
+        try {
+            return input.readBoolean();
+        } catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public byte readByte() throws IOException {
 //        return kryo.readObject(input, byte.class);
-        return kryo.readObjectOrNull(input, byte.class);
+//        return kryo.readObjectOrNull(input, byte.class, new DefaultSerializers.ByteSerializer());
+        try {
+            return input.readByte();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public short readShort() throws IOException {
-        return kryo.readObjectOrNull(input, short.class);
+//        return kryo.readObjectOrNull(input, short.class, new DefaultSerializers.ShortSerializer());
+        try {
+            return input.readShort();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public int readInt() throws IOException {
-        return kryo.readObjectOrNull(input, int.class);
+//        return kryo.readObjectOrNull(input, int.class, new DefaultSerializers.IntSerializer());
+        try {
+            return input.readInt();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public long readLong() throws IOException {
-        return kryo.readObjectOrNull(input, long.class);
+//        return kryo.readObjectOrNull(input, long.class, new DefaultSerializers.LongSerializer());
+        try {
+            return input.readLong();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public float readFloat() throws IOException {
-        return kryo.readObjectOrNull(input, float.class);
+//        return kryo.readObjectOrNull(input, float.class, new DefaultSerializers.FloatSerializer());
+        try {
+            return input.readFloat();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public double readDouble() throws IOException {
-        return kryo.readObjectOrNull(input, double.class);
+//        return kryo.readObjectOrNull(input, double.class, new DefaultSerializers.DoubleSerializer());
+        try {
+            return input.readDouble();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public String readUTF() throws IOException {
-        return (String) kryo.readClassAndObject(input);
+//        return kryo.readObjectOrNull(input, String.class, new DefaultSerializers.StringSerializer());
+        try {
+            return input.readString();
+        }catch (KryoException e) {
+            throw new IOException(e);
+        }
     }
 
     public byte[] readBytes() throws IOException {
@@ -86,10 +128,18 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
     }
 
     public <T> T readObject(Class<T> cls) throws IOException, ClassNotFoundException {
+        if (cls.equals(String.class))
+            return (T) readObject();
         return (T) kryo.readClassAndObject(input);
     }
 
     public <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException {
-        return (T) kryo.readClassAndObject(input);
+        if (cls.equals(String.class))
+            return (T) readObject();
+        return (T) readObject(cls);
+    }
+
+    public void flushBuffer () throws IOException {
+        KryoFactory.getInstance().close(kryo);
     }
 }

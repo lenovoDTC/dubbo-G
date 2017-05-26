@@ -102,4 +102,9 @@ public class NativeJavaObjectInput implements ObjectInput {
             return result;
         }
     }
+
+    @Override
+    public void flushBuffer() throws IOException {
+
+    }
 }

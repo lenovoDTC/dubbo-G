@@ -64,7 +64,7 @@ public class InvokerSideConfigUrlTest extends UrlTestBase {
 //            {"timeout", "registry.timeout", "int", 5000, 9000, "", "", "", "", ""}, 
 //            {"file", "registry.file", "string", "", "regConfForServiceTable.log", "", "", "", "", ""}, 
 //            {"wait", "registry.wait", "int", 0, 9000, "", "", "", "", ""}, 
-//            {"transport", "registry.transporter", "string", "netty", "mina", "", "", "", "", ""}, 
+//            {"transport", "registry.transporter", "string", "netty", "mina", "", "", "", "", ""},
             {"subscribe", "subscribe", "boolean", true, false, "", "", "", "", ""},
             {"dynamic", "dynamic", "boolean", true, false, "", "", "", "", ""},
     };

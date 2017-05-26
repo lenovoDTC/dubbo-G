@@ -107,6 +107,7 @@ final class NettyCodecAdapter {
                 return;
             }
 //            if((input.getByte(0)==71&&input.getByte(1)==69&&input.getByte(2)==84)||(input.getByte(0)==80&&input.getByte(1)==79&&input.getByte(2)==83&&input.getByte(3)==84)) {
+            int length = input.readableBytes();
             if (new String(input.array(), "UTF-8").indexOf("HTTP/1.1\r\n") != -1) {
                 ctx.getPipeline().addAfter("decoder", "httpdecoder", new HttpRequestDecoder());
                 ctx.getPipeline().remove(this);
