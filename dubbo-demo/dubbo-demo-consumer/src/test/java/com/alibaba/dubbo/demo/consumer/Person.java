@@ -1,20 +1,7 @@
 package com.alibaba.dubbo.demo.consumer;
 
-import com.alibaba.dubbo.demo.DemoService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.ByteArraySerializer;
-import javafx.beans.binding.ObjectExpression;
-import javassist.bytecode.ByteArray;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.*;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.TypeVariable;
 
 /**
  * Created by haoning1 on 2017/3/16.
