@@ -72,15 +72,9 @@ public class ExchangeCodec extends TelnetCodec {
 
     public void encode(Channel channel, ChannelBuffer buffer, Object msg) throws IOException {
         if (msg instanceof Request) {
-            long start = System.nanoTime();
             encodeRequest(channel, buffer, (Request) msg);
-            long end = System.nanoTime();
-            System.out.println("request encode total time :  " + (end - start) + " ns");
         } else if (msg instanceof Response) {
-            long start = System.nanoTime();
             encodeResponse(channel, buffer, (Response) msg);
-            long end = System.nanoTime();
-            System.out.println("response encode total time :  " + (end - start) + " ns");
         } else {
             super.encode(channel, buffer, msg);
         }
@@ -247,10 +241,8 @@ public class ExchangeCodec extends TelnetCodec {
         if (req.isEvent()) {
             encodeEventData(channel, out, req.getData());
         } else {
-            long start = System.nanoTime();
             encodeRequestData(channel, out, req.getData());
             long end = System.nanoTime();
-            System.out.println("request encode data use time : " + (end - start ) + " ns");
         }
         out.flushBuffer();
         bos.flush();
@@ -290,10 +282,7 @@ public class ExchangeCodec extends TelnetCodec {
                 if (res.isHeartbeat()) {
                     encodeHeartbeatData(channel, out, res.getResult());
                 } else {
-                    long start = System.nanoTime();
                     encodeResponseData(channel, out, res.getResult());
-                    long end = System.nanoTime();
-                    System.out.println("response encode data use time : " + (end - start ) + " ns");
                 }
             } else out.writeUTF(res.getErrorMessage());
             out.flushBuffer();

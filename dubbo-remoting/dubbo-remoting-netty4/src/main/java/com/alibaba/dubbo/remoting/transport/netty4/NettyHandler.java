@@ -19,10 +19,20 @@ import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.utils.NetUtils;
 import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.ChannelHandler;
+import com.alibaba.dubbo.remoting.exchange.NettyRequest;
 import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.DefaultHttpRequest;
+import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -41,6 +51,12 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     private final URL url;
 
     private final ChannelHandler handler;
+
+    private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
+
+    private HttpPostRequestDecoder decoder;
+
+    private NettyRequest request;
 
     public NettyHandler(URL url, ChannelHandler handler) {
         if (url == null) {
@@ -64,7 +80,9 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelUnregistered(ctx);
+        if (decoder != null) {
+            decoder.cleanFiles();
+        }
     }
 
     @Override
@@ -93,11 +111,58 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+//        if (msg instanceof HttpRequest) {
+//            request = new NettyRequest();
+//            request.setRequest((DefaultHttpRequest) msg);
+//
+//        }
+//
+//        if (decoder != null) {
+//            if (msg instanceof HttpContent) {
+//                // New chunk is received
+//                HttpContent chunk = (HttpContent) msg;
+//                try {
+//                    decoder.offer(chunk);
+//                } catch (HttpPostRequestDecoder.ErrorDataDecoderException e) {
+//                    ctx.channel().close();
+//                    return;
+//                }
+//
+//                readHttpDataChunkByChunk();
+//
+//                if (chunk instanceof LastHttpContent) {
+//                    reset();
+//                }
+//            }
+//        } else {
+//
+//        }
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             handler.received(channel, msg);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
+        }
+    }
+
+    /**
+     * Example of reading request by chunk and getting values from chunk to chunk
+     */
+    private void readHttpDataChunkByChunk() {
+        try {
+            while (decoder.hasNext()) {
+                InterfaceHttpData data = decoder.next();
+                if (data != null) {
+                    try {
+                        readData(data);
+//                        writeHttpData(data);
+                    } finally {
+                        data.release();
+                    }
+                }
+            }
+        } catch (HttpPostRequestDecoder.EndOfDataDecoderException e) {
+            // end
         }
     }
 
@@ -124,5 +189,21 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
         }
+    }
+
+    private void reset() {
+        request = null;
+
+        // destroy the decoder to release all resources
+        decoder.destroy();
+        decoder = null;
+    }
+
+    private void readData (InterfaceHttpData data) {
+        if (!data.getHttpDataType().equals(InterfaceHttpData.HttpDataType.Attribute)) {
+            return;
+        }
+
+        //if (data.getHttpDataType().equals(InterfaceHttpData.HttpDataType.))
     }
 }
