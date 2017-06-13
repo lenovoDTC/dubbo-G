@@ -129,13 +129,13 @@ public class KryoObjectInput implements ObjectInput, KryoDataFlag {
 
     public <T> T readObject(Class<T> cls) throws IOException, ClassNotFoundException {
         if (cls.equals(String.class))
-            return (T) readObject();
+            return (T) readUTF();
         return (T) kryo.readClassAndObject(input);
     }
 
     public <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException {
         if (cls.equals(String.class))
-            return (T) readObject();
+            return (T) readUTF();
         return (T) readObject(cls);
     }
 

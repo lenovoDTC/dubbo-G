@@ -22,6 +22,8 @@ import com.alibaba.dubbo.rpc.RpcContext;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -40,16 +42,36 @@ public class DemoAction {
     }
 
     public void start() throws Exception {
-        for (int i = 0; i < 20/*Integer.MAX_VALUE*/; i++) {
-            try {
-                String hello = demoService.sayHello("world" + i);
-                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + "");
-                String hello1 = demoServiceOne.get("aa");
-                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello + " : " + hello1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Thread.sleep(1000);
+
+        for (int i = 0; i < 10/*Integer.MAX_VALUE*/; i++) {
+            final int finalI = i;
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        System.out.println("api start " + System.currentTimeMillis());
+//                        String hello = demoService.sayHello("world " + finalI);
+                        demoService.sayHello("world " + finalI);
+                        Future<String> future = RpcContext.getContext().getFuture();
+                        String hello = future.get(3000, TimeUnit.MILLISECONDS);
+                        System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + " " + hello);
+//                        String hello1 = demoServiceOne.get("aa");
+//                        System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello + " : " + hello1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+//            try {
+//                String hello = demoService.sayHello("world");
+//                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + "");
+//                String hello1 = demoServiceOne.get("aa");
+//                System.out.println("[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + hello + " : " + hello1);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            Thread.sleep(1000);
         }
 //        for (int i = 0; i < 10; i++) {
 //            Person<String> person = new Person<String>();

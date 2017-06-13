@@ -17,6 +17,7 @@ package com.alibaba.dubbo.remoting.transport.netty4;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
+import com.alibaba.dubbo.common.utils.NamedThreadFactory;
 import com.alibaba.dubbo.remoting.Codec2;
 import com.alibaba.dubbo.remoting.buffer.ChannelBuffers;
 import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
@@ -28,6 +29,8 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * NettyCodecAdapter.
@@ -47,6 +50,8 @@ final class NettyCodecAdapter {
     private final int bufferSize;
 
     private final com.alibaba.dubbo.remoting.ChannelHandler handler;
+
+    private ExecutorService executor = Executors.newCachedThreadPool(new NamedThreadFactory("DubboCodecSharedHandler", true));
 
     public NettyCodecAdapter(Codec2 codec, URL url, com.alibaba.dubbo.remoting.ChannelHandler handler) {
         this.codec = codec;
@@ -69,6 +74,8 @@ final class NettyCodecAdapter {
 
         @Override
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+            System.out.println("send request : " + System.currentTimeMillis());
+//            executor.execute(new NettyCodecRunnable(ctx, msg, decoder, handler, codec, url, bufferSize, NettyCodecRunnable.State.encode, this, out));
             if (msg instanceof DefaultHttpResponse) {
                 ctx.pipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
                 ctx.pipeline().remove(this);
@@ -81,10 +88,8 @@ final class NettyCodecAdapter {
                 } finally {
                     NettyChannel.removeChannelIfDisconnected(ctx.channel());
                 }
-
                 out.writeBytes(buffer.toByteBuffer());
 
-//                ChannelBuffers.wrappedBuffer(buffer.toByteBuffer());
             }
         }
     }
@@ -96,6 +101,8 @@ final class NettyCodecAdapter {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            System.out.println("get request : " + System.currentTimeMillis());
+//            executor.execute(new NettyCodecRunnable(ctx, msg, decoder, handler, codec, url, bufferSize, buffer, NettyCodecRunnable.State.decode, this));
             Object o = msg;
             if (!(o instanceof  ByteBuf)) {
                 ctx.fireChannelRead(msg);

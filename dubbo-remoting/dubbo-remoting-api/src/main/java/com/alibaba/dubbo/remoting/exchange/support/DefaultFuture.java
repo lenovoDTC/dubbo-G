@@ -95,7 +95,7 @@ public class DefaultFuture implements ResponseFuture {
             lock.lock();
             try {
                 while (!isDone()) {
-                    done.await(timeout, TimeUnit.MILLISECONDS);
+                    done.await(interval, TimeUnit.MILLISECONDS);
                     if (isDone() || System.currentTimeMillis() - start > timeout) {
                         break;
                     }
@@ -254,6 +254,7 @@ public class DefaultFuture implements ResponseFuture {
     }
 
     private void doReceived(Response res) {
+        System.out.println("future doReceived start : " + System.currentTimeMillis());
         lock.lock();
         try {
             response = res;
@@ -266,6 +267,7 @@ public class DefaultFuture implements ResponseFuture {
         if (callback != null) {
             invokeCallback(callback);
         }
+        System.out.println("future doReceived end : " + System.currentTimeMillis());
     }
 
     private String getTimeoutMessage(boolean scan) {

@@ -111,32 +111,31 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-//        if (msg instanceof HttpRequest) {
-//            request = new NettyRequest();
-//            request.setRequest((DefaultHttpRequest) msg);
-//
-//        }
-//
-//        if (decoder != null) {
-//            if (msg instanceof HttpContent) {
-//                // New chunk is received
-//                HttpContent chunk = (HttpContent) msg;
-//                try {
-//                    decoder.offer(chunk);
-//                } catch (HttpPostRequestDecoder.ErrorDataDecoderException e) {
-//                    ctx.channel().close();
-//                    return;
-//                }
-//
-//                readHttpDataChunkByChunk();
-//
-//                if (chunk instanceof LastHttpContent) {
-//                    reset();
-//                }
-//            }
-//        } else {
-//
-//        }
+        if (msg instanceof HttpRequest) {
+            request = new NettyRequest();
+            request.setRequest((DefaultHttpRequest) msg);
+
+        }
+
+        if (decoder != null) {
+            if (msg instanceof HttpContent) {
+                HttpContent chunk = (HttpContent) msg;
+                try {
+                    decoder.offer(chunk);
+                } catch (HttpPostRequestDecoder.ErrorDataDecoderException e) {
+                    ctx.channel().close();
+                    return;
+                }
+
+                readHttpDataChunkByChunk();
+
+                if (chunk instanceof LastHttpContent) {
+                    reset();
+                }
+            }
+        } else {
+
+        }
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             handler.received(channel, msg);
@@ -168,7 +167,9 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        super.channelReadComplete(ctx);
+//        super.channelReadComplete(ctx);
+//        ctx.flush();
+//        ctx.channel().flush();
     }
 
     @Override

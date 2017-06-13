@@ -100,6 +100,7 @@ final class NettyCodecAdapter {
 
         @Override
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) throws Exception {
+            System.out.println("ThreadLocal Thread Name : " + Thread.currentThread().getName() + " -- " + Thread.currentThread().getId());
             Object o = event.getMessage();
             ChannelBuffer input = (ChannelBuffer) o;
             if (!(o instanceof ChannelBuffer)) {

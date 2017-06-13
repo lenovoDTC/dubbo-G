@@ -15,6 +15,7 @@
  */
 package com.alibaba.dubbo.remoting.transport.netty4;
 
+import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.Version;
 import com.alibaba.dubbo.common.logger.Logger;
@@ -26,11 +27,10 @@ import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.ChannelHandler;
 import com.alibaba.dubbo.remoting.transport.AbstractClient;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ChannelFactory;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -38,10 +38,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.SystemPropertyUtil;
 
+import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,9 +68,17 @@ public class NettyClient extends AbstractClient {
 
     private io.netty.channel.Channel channel;
 
+    private final int THREADS = 8;
+
+    private final EventExecutorGroup executor = new DefaultEventExecutorGroup(THREADS);
 
     public NettyClient(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
+    }
+
+    @Override
+    public InetSocketAddress getConnectAddress() {
+        return super.getConnectAddress();
     }
 
     @Override
@@ -80,11 +92,27 @@ public class NettyClient extends AbstractClient {
         }
         bootstrap = new Bootstrap();
         if ("linux".equals(osName)) {
-            group = new EpollEventLoopGroup(threads, new NamedThreadFactory("NettyServerBoss", true));
-            bootstrap.group(group).channel(EpollSocketChannel.class);
+            group = new EpollEventLoopGroup(THREADS, new NamedThreadFactory("NettyServerBoss-Linux", true));
+            bootstrap
+                    .group(group)
+                    .channel(EpollSocketChannel.class)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .option(ChannelOption.SO_REUSEADDR, true)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .option(ChannelOption.SO_RCVBUF, 128 * 1024)
+                    .option(ChannelOption.SO_SNDBUF, 128 * 1024);
         } else {
-            group = new NioEventLoopGroup(threads, new NamedThreadFactory("NettyServerBoss", true));
-            bootstrap.group(group).channel(NioSocketChannel.class);
+            group = new NioEventLoopGroup(THREADS, new NamedThreadFactory("NettyServerBoss-Windows", true));
+            bootstrap.
+                    group(group).
+                    channel(NioSocketChannel.class)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .option(ChannelOption.SO_REUSEADDR, true)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .option(ChannelOption.SO_RCVBUF, 128 * 1024)
+                    .option(ChannelOption.SO_SNDBUF, 128 * 1024);
         }
 
         final NettyHandler nettyHandler = new NettyHandler(getUrl(), this);
@@ -95,9 +123,9 @@ public class NettyClient extends AbstractClient {
             protected void initChannel(SocketChannel ch) throws Exception {
                 NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyClient.this);
                 ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast("decoder", adapter.getDecoder());
-                pipeline.addLast("encoder", adapter.getEncoder());
-                pipeline.addLast("handler", nettyHandler);
+                pipeline.addLast(executor, "decoder", adapter.getDecoder());
+                pipeline.addLast(executor, "encoder", adapter.getEncoder());
+                pipeline.addLast(executor, "handler", nettyHandler);
             }
         });
     }
