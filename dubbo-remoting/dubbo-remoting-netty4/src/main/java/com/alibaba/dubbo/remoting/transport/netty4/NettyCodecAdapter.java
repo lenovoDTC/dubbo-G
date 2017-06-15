@@ -74,8 +74,6 @@ final class NettyCodecAdapter {
 
         @Override
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-            System.out.println("send request : " + System.currentTimeMillis());
-//            executor.execute(new NettyCodecRunnable(ctx, msg, decoder, handler, codec, url, bufferSize, NettyCodecRunnable.State.encode, this, out));
             if (msg instanceof DefaultHttpResponse) {
                 ctx.pipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
                 ctx.pipeline().remove(this);
@@ -101,7 +99,7 @@ final class NettyCodecAdapter {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            System.out.println("get request : " + System.currentTimeMillis());
+//            System.out.println("get request : " + System.currentTimeMillis());
 //            executor.execute(new NettyCodecRunnable(ctx, msg, decoder, handler, codec, url, bufferSize, buffer, NettyCodecRunnable.State.decode, this));
             Object o = msg;
             if (!(o instanceof  ByteBuf)) {

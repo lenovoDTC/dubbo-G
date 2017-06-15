@@ -19,23 +19,17 @@ import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.utils.NetUtils;
 import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.ChannelHandler;
+import com.alibaba.dubbo.remoting.exchange.NettyCookie;
 import com.alibaba.dubbo.remoting.exchange.NettyRequest;
-import com.alibaba.dubbo.remoting.exchange.Request;
-import com.alibaba.dubbo.remoting.exchange.Response;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.LastHttpContent;
-import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.multipart.*;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Map;
+import java.net.URI;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -56,7 +50,11 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     private HttpPostRequestDecoder decoder;
 
-    private NettyRequest request;
+    private NettyRequest nRequest;
+
+    private Object message;
+
+    private boolean isFinished = true;
 
     public NettyHandler(URL url, ChannelHandler handler) {
         if (url == null) {
@@ -112,13 +110,59 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
-            request = new NettyRequest();
-            request.setRequest((DefaultHttpRequest) msg);
+            isFinished = false;
+            HttpRequest request = (HttpRequest) msg;
+//            String uri = request.getUri();
+            URI uri = new URI(request.getUri());
+            String reqeustUri = uri.getPath();
+            message = nRequest = new NettyRequest(reqeustUri, request.getMethod().name());
+            HttpHeaders headers = request.headers();
+            Iterator<Map.Entry<String, String>> it = headers.iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, String> entry = it.next();
+                nRequest.addHeader(entry.getKey(), entry.getValue());
+            }
 
-        }
+            Set<Cookie> cookies = null;
+            String cookie = headers.get("COOKIE");
+            if (cookie != null) {
+                cookies = CookieDecoder.decode(cookie);
+                for (Cookie c : cookies) {
+                    com.alibaba.dubbo.remoting.exchange.Cookie nCookie = new NettyCookie(c.getName(), c.getValue());
+                    nCookie.setComment(c.getComment());
+                    nCookie.setCommentUrl(c.getCommentUrl());
+                    nCookie.setDomain(c.getDomain());
+                    nCookie.setHttpOnly(c.isHttpOnly());
+                    nCookie.setDiscard(c.isDiscard());
+                    nCookie.setMaxAge(c.getMaxAge());
+                    nCookie.setVersion(c.getVersion());
+                    nCookie.setPath(c.getPath());
+                    nCookie.setPorts(c.getPorts());
+                    nRequest.addCookie(nCookie);
+                }
+            }
 
-        if (decoder != null) {
-            if (msg instanceof HttpContent) {
+            QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+            Map<String, List<String>> parameters = queryStringDecoder.parameters();
+            nRequest.addAllParameters(parameters);
+
+            if (nRequest.getMethod().equals("GET")) {
+                isFinished = true;
+            }
+
+            if (nRequest.getMethod().equals("POST")) {
+                try {
+
+                    decoder = new HttpPostRequestDecoder(factory, request);
+                } catch (HttpPostRequestDecoder.ErrorDataDecoderException e1) {
+                    e1.printStackTrace();
+                    ctx.channel().close();
+                    return;
+                }
+
+            }
+        } else if (msg instanceof HttpContent) {
+            if (decoder != null) {
                 HttpContent chunk = (HttpContent) msg;
                 try {
                     decoder.offer(chunk);
@@ -133,15 +177,17 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
                     reset();
                 }
             }
-        } else {
+        } else message = msg;
 
+        if (isFinished) {
+            NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+            try {
+                handler.received(channel, message);
+            } finally {
+                NettyChannel.removeChannelIfDisconnected(ctx.channel());
+            }
         }
-        NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
-        try {
-            handler.received(channel, msg);
-        } finally {
-            NettyChannel.removeChannelIfDisconnected(ctx.channel());
-        }
+
     }
 
     /**
@@ -154,7 +200,6 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
                 if (data != null) {
                     try {
                         readData(data);
-//                        writeHttpData(data);
                     } finally {
                         data.release();
                     }
@@ -167,9 +212,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-//        super.channelReadComplete(ctx);
-//        ctx.flush();
-//        ctx.channel().flush();
+        super.channelReadComplete(ctx);
     }
 
     @Override
@@ -193,8 +236,8 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void reset() {
-        request = null;
-
+        nRequest = null;
+        isFinished = true;
         // destroy the decoder to release all resources
         decoder.destroy();
         decoder = null;
@@ -205,6 +248,12 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
+        Attribute attribute = (Attribute) data;
+        try {
+            nRequest.addParameter(attribute.getName(), attribute.getValue());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //if (data.getHttpDataType().equals(InterfaceHttpData.HttpDataType.))
     }
 }

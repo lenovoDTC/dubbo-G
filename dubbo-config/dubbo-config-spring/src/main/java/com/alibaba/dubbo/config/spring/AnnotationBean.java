@@ -328,7 +328,7 @@ public class AnnotationBean extends AbstractConfig implements DisposableBean, Be
                         schema.setRequestMeta(requestMeta);
                         schema.setMethodName(method.getName());
                         schema.setParameterMeta(parameterMetaMap);
-                        schema.setInterfaceName(interfaceMap.get(method.getName()));
+                        schema.setInterfaceName(interfaceMap.get(key));
                         Mapping.push(method, schema);
 
                     }
