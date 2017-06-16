@@ -92,4 +92,8 @@ public class NettyResponse {
     public void setConnection(String connection) {
         this.connection = connection;
     }
+
+    public void addHeaders (Map<String, String> headers) {
+        this.headers.putAll(headers);
+    }
 }

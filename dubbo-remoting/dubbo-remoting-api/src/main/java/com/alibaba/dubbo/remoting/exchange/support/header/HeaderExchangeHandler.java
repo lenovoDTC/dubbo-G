@@ -31,6 +31,7 @@ import com.alibaba.dubbo.remoting.exchange.*;
 import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
 import com.alibaba.dubbo.rpc.RpcInvocation;
+import com.alibaba.dubbo.rpc.RpcResult;
 import com.alibaba.fastjson.JSON;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
@@ -189,11 +190,18 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                             if (result == null) {
                                 result = ((Response) response).getErrorMessage();
                             }
+
                             NettyResponse nResponse = new NettyResponse(HttpResponseStatus.OK.getCode(), HTTP_1_1.getProtocolName());
-                            nResponse.setContent(JSON.toJSONString(request));
+
                             nResponse.setConnection(invocation.getAttachment("Connection"));
                             nResponse.setVersion(request.getVersion());
                             nResponse.addHeader("Content-Type", "text/html; charset=UTF-8");
+                            Object content = result;
+                            if (result instanceof RpcResult) {
+                                content = ((RpcResult) result).getValue();
+                                nResponse.addHeaders(((RpcResult) result).getAttachments());
+                            }
+                            nResponse.setContent(JSON.toJSONString(content));
 
 //                            nResponse.setConnection();
 

@@ -36,6 +36,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.SystemPropertyUtil;
@@ -130,6 +131,7 @@ public class NettyServer extends AbstractServer implements Server {
                 ChannelPipeline pipeline = ch.pipeline();
                 pipeline.addLast(executor, "decoder", adapter.getDecoder());
                 pipeline.addLast(executor, "encoder", adapter.getEncoder());
+
                 pipeline.addLast(executor, "handler", nettyHandler);
 
 //                pipeline.addLast("decoder", adapter.getDecoder());
