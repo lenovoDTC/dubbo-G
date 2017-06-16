@@ -12,6 +12,7 @@ public class NettyRequest {
 
     private String uri;
     private String method;
+    private String version;
 
     private Map<String, List<String>> parameters;
     private Map<String, String> headers;
@@ -27,6 +28,11 @@ public class NettyRequest {
         this();
         this.uri = uri;
         this.method = method;
+    }
+
+    public NettyRequest (String uri, String method, String version) {
+        this(uri, method);
+        this.version = version;
     }
 
     public void addHeader (String name, String value) {
@@ -75,5 +81,21 @@ public class NettyRequest {
 
     public Map<String, List<String>> getParameters() {
         return this.parameters;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public Map<String, Cookie> getCookies() {
+        return cookies;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }
