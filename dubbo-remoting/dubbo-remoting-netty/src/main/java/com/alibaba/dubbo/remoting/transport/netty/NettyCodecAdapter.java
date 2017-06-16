@@ -121,7 +121,6 @@ final class NettyCodecAdapter {
                 for (String name : headers.keySet()) {
                     response.headers().add(name, headers.get(name));
                 }
-
                 ctx.getPipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
                 ctx.getPipeline().remove(this);
                 return response;

@@ -154,6 +154,9 @@ public class NettyHandler extends SimpleChannelHandler {
                     ctx.getChannel().close();
                     return;
                 }
+                if (!request.isChunked()){
+                    isFinished = true;
+                }
 
             }
         }
