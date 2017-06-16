@@ -257,8 +257,9 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         }
         Request req = new Request();
         req.setVersion(request.getVersion());
+
         if (!param.contains("{") && !param.contains("}")) {
-            req.setData(param);
+            req.setData(new RpcInvocation());
             return req;
         }
         //        localhost:20880/{"interface":"com.alibaba.dubbo.demo.DemoService","method":"sayHello","schema":"[java.lang.String,int]","args":"[\"world\",1]"}

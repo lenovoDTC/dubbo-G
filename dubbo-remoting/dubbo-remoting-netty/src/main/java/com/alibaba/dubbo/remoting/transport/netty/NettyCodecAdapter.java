@@ -16,7 +16,13 @@
 package com.alibaba.dubbo.remoting.transport.netty;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
+import com.alibaba.dubbo.remoting.exchange.NettyResponse;
+import io.netty.buffer.ByteBuf;
+import org.jboss.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,12 +34,21 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.handler.codec.http.*;
+import org.jboss.netty.handler.codec.http.cookie.Cookie;
+import org.jboss.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.remoting.Codec2;
 import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
+import org.jboss.netty.util.CharsetUtil;
+
+import static io.netty.buffer.Unpooled.copiedBuffer;
+import static org.apache.http.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.SET_COOKIE;
 
 /**
  * NettyCodecAdapter.
@@ -75,10 +90,41 @@ final class NettyCodecAdapter {
 
         @Override
         protected Object encode(ChannelHandlerContext ctx, Channel ch, Object msg) throws Exception {
-            if (msg instanceof DefaultHttpResponse) {
+            if (msg instanceof NettyResponse) {
+                NettyResponse nResponse = (NettyResponse) msg;
+                ChannelBuffer buffer = ChannelBuffers.buffer(nResponse.getContent().length());
+                buffer.writeBytes(nResponse.getContent().getBytes());
+                HttpResponse response = new DefaultHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                response.setContent(buffer);
+                response.headers().set(CONTENT_TYPE, nResponse.getHeaders().get(CONTENT_TYPE));
+                boolean close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(nResponse.getConnection())
+                        || nResponse.getVersion().equals(HttpVersion.HTTP_1_0)
+                        && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(nResponse.getConnection());
+                if (!close) {
+                    response.headers().set(CONTENT_LENGTH, buffer.readableBytes());
+                }
+                Set<Cookie> cookies;
+                String value = nResponse.getHeaders().get(COOKIE);
+                if (value == null) {
+                    cookies = Collections.emptySet();
+                } else {
+                    cookies = ServerCookieDecoder.STRICT.decode(value);
+                }
+                if (!cookies.isEmpty()) {
+                    for (Cookie cookie : cookies) {
+                        response.headers().add(SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+                    }
+                }
+
+                Map<String, String> headers = nResponse.getHeaders();
+                for (String name : headers.keySet()) {
+                    response.headers().add(name, headers.get(name));
+                }
+
                 ctx.getPipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
                 ctx.getPipeline().remove(this);
-                return msg;
+                return response;
             } else {
                 com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =
                         com.alibaba.dubbo.remoting.buffer.ChannelBuffers.dynamicBuffer(1024);

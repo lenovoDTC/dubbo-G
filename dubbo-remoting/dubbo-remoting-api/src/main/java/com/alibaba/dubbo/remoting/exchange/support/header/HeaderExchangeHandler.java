@@ -184,6 +184,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         Object response;
                         response = handleRequest(exchangeChannel, request);
                         // Decide whether to close the connection or not.
+
                         if (request.getVersion().equals("HTTP/1.1") || request.getVersion().equals("HTTP/1.0")) {
                             RpcInvocation invocation = (RpcInvocation) request.getData();
                             Object result = ((Response) response).getResult();

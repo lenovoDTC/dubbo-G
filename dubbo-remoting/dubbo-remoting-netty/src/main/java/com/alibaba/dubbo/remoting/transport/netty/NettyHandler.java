@@ -110,7 +110,7 @@ public class NettyHandler extends SimpleChannelHandler {
 //            String uri = request.getUri();
             URI uri = new URI(request.getUri());
             String reqeustUri = uri.getPath();
-            message = nRequest = new NettyRequest(reqeustUri, request.getMethod().getName());
+            message = nRequest = new NettyRequest(reqeustUri, request.getMethod().getName(),request.getProtocolVersion().getText());
             HttpHeaders headers = request.headers();
             Iterator<Map.Entry<String, String>> it = headers.iterator();
             while (it.hasNext()) {
@@ -130,7 +130,7 @@ public class NettyHandler extends SimpleChannelHandler {
                     nCookie.setHttpOnly(c.isHttpOnly());
 //                    nCookie.setDiscard(c.isDiscard());
                     nCookie.setMaxAge(c.maxAge());
-//                    nCookie.setVersion(c.getVersion());
+//                    nCookie.setVersion(c.getVersion);
                     nCookie.setPath(c.path());
 //                    nCookie.setPorts(c.getPorts());
                     nRequest.addCookie(nCookie);
