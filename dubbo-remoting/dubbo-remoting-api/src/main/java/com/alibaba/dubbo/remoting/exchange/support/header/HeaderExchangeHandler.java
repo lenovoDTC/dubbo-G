@@ -27,12 +27,11 @@ import com.alibaba.dubbo.remoting.Channel;
 import com.alibaba.dubbo.remoting.ChannelHandler;
 import com.alibaba.dubbo.remoting.ExecutionException;
 import com.alibaba.dubbo.remoting.RemotingException;
-import com.alibaba.dubbo.remoting.exchange.ExchangeChannel;
-import com.alibaba.dubbo.remoting.exchange.ExchangeHandler;
-import com.alibaba.dubbo.remoting.exchange.Request;
-import com.alibaba.dubbo.remoting.exchange.Response;
+import com.alibaba.dubbo.remoting.exchange.*;
 import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
+import com.alibaba.dubbo.rpc.RpcInvocation;
+import com.alibaba.dubbo.rpc.RpcResult;
 import com.alibaba.fastjson.JSON;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
@@ -185,25 +184,41 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         Object response;
                         response = handleRequest(exchangeChannel, request);
                         // Decide whether to close the connection or not.
-                        if (request.getVersion().equals("http1.0.0")) {
+                        if (request.getVersion().equals("HTTP/1.1") || request.getVersion().equals("HTTP/1.0")) {
+                            RpcInvocation invocation = (RpcInvocation) request.getData();
                             Object result = ((Response) response).getResult();
                             if (result == null) {
                                 result = ((Response) response).getErrorMessage();
                             }
-                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
-                            httpResponse.setContent(ChannelBuffers.copiedBuffer(JSON.toJSONString(result), CharsetUtil.UTF_8));
-                            System.out.println(JSON.toJSONString(result));
-                            httpResponse.headers().set("Content-Type", "text/html; charset=UTF-8");
 
-                            // Add 'Content-Length' header only for a keep-alive connection.
-                            if (true) {
-                                // Add 'Content-Length' header only for a keep-alive connection.
-                                httpResponse.headers().set(CONTENT_LENGTH, httpResponse.getContent().readableBytes());
-                                // Add keep alive header as per:
-                                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-                                httpResponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                            NettyResponse nResponse = new NettyResponse(HttpResponseStatus.OK.getCode(), HTTP_1_1.getProtocolName());
+
+                            nResponse.setConnection(invocation.getAttachment("Connection"));
+                            nResponse.setVersion(request.getVersion());
+                            nResponse.addHeader("Content-Type", "text/html; charset=UTF-8");
+                            Object content = result;
+                            if (result instanceof RpcResult) {
+                                content = ((RpcResult) result).getValue();
+                                nResponse.addHeaders(((RpcResult) result).getAttachments());
                             }
-                            channel.send(httpResponse);
+                            nResponse.setContent(JSON.toJSONString(content));
+
+//                            nResponse.setConnection();
+
+//                            HttpResponse httpResponse = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
+//                            httpResponse.setContent(ChannelBuffers.copiedBuffer(JSON.toJSONString(result), CharsetUtil.UTF_8));
+//                            System.out.println(JSON.toJSONString(result));
+//                            httpResponse.headers().set("Content-Type", "text/html; charset=UTF-8");
+//
+//                            // Add 'Content-Length' header only for a keep-alive connection.
+//                            if (true) {
+//                                // Add 'Content-Length' header only for a keep-alive connection.
+//                                httpResponse.headers().set(CONTENT_LENGTH, httpResponse.getContent().readableBytes());
+//                                // Add keep alive header as per:
+//                                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+//                                httpResponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+//                            }
+                            channel.send(nResponse);
                         } else {
                             channel.send(response);
                         }

@@ -37,6 +37,7 @@ import com.alibaba.fastjson.JSON;
 import io.netty.handler.codec.http.DefaultHttpContent;
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.cookie.CookieDecoder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -74,7 +75,6 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         }
         handler.received(channel, message);
     }
-
 //    private Object decodeRequest(Channel channel, Object message) {
 //        String param = "uri is error";
 //        Map<String, Object> parameter = new LinkedHashMap<String, Object>();
@@ -218,13 +218,12 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
 //        }
 //        return req;
 //    }
-
     private Object decodeRequest4(Channel channel, Object message) {
         String param = "uri is error";
         Map<String, Object> parameter = new LinkedHashMap<String, Object>();
-
+        NettyRequest request = null;
         if (message instanceof NettyRequest) {
-            NettyRequest request = (NettyRequest) message;
+            request = (NettyRequest) message;
             String uri = request.getUri();
             Map<String, List<String>> parameters = request.getParameters();
             for (String key : parameters.keySet()) {
@@ -234,54 +233,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 else
                     parameter.put(key, value.get(0));
             }
-//            io.netty.handler.codec.http.DefaultHttpRequest httpRequst = (io.netty.handler.codec.http.DefaultHttpRequest) ((NettyRequest) message).getRequest();
-//            DefaultHttpContent content = ((NettyRequest) message).getContent();
-//            String uri = null;
-//            try {
-//                uri = URLDecoder.decode(httpRequst.getUri(), "UTF-8");
-//            } catch (UnsupportedEncodingException e) {
-//                e.printStackTrace();
-//            }
-//            if (uri.contains("?")) uri = uri.substring(0, httpRequst.getUri().indexOf("?"));
-//            String[] parameters = new String[0];
-//            if (httpRequst.getMethod().name().equals("GET")) {
-//                try {
-//                    parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?") + 1), "UTF-8").split("&");
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                }
-//            } else if (httpRequst.getMethod().name().equals("POST")) {
-//                try {
-//                    parameters = URLDecoder.decode(httpRequst.getUri().substring(httpRequst.getUri().indexOf("?") + 1) + "&" + new String(content.content().array()), "UTF-8").split("&");
-//                } catch (UnsupportedEncodingException e) {
-//                    e.printStackTrace();
-//                }
-//            }
 
-//            if (parameters.length == 1 && parameters[0].equals(uri)) {
-//            } else {
-//                for (String p : parameters) {
-//                    if (!p.equals(uri)) {
-//                        String[] ps = p.split("=");
-//                        if (ps.length < 2) {
-//                            if (parameter.containsKey(ps[0])) {
-//                                parameter.put(ps[0], parameter.get(ps[0]).toString() + "&");
-//                            } else parameter.put(ps[0], "");
-//                        } else {
-//                            if (parameter.containsKey(ps[0])) {
-//                                parameter.put(ps[0], parameter.get(ps[0]).toString() + "&" + ps[1]);
-//                            } else parameter.put(ps[0], ps[1]);
-//                        }
-//                    }
-//                }
-//                for (String p : parameters) {
-//                    if (!p.equals(uri)) {
-//                        String[] ps = p.split("=");
-//                        if (parameter.get(ps[0]).toString().contains("&"))
-//                            parameter.put(ps[0], parameter.get(ps[0]).toString().split("&"));
-//                    }
-//                }
-//            }
             if (Mapping.isMapping(uri)) {
                 if (!uri.contains(".")) {
                     try {
@@ -304,7 +256,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             }
         }
         Request req = new Request();
-        req.setVersion("http1.0.0");
+        req.setVersion(request.getVersion());
         if (!param.contains("{") && !param.contains("}")) {
             req.setData(param);
             return req;
@@ -356,6 +308,7 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             if (attachment == null) {
                 attachment = new HashMap<String, String>();
             }
+            attachment.putAll(request.getHeaders());
             rpcInvocation.setAttachments(attachment);
             rpcInvocation.setArguments(args);
             req.setData(rpcInvocation);

@@ -115,7 +115,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 //            String uri = request.getUri();
             URI uri = new URI(request.getUri());
             String reqeustUri = uri.getPath();
-            message = nRequest = new NettyRequest(reqeustUri, request.getMethod().name());
+            message = nRequest = new NettyRequest(reqeustUri, request.getMethod().name(), request.getProtocolVersion().text());
             HttpHeaders headers = request.headers();
             Iterator<Map.Entry<String, String>> it = headers.iterator();
             while (it.hasNext()) {

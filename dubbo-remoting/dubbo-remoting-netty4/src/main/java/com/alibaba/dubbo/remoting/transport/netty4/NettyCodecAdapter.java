@@ -19,18 +19,23 @@ import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.utils.NamedThreadFactory;
 import com.alibaba.dubbo.remoting.Codec2;
-import com.alibaba.dubbo.remoting.buffer.ChannelBuffers;
 import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
+import com.alibaba.dubbo.remoting.exchange.NettyResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static io.netty.buffer.Unpooled.copiedBuffer;
+import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 
 /**
  * NettyCodecAdapter.
@@ -42,6 +47,10 @@ final class NettyCodecAdapter {
     private final ChannelHandler encoder = new InternalEncoder();
 
     private final ChannelHandler decoder = new InternalDecoder();
+
+    private final ChannelHandler httpEncoder = new HttpResponseEncoder();
+
+    private final ChannelHandler dubboEncoder = new InternalDubboEncoder();
 
     private final Codec2 codec;
 
@@ -69,26 +78,65 @@ final class NettyCodecAdapter {
         return decoder;
     }
 
+    private class InternalEncoder extends ChannelOutboundHandlerAdapter {
+        @Override
+        public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+            Object message = msg;
+            if (msg instanceof  NettyResponse) {
+                NettyResponse nResponse = (NettyResponse) msg;
+                ByteBuf buf = copiedBuffer(nResponse.getContent().toString(), CharsetUtil.UTF_8);
+                FullHttpResponse response = new DefaultFullHttpResponse(
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
+                response.headers().set(CONTENT_TYPE, nResponse.getHeaders().get(CONTENT_TYPE));
+
+                boolean close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(nResponse.getConnection())
+                        || nResponse.getVersion().equals(HttpVersion.HTTP_1_0)
+                        && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(nResponse.getConnection());
+                if (!close) {
+                    response.headers().set(CONTENT_LENGTH, buf.readableBytes());
+                }
+
+                Set<Cookie> cookies;
+                String value = nResponse.getHeaders().get(COOKIE);
+                if (value == null) {
+                    cookies = Collections.emptySet();
+                } else {
+                    cookies = CookieDecoder.decode(value);
+                }
+                if (!cookies.isEmpty()) {
+                    for (Cookie cookie : cookies) {
+                        response.headers().add(SET_COOKIE, ServerCookieEncoder.encode(cookie));
+                    }
+                }
+
+                Map<String, String> headers = nResponse.getHeaders();
+                for (String name : headers.keySet()) {
+                    response.headers().add(name, headers.get(name));
+                }
+                message = response;
+                ctx.pipeline().addBefore("encoder", "httpencoder", httpEncoder);
+            } else {
+                ctx.pipeline().addBefore("encoder", "dubboEncoder", dubboEncoder);
+            }
+
+            super.write(ctx, message, promise);
+        }
+    }
+
     @ChannelHandler.Sharable
-    private class InternalEncoder extends MessageToByteEncoder<Object> {
+    private class InternalDubboEncoder extends MessageToByteEncoder<Object> {
 
         @Override
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
-            if (msg instanceof DefaultHttpResponse) {
-                ctx.pipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
-                ctx.pipeline().remove(this);
-            } else {
-                com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =
-                        com.alibaba.dubbo.remoting.buffer.ChannelBuffers.dynamicBuffer(1024);
-                NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
-                try {
-                    codec.encode(channel, buffer, msg);
-                } finally {
-                    NettyChannel.removeChannelIfDisconnected(ctx.channel());
-                }
-                out.writeBytes(buffer.toByteBuffer());
-
+            com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =
+                    com.alibaba.dubbo.remoting.buffer.ChannelBuffers.dynamicBuffer(1024);
+            NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+            try {
+                codec.encode(channel, buffer, msg);
+            } finally {
+                NettyChannel.removeChannelIfDisconnected(ctx.channel());
             }
+            out.writeBytes(buffer.toByteBuffer());
         }
     }
 
