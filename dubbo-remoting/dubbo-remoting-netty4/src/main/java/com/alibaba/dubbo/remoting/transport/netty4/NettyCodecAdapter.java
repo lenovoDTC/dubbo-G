@@ -22,6 +22,7 @@ import com.alibaba.dubbo.remoting.Codec2;
 import com.alibaba.dubbo.remoting.buffer.DynamicChannelBuffer;
 import com.alibaba.dubbo.remoting.exchange.NettyResponse;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.http.*;
@@ -84,7 +85,7 @@ final class NettyCodecAdapter {
             Object message = msg;
             if (msg instanceof  NettyResponse) {
                 NettyResponse nResponse = (NettyResponse) msg;
-                ByteBuf buf = copiedBuffer(nResponse.getContent().toString(), CharsetUtil.UTF_8);
+                ByteBuf buf = Unpooled.wrappedBuffer(nResponse.getConnection().getBytes("UTF-8"));
                 FullHttpResponse response = new DefaultFullHttpResponse(
                         HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
                 response.headers().set(CONTENT_TYPE, nResponse.getHeaders().get(CONTENT_TYPE));
@@ -114,9 +115,11 @@ final class NettyCodecAdapter {
                     response.headers().add(name, headers.get(name));
                 }
                 message = response;
-                ctx.pipeline().addBefore("encoder", "httpencoder", httpEncoder);
+                if (ctx.pipeline().get("httpEncoder") == null)
+                    ctx.pipeline().addBefore("encoder", "httpEncoder", httpEncoder);
             } else {
-                ctx.pipeline().addBefore("encoder", "dubboEncoder", dubboEncoder);
+                if (ctx.pipeline().get("dubboEncoder") == null)
+                    ctx.pipeline().addBefore("encoder", "dubboEncoder", dubboEncoder);
             }
 
             super.write(ctx, message, promise);
@@ -147,8 +150,6 @@ final class NettyCodecAdapter {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-//            System.out.println("get request : " + System.currentTimeMillis());
-//            executor.execute(new NettyCodecRunnable(ctx, msg, decoder, handler, codec, url, bufferSize, buffer, NettyCodecRunnable.State.decode, this));
             Object o = msg;
             if (!(o instanceof  ByteBuf)) {
                 ctx.fireChannelRead(msg);
