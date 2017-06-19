@@ -36,7 +36,6 @@ import org.jboss.netty.handler.codec.http.cookie.*;
 import org.jboss.netty.handler.codec.http.cookie.Cookie;
 import org.jboss.netty.handler.codec.http.multipart.*;
 
-import static sun.plugin.ClassLoaderInfo.reset;
 
 /**
  * NettyHandler
