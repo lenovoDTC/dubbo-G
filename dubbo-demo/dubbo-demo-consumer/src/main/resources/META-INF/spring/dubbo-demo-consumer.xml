@@ -22,7 +22,7 @@
 
 	<dubbo:protocol transporter="netty4" server="netty4" client="netty4" />
 
-	<dubbo:reference id="demoService"
+	<dubbo:reference id="demoService" connections="20"
 		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
 	<dubbo:reference id="demoServiceOne"
 					 interface="com.alibaba.dubbo.demo.DemoServiceOne"  mock="return null" errorrate="35" loadbalance="roundrobin"/>

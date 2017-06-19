@@ -85,7 +85,7 @@ final class NettyCodecAdapter {
             Object message = msg;
             if (msg instanceof  NettyResponse) {
                 NettyResponse nResponse = (NettyResponse) msg;
-                ByteBuf buf = Unpooled.wrappedBuffer(nResponse.getConnection().getBytes("UTF-8"));
+                ByteBuf buf = Unpooled.wrappedBuffer(nResponse.getContent().getBytes("UTF-8"));
                 FullHttpResponse response = new DefaultFullHttpResponse(
                         HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
                 response.headers().set(CONTENT_TYPE, nResponse.getHeaders().get(CONTENT_TYPE));
