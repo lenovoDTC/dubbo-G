@@ -121,8 +121,9 @@ final class NettyCodecAdapter {
                 for (String name : headers.keySet()) {
                     response.headers().add(name, headers.get(name));
                 }
-                if (ctx.getPipeline().get("httpencoder") == null)
+                if (ctx.getPipeline().get("httpencoder") == null) {
                     ctx.getPipeline().addBefore("encoder", "httpencoder", new HttpResponseEncoder());
+                }
                 return response;
             } else {
                 com.alibaba.dubbo.remoting.buffer.ChannelBuffer buffer =

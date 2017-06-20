@@ -85,7 +85,7 @@ final class NettyCodecAdapter {
             Object message = msg;
             if (msg instanceof  NettyResponse) {
                 NettyResponse nResponse = (NettyResponse) msg;
-                ByteBuf buf = Unpooled.wrappedBuffer(nResponse.getConnection().getBytes("UTF-8"));
+                ByteBuf buf = Unpooled.wrappedBuffer(nResponse.getContent().getBytes("UTF-8"));
                 FullHttpResponse response = new DefaultFullHttpResponse(
                         HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
                 response.headers().set(CONTENT_TYPE, nResponse.getHeaders().get(CONTENT_TYPE));
@@ -115,11 +115,14 @@ final class NettyCodecAdapter {
                     response.headers().add(name, headers.get(name));
                 }
                 message = response;
-                if (ctx.pipeline().get("httpEncoder") == null)
+                if (ctx.pipeline().get("httpEncoder") == null){
                     ctx.pipeline().addBefore("encoder", "httpEncoder", httpEncoder);
+                }
+
             } else {
-                if (ctx.pipeline().get("dubboEncoder") == null)
+                if (ctx.pipeline().get("dubboEncoder") == null){
                     ctx.pipeline().addBefore("encoder", "dubboEncoder", dubboEncoder);
+                }
             }
 
             super.write(ctx, message, promise);
