@@ -26,6 +26,7 @@ import com.alibaba.dubbo.remoting.exchange.NettyRequest;
 import com.alibaba.dubbo.remoting.exchange.Request;
 import com.alibaba.dubbo.remoting.exchange.Response;
 import com.alibaba.dubbo.remoting.http.Mapping;
+import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.dubbo.rpc.RpcInvocation;
 
 import java.io.IOException;
@@ -282,7 +283,16 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             } else if (jsonArray.length() == 1 && jsonArray.getString(0).equals("")) {
                 pts = null;
                 args = null;
-            } else {
+            } else if(jsonArray.length()!=jsonArrayargs.length()){
+                try {
+                    throw new RpcException("Parameter missing");
+                }finally {
+                    req.setData(new RpcInvocation());
+                    return req;
+                }
+            }
+            else {
+
                 for (int i = 0; i < jsonArray.length(); i++) {
                     Class<?> pt = ReflectUtils.name2class(jsonArray.getString(i));
                     ptsl.add(pt);
@@ -290,7 +300,9 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 pts = new Class[ptsl.size()];
                 ptsl.toArray(pts);
                 args = new Object[pts.length];
+
                 for (int i = 0; i < args.length; i++) {
+
                     String addString = jsonArrayargs.get(i).toString();
 
                     try {

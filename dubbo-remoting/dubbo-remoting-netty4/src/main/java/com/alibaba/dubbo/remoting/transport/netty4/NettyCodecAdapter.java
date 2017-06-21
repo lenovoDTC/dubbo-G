@@ -115,11 +115,14 @@ final class NettyCodecAdapter {
                     response.headers().add(name, headers.get(name));
                 }
                 message = response;
-                if (ctx.pipeline().get("httpEncoder") == null)
+                if (ctx.pipeline().get("httpEncoder") == null){
                     ctx.pipeline().addBefore("encoder", "httpEncoder", httpEncoder);
+                }
+
             } else {
-                if (ctx.pipeline().get("dubboEncoder") == null)
+                if (ctx.pipeline().get("dubboEncoder") == null){
                     ctx.pipeline().addBefore("encoder", "dubboEncoder", dubboEncoder);
+                }
             }
 
             super.write(ctx, message, promise);
