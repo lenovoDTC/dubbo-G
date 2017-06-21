@@ -112,7 +112,6 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof HttpRequest) {
             isFinished = false;
             HttpRequest request = (HttpRequest) msg;
-//            String uri = request.getUri();
             URI uri = new URI(request.getUri());
             String reqeustUri = uri.getPath();
             message = nRequest = new NettyRequest(reqeustUri, request.getMethod().name(), request.getProtocolVersion().text());
@@ -155,7 +154,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
                     decoder = new HttpPostRequestDecoder(factory, request);
                 } catch (HttpPostRequestDecoder.ErrorDataDecoderException e1) {
-                    e1.printStackTrace();
+//                    NettyChannel.removeChannelIfDisconnected(ctx.channel());
                     ctx.channel().close();
                     return;
                 }
@@ -206,13 +205,14 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
                 }
             }
         } catch (HttpPostRequestDecoder.EndOfDataDecoderException e) {
-            // end
+
         }
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        super.channelReadComplete(ctx);
+        ctx.channel().flush();
+        NettyChannel.removeChannelIfDisconnected(ctx.channel());
     }
 
     @Override
@@ -254,6 +254,5 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //if (data.getHttpDataType().equals(InterfaceHttpData.HttpDataType.))
     }
 }

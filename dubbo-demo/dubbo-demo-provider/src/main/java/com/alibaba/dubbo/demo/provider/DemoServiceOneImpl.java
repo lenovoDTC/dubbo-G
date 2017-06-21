@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by haoning1 on 2017/4/18.
  */
-public class DemoServiceOneImpl implements DemoServiceOne, DemoService{
+public class DemoServiceOneImpl implements DemoServiceOne{
 
     @Override
     public String get(String str) {
@@ -21,18 +21,4 @@ public class DemoServiceOneImpl implements DemoServiceOne, DemoService{
         return name;
     }
 
-    @Override
-    public String sayHello1(String name) {
-        return null;
-    }
-
-    @Override
-    public byte[] sayHello2(List<String> name) {
-        return new byte[0];
-    }
-
-    @Override
-    public String sayHello3(Person<String> z) {
-        return null;
-    }
 }

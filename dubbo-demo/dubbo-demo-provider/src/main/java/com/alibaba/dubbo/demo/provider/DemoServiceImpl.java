@@ -39,8 +39,8 @@ public class DemoServiceImpl implements DemoService {
 
     @Request(name="sayHello", value="/demo/sayHello", method = {Request.Method.POST, Request.Method.GET})
     @Response(headers = {""})
-    public byte[] sayHello2(@Parameter(value = "name", required = false) List<String> name) {
-        return new byte[]{1,2,3,4};
+    public String sayHello2(@Parameter(value = "name", required = false) List<String> name) {
+        return "hello world";
     }
 
     @Override

@@ -22,7 +22,7 @@ public interface DemoService {
     String sayHello(String name);
     String sayHello1( String name);
 
-    byte[] sayHello2(List<String> name);
+    String sayHello2(List<String> name);
 
     String sayHello3(Person<String> z);
 
