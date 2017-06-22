@@ -1,7 +1,7 @@
 Dubbo-G Framework 是基于Dubbo2.5.3 二次开发版本.
 ## 主要贡献者
     郝宁 haoning1@lenovo.com
-    袁博 yuanbo5@lenovo.com
+    袁博 yuanbo6@lenovo.com
 ## 主要功能
     Mock 功能扩展
         增加 CircuitBreaker （熔断机制）
