@@ -20,12 +20,12 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-	<dubbo:protocol transporter="netty4" server="netty4" client="netty4" />
+	<!--<dubbo:protocol transporter="netty4" server="netty4" client="netty4" />-->
 
-	<dubbo:reference id="demoService" connections="20"
-		interface="com.alibaba.dubbo.demo.DemoService"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
+	<dubbo:reference id="demoService"
+		interface="com.alibaba.dubbo.demo.DemoService" />
 	<dubbo:reference id="demoServiceOne"
-					 interface="com.alibaba.dubbo.demo.DemoServiceOne"  mock="return null" errorrate="35" loadbalance="roundrobin"/>
+					 interface="com.alibaba.dubbo.demo.DemoServiceOne" />
 		<!--retries="0" />-->
 
 </beans>
