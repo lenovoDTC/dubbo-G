@@ -23,6 +23,8 @@ import com.alibaba.dubbo.remoting.exchange.NettyCookie;
 import com.alibaba.dubbo.remoting.exchange.NettyRequest;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.*;
 
@@ -48,11 +50,13 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
 
-    private HttpPostRequestDecoder decoder;
+    private final Map<String, ChannelState> states = new HashMap<String, ChannelState>();
 
-    private NettyRequest nRequest;
-
-    private Object message;
+//    private HttpPostRequestDecoder decoder;
+//
+//    private NettyRequest nRequest;
+//
+//    private Object message;
 
     private boolean isFinished = true;
 
@@ -71,6 +75,10 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         return channels;
     }
 
+    private String getChannelKey (ChannelHandlerContext ctx) {
+        return NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress());
+    }
+
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
@@ -78,9 +86,12 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        if (decoder != null) {
-            decoder.cleanFiles();
+        String channelKey = NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress());
+        if (states.containsKey(channelKey)) {
+            states.get(channelKey).clear();
+            states.remove(channelKey);
         }
+
     }
 
     @Override
@@ -88,7 +99,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
             if (channel != null) {
-                channels.put(NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress()), channel);
+                remove(ctx);
             }
             handler.connected(channel);
         } finally {
@@ -100,7 +111,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
-            channels.remove(NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress()));
+            remove(ctx);
             handler.disconnected(channel);
         } finally {
             NettyChannel.removeChannelIfDisconnected(ctx.channel());
@@ -109,12 +120,21 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        String channelKey = getChannelKey(ctx);
+        ChannelState state = null;
+        if (!states.containsKey(channelKey)) {
+            state = new ChannelState();
+            states.put(channelKey, state);
+        }
+
+        HttpPostRequestDecoder decoder = null;
         if (msg instanceof HttpRequest) {
-            isFinished = false;
+            state.setFinished(false);
             HttpRequest request = (HttpRequest) msg;
             URI uri = new URI(request.getUri());
             String reqeustUri = uri.getPath();
-            message = nRequest = new NettyRequest(reqeustUri, request.getMethod().name(), request.getProtocolVersion().text());
+            NettyRequest nRequest = new NettyRequest(reqeustUri, request.getMethod().name(), request.getProtocolVersion().text());
+            state.setMessage(nRequest);
             HttpHeaders headers = request.headers();
             Iterator<Map.Entry<String, String>> it = headers.iterator();
             while (it.hasNext()) {
@@ -145,22 +165,19 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
             Map<String, List<String>> parameters = queryStringDecoder.parameters();
             nRequest.addAllParameters(parameters);
 
-            if (nRequest.getMethod().equals("GET")) {
-                isFinished = true;
-            }
-
             if (nRequest.getMethod().equals("POST")) {
                 try {
-
                     decoder = new HttpPostRequestDecoder(factory, request);
+                    state.setDecoder(decoder);
                 } catch (HttpPostRequestDecoder.ErrorDataDecoderException e1) {
-//                    NettyChannel.removeChannelIfDisconnected(ctx.channel());
                     ctx.channel().close();
                     return;
                 }
 
             }
         } else if (msg instanceof HttpContent) {
+            state = states.get(channelKey);
+            decoder = state.getDecoder();
             if (decoder != null) {
                 HttpContent chunk = (HttpContent) msg;
                 try {
@@ -170,20 +187,23 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
                     return;
                 }
 
-                readHttpDataChunkByChunk();
+                readHttpDataChunkByChunk(state);
 
                 if (chunk instanceof LastHttpContent) {
-                    reset();
+                    reset(ctx);
                 }
+            } else {
+                state.setFinished(true);
             }
-        } else message = msg;
+        }
 
-        if (isFinished) {
+        if (states.get(channelKey).isFinished()) {
             NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
             try {
-                handler.received(channel, message);
+                handler.received(channel, states.get(channelKey).getMessage());
             } finally {
                 NettyChannel.removeChannelIfDisconnected(ctx.channel());
+                states.remove(channelKey);
             }
         }
 
@@ -192,13 +212,14 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
     /**
      * Example of reading request by chunk and getting values from chunk to chunk
      */
-    private void readHttpDataChunkByChunk() {
+    private void readHttpDataChunkByChunk(ChannelState state) {
+        HttpPostRequestDecoder decoder = state.getDecoder();
         try {
             while (decoder.hasNext()) {
                 InterfaceHttpData data = decoder.next();
                 if (data != null) {
                     try {
-                        readData(data);
+                        readData(state, data);
                     } finally {
                         data.release();
                     }
@@ -211,8 +232,6 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.channel().flush();
-        NettyChannel.removeChannelIfDisconnected(ctx.channel());
     }
 
     @Override
@@ -235,24 +254,29 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void reset() {
-        nRequest = null;
-        isFinished = true;
-        // destroy the decoder to release all resources
-        decoder.destroy();
-        decoder = null;
+    private void reset(ChannelHandlerContext ctx) {
+        String channelKey = getChannelKey(ctx);
+        states.get(channelKey).clear();
+        states.remove(channelKey);
     }
 
-    private void readData (InterfaceHttpData data) {
+    private void readData (ChannelState state, InterfaceHttpData data) {
         if (!data.getHttpDataType().equals(InterfaceHttpData.HttpDataType.Attribute)) {
             return;
         }
 
         Attribute attribute = (Attribute) data;
+        NettyRequest nRequest = (NettyRequest) state.getMessage();
         try {
             nRequest.addParameter(attribute.getName(), attribute.getValue());
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void remove (ChannelHandlerContext ctx) {
+        String channelKey = getChannelKey(ctx);
+        channels.remove(channelKey);
+        states.remove(channelKey);
     }
 }

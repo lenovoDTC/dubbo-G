@@ -283,11 +283,14 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
             } else if (jsonArray.length() == 1 && jsonArray.getString(0).equals("")) {
                 pts = null;
                 args = null;
-            } else if(jsonArray.length()!=jsonArrayargs.length()){
+            } else if(jsonArray.length() != jsonArrayargs.length()){
                 try {
+                    System.out.println("parameter false: " + request.getUri() + "; " + request.getParameters().size());
                     throw new RpcException("Parameter missing");
-                }finally {
-                    req.setData(new RpcInvocation());
+
+                } finally {
+                    RpcInvocation error = new RpcInvocation();
+                    req.setData(error);
                     return req;
                 }
             }
