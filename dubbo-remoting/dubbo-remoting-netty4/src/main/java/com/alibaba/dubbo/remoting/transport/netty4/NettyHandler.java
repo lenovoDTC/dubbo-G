@@ -50,7 +50,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
 
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE);
 
-    private final Map<String, ChannelState> states = new HashMap<String, ChannelState>();
+    private final Map<String, ChannelState> states = new ConcurrentHashMap<String, ChannelState>();
 
 //    private HttpPostRequestDecoder decoder;
 //
