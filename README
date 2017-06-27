@@ -31,3 +31,16 @@ Dubbo-G Framework 是基于Dubbo2.5.3 二次开发版本.
             去除dubbo-remoting/dubbo-remoting-p2p
         dubbo-container 模块整理
             去除dubbo-container/dubbo-container-jetty
+
+    比较dubbo2.5.3-G03:
+    1、兼容Netty4.0.25.Final。
+    2、双协议（HTTP，TCP）改造优化性能提升。
+    使用Netty4应在consumer，provider xml中配置:
+        <dubbo:protocol transporter="netty4" server="netty4" client="netty4"/>
+    Netty4应多使用多线程配置以提高性能:
+        provider xml中:
+            <dubbo:service connections="number"/>
+        consumer xml中:
+            <dubbo:reference connections="number"/>
+    Netty3应该使用单线程方式，性能更高。
+
