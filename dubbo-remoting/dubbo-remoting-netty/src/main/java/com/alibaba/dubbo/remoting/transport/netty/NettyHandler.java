@@ -103,6 +103,7 @@ public class NettyHandler extends SimpleChannelHandler {
         if (!states.containsKey(channelKey)) {
             state = new ChannelState();
             states.put(channelKey, state);
+            state.setMessage(e.getMessage());
         }
 
         HttpPostRequestDecoder decoder = null;

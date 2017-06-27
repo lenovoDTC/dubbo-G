@@ -125,6 +125,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         if (!states.containsKey(channelKey)) {
             state = new ChannelState();
             states.put(channelKey, state);
+            state.setMessage(msg);
         }
 
         HttpPostRequestDecoder decoder = null;

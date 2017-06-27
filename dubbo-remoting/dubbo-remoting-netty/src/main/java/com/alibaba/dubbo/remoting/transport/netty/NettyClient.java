@@ -77,7 +77,7 @@ public class NettyClient extends AbstractClient {
                 ChannelPipeline pipeline = Channels.pipeline();
                 pipeline.addLast("decoder", adapter.getDecoder());
                 pipeline.addLast("encoder", adapter.getEncoder());
-                pipeline.addLast("handler", nettyHandler);
+                pipeline.addLast("handler", new NettyHandler(getUrl(), NettyClient.this));
                 return pipeline;
             }
         });

@@ -85,7 +85,7 @@ public class NettyServer extends AbstractServer implements Server {
                 }*/
                 pipeline.addLast("decoder", adapter.getDecoder());
                 pipeline.addLast("encoder", adapter.getEncoder());
-                pipeline.addLast("handler", nettyHandler);
+                pipeline.addLast("handler", new NettyHandler(getUrl(), NettyServer.this));
                 return pipeline;
             }
         });
